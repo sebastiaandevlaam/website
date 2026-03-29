@@ -1,0 +1,783 @@
+/* Google Fonts Import */
+@import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@700;800&family=Open+Sans:wght@400;700&display=swap');
+
+/* CSS Custom Properties (Variables) for Colors */
+:root {
+    --pantry-red: #A00405;
+    --pantry-beige: #F0EAD6;
+    --pantry-gold: #C19A6B;
+    --pantry-text: #4A4A4A;
+    --pantry-bg: #FAF8F0;
+    --white: #FFFFFF;
+    --gray-100: #f3f4f6;
+    /* For hover states */
+    --gray-300: #d1d5db;
+    /* Footer text */
+    --shadow-color: rgba(0, 0, 0, 0.1);
+    --shadow-color-lg: rgba(0, 0, 0, 0.15);
+    --announcement-bg: var(--pantry-gold);
+    /* Announcement background */
+    --announcement-text: var(--white);
+    /* Announcement text color */
+
+}
+
+/* Basic Reset & Body Styles */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: 'Open Sans', sans-serif;
+    /* Body font */
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--pantry-text);
+    background-color: var(--pantry-bg);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Headings Font */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-family: 'Nunito Sans', sans-serif;
+    /* Header font */
+    color: var(--pantry-red);
+    line-height: 1.3;
+    margin-bottom: 0.75em;
+}
+
+h1 {
+    font-size: 2.5rem;
+    font-weight: 800;
+}
+
+h2 {
+    font-size: 2rem;
+    font-weight: 700;
+}
+
+h3 {
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
+/* Paragraph styling */
+p {
+    margin-bottom: 1rem;
+}
+
+p.lead {
+    font-size: 1.125rem;
+    line-height: 1.7;
+}
+
+/* Links */
+a {
+    color: var(--pantry-gold);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+a:hover {
+    text-decoration: underline;
+    color: var(--pantry-red);
+}
+
+.link-subtle {
+    color: var(--pantry-gold);
+    font-weight: 700;
+}
+
+.link-subtle:hover {
+    text-decoration: underline;
+    color: var(--pantry-gold);
+}
+
+.link-subtle .lucide {
+    /* Style icon within link */
+    display: inline-block;
+    margin-left: 0.25rem;
+    height: 1em;
+    /* Adjust size relative to font */
+    width: 1em;
+    vertical-align: middle;
+}
+
+
+/* Container */
+.container {
+    max-width: 1140px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+}
+
+/* Buttons */
+.button {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    font-weight: 700;
+    font-family: 'Open Sans', sans-serif;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease, opacity 0.3s ease, box-shadow 0.3s ease;
+    border: none;
+    box-shadow: 0 4px 6px -1px var(--shadow-color), 0 2px 4px -2px var(--shadow-color);
+}
+
+.button:hover {
+    text-decoration: none;
+    opacity: 0.9;
+    box-shadow: 0 10px 15px -3px var(--shadow-color), 0 4px 6px -2px var(--shadow-color);
+}
+
+.button.primary-button {
+    background-color: var(--pantry-gold);
+    color: var(--white);
+}
+
+.button.primary-button:hover {
+    color: var(--white);
+}
+
+.button.secondary-button {
+    background-color: var(--white);
+    color: var(--pantry-red);
+}
+
+.button.secondary-button:hover {
+    background-color: var(--gray-100);
+    color: var(--pantry-red);
+}
+
+/* Nav button variant */
+.button.nav-contact-button {
+    padding: 0.5rem 1rem;
+    box-shadow: 0 2px 4px -1px var(--shadow-color);
+    /* Lighter shadow */
+}
+
+.button.nav-contact-button:hover {
+    box-shadow: 0 4px 6px -1px var(--shadow-color), 0 2px 4px -2px var(--shadow-color);
+}
+
+.announcement-header {
+    background-color: var(--announcement-bg);
+    color: var(--announcement-text);
+    padding: 0.75rem 1.5rem;
+    text-align: center;
+    font-size: 0.95rem;
+    font-weight: 600; /* Semibold Open Sans */
+    position: relative; /* Optional: for potential close button */
+    z-index: 60; /* Above header */
+}
+.announcement-header p {
+    margin-bottom: 0; /* Remove default margin */
+    display: inline; /* Keep icon and text inline */
+}
+.announcement-header .icon { /* Style icon */
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 0.5rem;
+    height: 1.2em; /* Size relative to font */
+    width: 1.2em;
+    /* Optional: Adjust position slightly */
+    position: relative;
+    top: -1px;
+}
+.announcement-header a {
+    color: var(--announcement-text);
+    text-decoration: underline;
+    font-weight: 700; /* Bold */
+    margin-left: 0.5rem; /* Space before link */
+    transition: opacity 0.3s ease;
+}
+.announcement-header a:hover {
+    opacity: 0.85;
+    color: var(--announcement-text); /* Keep color on hover */
+}
+
+/* Header */
+.header {
+    background-color: var(--white);
+    box-shadow: 0 4px 6px -1px var(--shadow-color), 0 2px 4px -2px var(--shadow-color);
+    position: sticky;
+    top: 0;
+    z-index: 50;
+}
+
+.header nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+}
+
+.header .logo {
+    font-size: 2.5rem;
+    font-weight: 800;
+    /* Nunito Sans ExtraBold */
+    font-family: 'Nunito Sans', sans-serif;
+    color: var(--pantry-red);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+header .logo img.logo-image {
+    height: 200px; /* Adjust height as desired */
+    width: auto;   /* Maintain aspect ratio */
+    display: inline-block; /* Prevents extra space below image */
+    vertical-align: middle; /* Helps align if needed, though block usually suffices */
+    margin-right: 50px;
+}
+
+.header .logo:hover {
+    color: var(--pantry-gold);
+    text-decoration: none;
+}
+
+.header .nav-links-desktop {
+    display: none;
+    /* Hidden on mobile */
+    list-style: none;
+    padding-left: 0;
+    align-items: center;
+}
+
+.header .nav-links-desktop li {
+    margin-left: 1.5rem;
+}
+
+.header .nav-links-desktop a:not(.button) {
+    /* Style non-button links */
+    color: var(--pantry-text);
+    text-decoration: none;
+    transition: color 0.3s ease;
+    font-weight: 600;
+    /* Semibold Open Sans */
+}
+
+.header .nav-links-desktop a:not(.button):hover {
+    color: var(--pantry-red);
+    text-decoration: none;
+}
+
+.header .mobile-menu-button {
+    display: block;
+    /* Show on mobile */
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--pantry-text);
+}
+
+.header .mobile-menu {
+    display: none;
+    /* Hidden by default */
+    position: absolute;
+    top: 100%;
+    /* Position below header */
+    left: 0;
+    width: 100%;
+    background-color: var(--white);
+    box-shadow: 0 4px 6px -1px var(--shadow-color);
+    padding: 0.5rem 0;
+    z-index: 40;
+}
+
+.header .mobile-menu.open {
+    display: block;
+    /* Show when open */
+}
+
+.header .mobile-menu ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.header .mobile-menu li {
+    width: 100%;
+    text-align: center;
+}
+
+.header .mobile-menu a {
+    display: block;
+    padding: 0.75rem 1rem;
+    font-size: 1.125rem;
+    /* Larger text for mobile */
+    color: var(--pantry-text);
+    text-decoration: none;
+    width: 100%;
+    transition: background-color 0.2s ease;
+}
+
+.header .mobile-menu a:hover {
+    background-color: var(--gray-100);
+    text-decoration: none;
+}
+
+.header .mobile-menu a.mobile-contact-link {
+    /* Special style if needed */
+    font-weight: 700;
+    color: var(--pantry-red);
+}
+
+
+/* Hero Section */
+.hero-section {
+    color: var(--white);
+    padding: 5rem 0;
+    text-align: center;
+}
+
+.hero-section.bg-red {
+    background-color: var(--pantry-red);
+}
+
+.hero-section.bg-gray {
+    background-color: #6b7280;
+}
+
+/* Example fallback */
+
+.hero-section h1 {
+    color: var(--white);
+    /* Override default red heading color */
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+}
+
+.hero-section p {
+    font-size: 1.125rem;
+    margin-bottom: 2rem;
+    /* max-width: 48rem; */
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.hero-section .button-group .button {
+    /* Space buttons */
+    margin: 0 0.5rem;
+}
+
+/* General Section Padding */
+section {
+    padding-top: 4rem;
+    padding-bottom: 4rem;
+}
+
+section.bg-beige {
+    background-color: var(--pantry-beige);
+}
+
+section.bg-default {
+    background-color: var(--pantry-bg);
+}
+
+
+/* About Section (TextWithImage) */
+.text-image-section .content-wrapper {
+    display: flex;
+    flex-direction: column;
+    /* Mobile first */
+    align-items: center;
+    gap: 3rem;
+}
+
+.text-image-section .text-content,
+.text-image-section .image-content {
+    width: 100%;
+}
+
+.text-image-section .image-content img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: 0.5rem;
+    box-shadow: 0 10px 15px -3px var(--shadow-color), 0 4px 6px -2px var(--shadow-color);
+    object-fit: cover;
+}
+
+.text-image-section .text-content .lead-paragraph {
+    font-size: 1.125rem;
+    font-weight: 600;
+    /* Semibold Open Sans */
+    margin-bottom: 1rem;
+}
+
+.text-image-section .text-content .body-text p {
+    font-size: 1.125rem;
+    /* Slightly larger body text */
+    line-height: 1.7;
+    margin-bottom: 1rem;
+}
+
+.text-image-section .text-content .section-link {
+    margin-top: 1.5rem;
+    display: inline-block;
+    /* Needed for margin-top */
+}
+
+
+/* Icon Grid Section */
+.icon-grid-section {
+    text-align: center;
+}
+
+.icon-grid-section .section-icon {
+    height: 4rem;
+    width: 4rem;
+    margin: 0 auto 1rem auto;
+    color: var(--pantry-red);
+}
+
+.icon-grid-section .lead-paragraph {
+    max-width: 48rem;
+    margin: 0 auto 2.5rem auto;
+    font-size: 1.125rem;
+}
+
+.icon-grid-section .grid {
+    display: grid;
+    gap: 2rem;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Specific grid column classes */
+.icon-grid-section .grid.grid-cols-md-2 {
+    /* For Get Help */
+    max-width: 56rem;
+}
+
+.icon-grid-section .grid.grid-cols-md-3 {
+    /* For Support */
+    /* Default max-width from container is fine */
+}
+
+.icon-grid-section .bottom-button {
+    margin-top: 2.5rem;
+}
+
+/* Card Component */
+.card {
+    background-color: var(--white);
+    padding: 1.5rem;
+    text-align: left;
+    /* Base padding */
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 6px -1px var(--shadow-color), 0 2px 4px -2px var(--shadow-color);
+}
+
+.card.support-card {
+    /* Specific styling for support cards */
+    padding: 2rem;
+    box-shadow: 0 10px 15px -3px var(--shadow-color), 0 4px 6px -2px var(--shadow-color);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    text-align: center;
+}
+
+.card.support-card:hover {
+    transform: scale(1.05);
+    box-shadow: 0 20px 25px -5px var(--shadow-color-lg), 0 8px 10px -6px var(--shadow-color-lg);
+}
+
+.card .card-icon {
+    height: 3rem;
+    width: 3rem;
+    margin: 0 auto 1rem auto;
+    color: var(--pantry-gold);
+}
+
+.card h3 {
+    margin-bottom: 0.75rem;
+}
+
+.card .description {
+    color: var(--pantry-text);
+    margin-bottom: 1rem;
+    font-size: 1rem;
+    /* Base text size */
+    line-height: 1.6;
+}
+
+.card .description p {
+    /* Style paragraphs generated from newlines */
+    margin-bottom: 0.5rem;
+}
+
+.card .card-link {
+    /* Button/Link styling applied directly via ButtonLink component */
+}
+
+/* Contact Section */
+.contact-section {
+    text-align: center;
+}
+
+.contact-section .section-icon {
+    height: 4rem;
+    width: 4rem;
+    margin: 0 auto 1rem auto;
+    color: var(--pantry-red);
+}
+
+.contact-section .lead-paragraph {
+    max-width: 40rem;
+    margin: 0 auto 2rem auto;
+    font-size: 1.125rem;
+}
+
+.contact-section .contact-info {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: var(--pantry-text);
+    margin-bottom: 1.5rem;
+}
+
+.contact-section .contact-info p {
+    margin-bottom: 0.5rem;
+}
+
+/* Footer */
+.footer {
+    background-color: var(--pantry-text);
+    color: var(--white);
+    padding: 2.5rem 0;
+    /*margin-top: 4rem;*/
+    text-align: center;
+}
+
+.footer p {
+    margin-bottom: 0;
+}
+
+.footer .copyright {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.footer .tagline {
+    font-size: 0.875rem;
+    color: var(--gray-300);
+    margin-top: 0.5rem;
+}
+
+.footer .social-links {
+    margin-top: 1rem;
+}
+
+.footer .social-links a {
+    margin: 0 0.5rem;
+    color: var(--gray-300);
+    text-decoration: none;
+}
+
+.footer .social-links a:hover {
+    color: var(--white);
+}
+
+/* Responsive Design - Media Queries */
+
+/* Medium devices (tablets, 768px and up) */
+@media (min-width: 768px) {
+    h1 {
+        font-size: 3rem;
+    }
+
+    h2 {
+        font-size: 2.25rem;
+    }
+
+    section {
+        padding-top: 6rem;
+        padding-bottom: 6rem;
+    }
+
+    .hero-section {
+        padding-top: 8rem;
+        padding-bottom: 8rem;
+    }
+
+    .header .nav-links-desktop {
+        display: flex;
+        /* Show desktop nav */
+    }
+
+    .header .mobile-menu-button {
+        display: none;
+        /* Hide mobile button */
+    }
+
+    .header .mobile-menu {
+        display: none !important;
+        /* Ensure mobile menu is hidden */
+    }
+
+    .text-image-section .content-wrapper {
+        flex-direction: row;
+        /* Default side-by-side */
+    }
+
+    .text-image-section .content-wrapper.image-left {
+        flex-direction: row-reverse;
+        /* Image left */
+    }
+
+    .text-image-section .text-content,
+    .text-image-section .image-content {
+        width: 50%;
+    }
+
+    .icon-grid-section .grid.grid-cols-md-2 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .icon-grid-section .grid.grid-cols-md-3 {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .card {
+        padding: 2rem;
+        /* Increase padding slightly on larger screens */
+    }
+}
+
+/* Large devices (desktops, 1024px and up) */
+@media (min-width: 1024px) {
+    h1 {
+        font-size: 3.75rem;
+    }
+
+    p.lead,
+    .hero-section p,
+    .text-image-section .text-content .body-text p {
+        font-size: 1.25rem;
+    }
+}
+
+/* Markdown */
+.markdown-content {
+    /* Base styling for the container */
+    line-height: 1.7;
+    font-size: 1.125rem;
+    /* Example size */
+}
+
+.markdown-content h1,
+.markdown-content h2,
+.markdown-content h3,
+.markdown-content h4,
+.markdown-content h5,
+.markdown-content h6 {
+    /* Inherit heading styles or define specific ones */
+    margin-top: 1.5em;
+    margin-bottom: 0.75em;
+    line-height: 1.3;
+    font-family: 'Nunito Sans', sans-serif;
+    /* Ensure correct font */
+    color: var(--pantry-red);
+    /* Ensure correct color */
+}
+
+/* Adjust sizes as needed */
+.markdown-content h1 {
+    font-size: 2em;
+}
+
+.markdown-content h2 {
+    font-size: 1.75em;
+}
+
+.markdown-content h3 {
+    font-size: 1.5em;
+}
+
+.markdown-content p {
+    margin-bottom: 1em;
+}
+
+.markdown-content ul,
+.markdown-content ol {
+    margin-left: 1.5rem;
+    margin-bottom: 1em;
+}
+
+.markdown-content li {
+    margin-bottom: 0.5em;
+}
+
+.markdown-content a {
+    /* Inherits global link styles, but you can override */
+    color: var(--pantry-gold);
+    text-decoration: underline;
+}
+
+.markdown-content a:hover {
+    color: var(--pantry-red);
+}
+
+.markdown-content strong {
+    font-weight: 700;
+    /* Bold */
+}
+
+.markdown-content em {
+    font-style: italic;
+}
+
+.markdown-content blockquote {
+    border-left: 4px solid var(--pantry-beige);
+    /* Example style */
+    padding-left: 1rem;
+    margin-left: 0;
+    margin-right: 0;
+    margin-bottom: 1em;
+    color: #666;
+    /* Example text color */
+    font-style: italic;
+}
+
+.markdown-content code {
+    background-color: var(--pantry-beige);
+    padding: 0.2em 0.4em;
+    border-radius: 3px;
+    font-family: monospace;
+    font-size: 0.9em;
+}
+
+.markdown-content pre {
+    background-color: var(--pantry-beige);
+    padding: 1rem;
+    border-radius: 4px;
+    overflow-x: auto;
+    /* Handle long code lines */
+    margin-bottom: 1em;
+}
+
+.markdown-content pre code {
+    background-color: transparent;
+    padding: 0;
+}
