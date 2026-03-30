@@ -10,6 +10,7 @@ import Header from './components/Header';
 import Footer from './components/Footer';
 import AnnouncementHeader from './components/AnnouncementHeader';
 import NewsPostSection from './components/NewsPostSection';
+import NotFoundSection from './components/NotFoundSection';
 
 import { useContentfulData } from './hooks/useContentfulData';
 
@@ -59,6 +60,13 @@ function App() {
 
     // Handle Error State
     if (error) {
+        if (error.notFound) {
+            return (
+                <div>
+                    <main><NotFoundSection /></main>
+                </div>
+            );
+        }
         return <div style={{ padding: '2rem', color: 'red' }}>Error loading content: {error.message}</div>;
     }
 
@@ -107,7 +115,13 @@ function App() {
 
     // Normal page — requires a matching page entry in Contentful
     if (!pageData) {
-        return <div style={{ padding: '2rem', color: 'orange' }}>Content could not be fully loaded.</div>;
+        return (
+            <div>
+                {sharedHeader}
+                <main><NotFoundSection /></main>
+                {sharedFooter}
+            </div>
+        );
     }
 
     return (

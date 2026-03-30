@@ -456,17 +456,62 @@ section.bg-default {
     margin-bottom: 1rem;
 }
 
-.text-image-section .text-content .body-text p {
+.text-image-section .text-content .body-text p,
+.text-image-section .text-content .body-text li {
     font-size: 1.125rem;
-    /* Slightly larger body text */
     line-height: 1.7;
     margin-bottom: 1rem;
 }
 
+.text-image-section .text-content .body-text ul,
+.text-image-section .text-content .body-text ol {
+    padding-left: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.text-image-section .text-content .body-text .rich-text-image,
+.body-text .rich-text-image {
+    float: right;
+    margin: 0.25rem 0 1rem 1.5rem;
+    max-width: 45%;
+}
+
+.text-image-section .text-content .body-text .rich-text-image img,
+.body-text .rich-text-image img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 6px -1px var(--shadow-color), 0 2px 4px -2px var(--shadow-color);
+}
+
+.text-image-section .text-content .body-text .rich-text-image figcaption,
+.body-text .rich-text-image figcaption {
+    margin-top: 0.5rem;
+    font-size: 0.875rem;
+    color: var(--pantry-gold);
+    font-style: italic;
+}
+
+/* Clear floats after body text */
+.body-text::after {
+    content: '';
+    display: block;
+    clear: both;
+}
+
+.text-image-section .text-content .body-text h2,
+.text-image-section .text-content .body-text h3,
+.text-image-section .text-content .body-text h4,
+.text-image-section .text-content .body-text h5,
+.text-image-section .text-content .body-text h6 {
+    margin-top: 1.5rem;
+}
+
 .text-image-section .text-content .section-link {
     margin-top: 1.5rem;
-    display: inline-block;
-    /* Needed for margin-top */
+    display: flex;
+    justify-content: center;
 }
 
 
@@ -558,7 +603,9 @@ section.bg-default {
 }
 
 .card .card-link {
-    /* Button/Link styling applied directly via ButtonLink component */
+    display: flex;
+    justify-content: center;
+    margin-top: 1rem;
 }
 
 /* Contact Section */
@@ -698,6 +745,10 @@ section.bg-default {
         width: 50%;
     }
 
+    .text-image-section .content-wrapper.no-image .text-content {
+        width: 100%;
+    }
+
     .icon-grid-section .grid.grid-cols-md-2 {
         grid-template-columns: repeat(2, 1fr);
     }
@@ -720,9 +771,37 @@ section.bg-default {
 
     p.lead,
     .hero-section p,
-    .text-image-section .text-content .body-text p {
+    .text-image-section .text-content .body-text p,
+    .text-image-section .text-content .body-text li {
         font-size: 1.25rem;
     }
+}
+
+/* Not Found Section */
+.not-found-section {
+    padding: 6rem 0;
+    text-align: center;
+}
+
+.not-found-container {
+    max-width: 36rem;
+}
+
+.not-found-icon {
+    height: 4rem;
+    width: 4rem;
+    color: var(--pantry-red);
+    margin: 0 auto 1.5rem;
+    display: block;
+}
+
+.not-found-title {
+    margin-bottom: 1rem;
+}
+
+.not-found-message {
+    margin-bottom: 2rem;
+    color: var(--pantry-text);
 }
 
 /* News List Section */

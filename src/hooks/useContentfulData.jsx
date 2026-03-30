@@ -59,7 +59,9 @@ const useContentfulData = () => {
           });
 
           if (postResults.items.length === 0) {
-            throw new Error(`No news post found for slug '${newsPostSlug}'.`);
+            const err = new Error(`No news post found for slug '${newsPostSlug}'.`);
+            err.notFound = true;
+            throw err;
           }
           setNewsPostEntry(postResults.items[0]);
         } else {
@@ -73,7 +75,9 @@ const useContentfulData = () => {
           });
 
           if (pageResults.items.length === 0) {
-            throw new Error(`No page found for slug '${slug}'.`);
+            const err = new Error(`No page found for slug '${slug}'.`);
+            err.notFound = true;
+            throw err;
           }
           setPageEntry(pageResults.items[0]);
         }
