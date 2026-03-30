@@ -427,12 +427,19 @@ section.bg-default {
 
 
 /* About Section (TextWithImage) */
+/* reduce top and bottom padding 
+.text-image-section {
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+} */
+
 .text-image-section .content-wrapper {
     display: flex;
     flex-direction: column;
     /* Mobile first */
     align-items: center;
     gap: 3rem;
+
 }
 
 .text-image-section .text-content,
