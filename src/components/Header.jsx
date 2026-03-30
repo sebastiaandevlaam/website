@@ -43,7 +43,7 @@ const Header = ({ siteName, logoText, navigationMenu, entryId }) => {
   return (
     <header className="header">
       <nav className="container">
-        {/* Logo */}
+        {/* Logo — flex row, never wraps */}
         <a href="/" className="logo">
           <img
             src={logo}

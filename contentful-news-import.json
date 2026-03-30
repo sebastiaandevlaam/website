@@ -1,0 +1,607 @@
+{
+  "contentTypes": [
+    {
+      "sys": { "id": "newsPost" },
+      "name": "News Post",
+      "description": "An individual news or announcement post",
+      "displayField": "title",
+      "fields": [
+        {
+          "id": "title",
+          "name": "Title",
+          "type": "Symbol",
+          "required": true,
+          "validations": []
+        },
+        {
+          "id": "slug",
+          "name": "Slug",
+          "type": "Symbol",
+          "required": true,
+          "validations": [
+            { "unique": true },
+            {
+              "regexp": { "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
+              "message": "Slug must be lowercase, with words separated by hyphens (e.g. spring-food-drive)"
+            }
+          ]
+        },
+        {
+          "id": "summary",
+          "name": "Summary",
+          "type": "Text",
+          "required": true,
+          "validations": []
+        },
+        {
+          "id": "publishDate",
+          "name": "Publish Date",
+          "type": "Date",
+          "required": true,
+          "validations": []
+        },
+        {
+          "id": "body",
+          "name": "Body",
+          "type": "RichText",
+          "required": true,
+          "validations": []
+        },
+        {
+          "id": "featuredImage",
+          "name": "Featured Image",
+          "type": "Link",
+          "linkType": "Asset",
+          "required": false,
+          "validations": []
+        },
+        {
+          "id": "author",
+          "name": "Author",
+          "type": "Symbol",
+          "required": false,
+          "validations": []
+        }
+      ]
+    },
+    {
+      "sys": { "id": "sectionNewsList" },
+      "name": "Section: News List",
+      "description": "Page section displaying a list of news post previews",
+      "displayField": "title",
+      "fields": [
+        {
+          "id": "title",
+          "name": "Title",
+          "type": "Symbol",
+          "required": true,
+          "validations": []
+        },
+        {
+          "id": "leadParagraph",
+          "name": "Lead Paragraph",
+          "type": "Symbol",
+          "required": false,
+          "validations": []
+        },
+        {
+          "id": "posts",
+          "name": "Posts",
+          "type": "Array",
+          "required": true,
+          "items": {
+            "type": "Link",
+            "linkType": "Entry",
+            "validations": [
+              { "linkContentType": ["newsPost"] }
+            ]
+          },
+          "validations": []
+        },
+        {
+          "id": "displayLimit",
+          "name": "Display Limit",
+          "type": "Integer",
+          "required": false,
+          "validations": [
+            {
+              "range": { "min": 1 },
+              "message": "Display limit must be at least 1"
+            }
+          ]
+        },
+        {
+          "id": "displayStyle",
+          "name": "Display Style",
+          "type": "Symbol",
+          "required": false,
+          "validations": [
+            {
+              "in": ["List", "Grid"]
+            }
+          ]
+        },
+        {
+          "id": "backgroundStyle",
+          "name": "Background Style",
+          "type": "Symbol",
+          "required": false,
+          "validations": [
+            {
+              "in": ["Default Background", "Beige Background"]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+
+  "entries": [
+    {
+      "sys": {
+        "id": "newsPost-spring-food-drive-2026",
+        "contentType": {
+          "sys": { "type": "Link", "linkType": "ContentType", "id": "newsPost" }
+        }
+      },
+      "fields": {
+        "title": { "en-US": "Spring Food Drive — Help Us Stock the Shelves!" },
+        "slug": { "en-US": "spring-food-drive-2026" },
+        "summary": { "en-US": "Our annual Spring Food Drive runs April 1–30. Drop off non-perishable donations at any Holliston fire station or the pantry itself. Every item makes a difference for families in our community." },
+        "publishDate": { "en-US": "2026-03-25T09:00:00" },
+        "author": { "en-US": "Holliston Pantry Shelf" },
+        "body": {
+          "en-US": {
+            "nodeType": "document",
+            "data": {},
+            "content": [
+              {
+                "nodeType": "paragraph",
+                "data": {},
+                "content": [
+                  {
+                    "nodeType": "text",
+                    "value": "Spring is here, and so is our annual Spring Food Drive! Throughout the month of April, we are collecting non-perishable food donations to replenish our shelves after a long winter season. Last year, generous community members donated over 3,000 pounds of food — this year, we're hoping to surpass that.",
+                    "marks": [],
+                    "data": {}
+                  }
+                ]
+              },
+              {
+                "nodeType": "paragraph",
+                "data": {},
+                "content": [
+                  {
+                    "nodeType": "text",
+                    "value": "Most-needed items include canned proteins (tuna, chicken, beans), pasta and rice, peanut butter, canned soups, and shelf-stable milk. Please check expiration dates before donating — items must be unexpired and in their original packaging.",
+                    "marks": [],
+                    "data": {}
+                  }
+                ]
+              },
+              {
+                "nodeType": "paragraph",
+                "data": {},
+                "content": [
+                  {
+                    "nodeType": "text",
+                    "value": "Drop-off locations are open April 1–30:",
+                    "marks": [],
+                    "data": {}
+                  }
+                ]
+              },
+              {
+                "nodeType": "paragraph",
+                "data": {},
+                "content": [
+                  {
+                    "nodeType": "text",
+                    "value": "• Holliston Pantry Shelf (59 Central Street) — Mon, Wed, Fri 9am–12pm\n• Holliston Fire Station 1 (59 Central Street) — 24/7 donation box\n• Holliston Fire Station 2 (204 Washington Street) — 24/7 donation box\n• Town Hall lobby (703 Washington Street) — Mon–Fri 8am–4pm",
+                    "marks": [],
+                    "data": {}
+                  }
+                ]
+              },
+              {
+                "nodeType": "paragraph",
+                "data": {},
+                "content": [
+                  {
+                    "nodeType": "text",
+                    "value": "Can't make it in person? Monetary donations are also accepted and allow us to purchase high-priority items in bulk. Every $1 donated provides approximately $5 worth of food for a family in need.",
+                    "marks": [],
+                    "data": {}
+                  }
+                ]
+              },
+              {
+                "nodeType": "paragraph",
+                "data": {},
+                "content": [
+                  {
+                    "nodeType": "text",
+                    "value": "Thank you for your continued generosity and support. Together, we can ensure no Holliston resident goes hungry.",
+                    "marks": [{ "type": "bold" }],
+                    "data": {}
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+
+    {
+      "sys": {
+        "id": "newsPost-volunteer-orientation-april-2026",
+        "contentType": {
+          "sys": { "type": "Link", "linkType": "ContentType", "id": "newsPost" }
+        }
+      },
+      "fields": {
+        "title": { "en-US": "Volunteer Orientation — New Sessions This April" },
+        "slug": { "en-US": "volunteer-orientation-april-2026" },
+        "summary": { "en-US": "Interested in joining our volunteer team? We're hosting two new orientation sessions in April. No experience needed — just a desire to help your neighbors." },
+        "publishDate": { "en-US": "2026-03-18T09:00:00" },
+        "author": { "en-US": "Volunteer Coordinator" },
+        "body": {
+          "en-US": {
+            "nodeType": "document",
+            "data": {},
+            "content": [
+              {
+                "nodeType": "paragraph",
+                "data": {},
+                "content": [
+                  {
+                    "nodeType": "text",
+                    "value": "We are always looking for caring individuals to join the Holliston Pantry Shelf volunteer family. Whether you have two hours a month or two days a week, your time has a real impact on families facing food insecurity right here in Holliston.",
+                    "marks": [],
+                    "data": {}
+                  }
+                ]
+              },
+              {
+                "nodeType": "paragraph",
+                "data": {},
+                "content": [
+                  {
+                    "nodeType": "text",
+                    "value": "We're hosting two in-person orientation sessions this April:",
+                    "marks": [],
+                    "data": {}
+                  }
+                ]
+              },
+              {
+                "nodeType": "paragraph",
+                "data": {},
+                "content": [
+                  {
+                    "nodeType": "text",
+                    "value": "• Saturday, April 5 at 10:00 AM\n• Tuesday, April 15 at 6:00 PM\n\nBoth sessions are held at the pantry (59 Central Street, Holliston) and last approximately one hour.",
+                    "marks": [],
+                    "data": {}
+                  }
+                ]
+              },
+              {
+                "nodeType": "paragraph",
+                "data": {},
+                "content": [
+                  {
+                    "nodeType": "text",
+                    "value": "Volunteer roles include: sorting and stocking donated food, assisting clients during pantry hours, helping with special events and food drives, and administrative support. Volunteers must be 16 or older (14–15 with a parent/guardian present).",
+                    "marks": [],
+                    "data": {}
+                  }
+                ]
+              },
+              {
+                "nodeType": "paragraph",
+                "data": {},
+                "content": [
+                  {
+                    "nodeType": "text",
+                    "value": "To sign up for an orientation session, please email us or call during pantry hours. Space is limited, so please register in advance. We look forward to welcoming you!",
+                    "marks": [],
+                    "data": {}
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+
+    {
+      "sys": {
+        "id": "newsPost-extended-saturday-hours",
+        "contentType": {
+          "sys": { "type": "Link", "linkType": "ContentType", "id": "newsPost" }
+        }
+      },
+      "fields": {
+        "title": { "en-US": "New Saturday Hours Starting April 5" },
+        "slug": { "en-US": "extended-saturday-hours" },
+        "summary": { "en-US": "We're expanding our hours to include Saturday mornings! Starting April 5, the pantry will be open every Saturday from 9am to noon. This change makes it easier for working families to visit." },
+        "publishDate": { "en-US": "2026-03-10T09:00:00" },
+        "author": { "en-US": "Holliston Pantry Shelf" },
+        "body": {
+          "en-US": {
+            "nodeType": "document",
+            "data": {},
+            "content": [
+              {
+                "nodeType": "paragraph",
+                "data": {},
+                "content": [
+                  {
+                    "nodeType": "text",
+                    "value": "We've heard from many families that our current Monday, Wednesday, and Friday morning hours can be difficult to access when balancing work and school schedules. Starting Saturday, April 5, we are adding a weekly Saturday session from 9:00 AM to 12:00 PM.",
+                    "marks": [],
+                    "data": {}
+                  }
+                ]
+              },
+              {
+                "nodeType": "paragraph",
+                "data": {},
+                "content": [
+                  {
+                    "nodeType": "text",
+                    "value": "Our updated hours will be:",
+                    "marks": [{ "type": "bold" }],
+                    "data": {}
+                  }
+                ]
+              },
+              {
+                "nodeType": "paragraph",
+                "data": {},
+                "content": [
+                  {
+                    "nodeType": "text",
+                    "value": "• Monday: 9:00 AM – 12:00 PM\n• Wednesday: 9:00 AM – 12:00 PM\n• Friday: 9:00 AM – 12:00 PM\n• Saturday: 9:00 AM – 12:00 PM (NEW)",
+                    "marks": [],
+                    "data": {}
+                  }
+                ]
+              },
+              {
+                "nodeType": "paragraph",
+                "data": {},
+                "content": [
+                  {
+                    "nodeType": "text",
+                    "value": "No registration or appointment is needed. Simply come to 59 Central Street during any open hours. All Holliston residents in need are welcome.",
+                    "marks": [],
+                    "data": {}
+                  }
+                ]
+              },
+              {
+                "nodeType": "paragraph",
+                "data": {},
+                "content": [
+                  {
+                    "nodeType": "text",
+                    "value": "This expansion is made possible by our incredible team of volunteers. If you'd like to help staff Saturday morning shifts, please reach out to our volunteer coordinator.",
+                    "marks": [],
+                    "data": {}
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+
+    {
+      "sys": {
+        "id": "newsPost-medway-valley-farm-partnership",
+        "contentType": {
+          "sys": { "type": "Link", "linkType": "ContentType", "id": "newsPost" }
+        }
+      },
+      "fields": {
+        "title": { "en-US": "Local Farm Partnership Brings Fresh Produce to the Pantry" },
+        "slug": { "en-US": "medway-valley-farm-partnership" },
+        "summary": { "en-US": "We're excited to announce a new partnership with Medway Valley Farm. Starting this spring, they will donate fresh seasonal vegetables weekly — bringing nutritious produce directly to Holliston families." },
+        "publishDate": { "en-US": "2026-02-20T09:00:00" },
+        "author": { "en-US": "Holliston Pantry Shelf" },
+        "body": {
+          "en-US": {
+            "nodeType": "document",
+            "data": {},
+            "content": [
+              {
+                "nodeType": "paragraph",
+                "data": {},
+                "content": [
+                  {
+                    "nodeType": "text",
+                    "value": "We are thrilled to announce a new community partnership with Medway Valley Farm. Beginning in April, the farm will donate a weekly supply of fresh, locally grown vegetables to the Holliston Pantry Shelf — completely free of charge.",
+                    "marks": [],
+                    "data": {}
+                  }
+                ]
+              },
+              {
+                "nodeType": "paragraph",
+                "data": {},
+                "content": [
+                  {
+                    "nodeType": "text",
+                    "value": "Fresh produce has historically been one of the hardest categories for food pantries to provide consistently. This partnership changes that for our clients. Families visiting the pantry can expect seasonal vegetables including leafy greens, root vegetables, squash, and herbs throughout the growing season.",
+                    "marks": [],
+                    "data": {}
+                  }
+                ]
+              },
+              {
+                "nodeType": "paragraph",
+                "data": {},
+                "content": [
+                  {
+                    "nodeType": "text",
+                    "value": "\"We believe everyone in our community deserves access to fresh, healthy food,\" said the farm's owner. \"Partnering with the Holliston Pantry Shelf is one of the most direct ways we can put that belief into action.\"",
+                    "marks": [],
+                    "data": {}
+                  }
+                ]
+              },
+              {
+                "nodeType": "paragraph",
+                "data": {},
+                "content": [
+                  {
+                    "nodeType": "text",
+                    "value": "Fresh produce will be available on a first-come basis each Wednesday morning while supplies last. We encourage clients to arrive early on Wednesdays for the best selection.",
+                    "marks": [],
+                    "data": {}
+                  }
+                ]
+              },
+              {
+                "nodeType": "paragraph",
+                "data": {},
+                "content": [
+                  {
+                    "nodeType": "text",
+                    "value": "Thank you to Medway Valley Farm for this generous and meaningful contribution to our neighbors in need.",
+                    "marks": [],
+                    "data": {}
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+
+    {
+      "sys": {
+        "id": "newsPost-holiday-baskets-2025-recap",
+        "contentType": {
+          "sys": { "type": "Link", "linkType": "ContentType", "id": "newsPost" }
+        }
+      },
+      "fields": {
+        "title": { "en-US": "Holiday Basket Drive: Thank You, Holliston!" },
+        "slug": { "en-US": "holiday-baskets-2025-recap" },
+        "summary": { "en-US": "Thanks to overwhelming community generosity, we distributed 187 holiday meal baskets to families in December 2025 — our largest distribution ever. Read about the impact your support made." },
+        "publishDate": { "en-US": "2026-01-08T09:00:00" },
+        "author": { "en-US": "Holliston Pantry Shelf" },
+        "body": {
+          "en-US": {
+            "nodeType": "document",
+            "data": {},
+            "content": [
+              {
+                "nodeType": "paragraph",
+                "data": {},
+                "content": [
+                  {
+                    "nodeType": "text",
+                    "value": "The holiday season reminded us once again why community matters. Thanks to the extraordinary generosity of Holliston residents, businesses, and civic organizations, the Holliston Pantry Shelf distributed 187 complete holiday meal baskets in December 2025 — the most in our history.",
+                    "marks": [],
+                    "data": {}
+                  }
+                ]
+              },
+              {
+                "nodeType": "paragraph",
+                "data": {},
+                "content": [
+                  {
+                    "nodeType": "text",
+                    "value": "Each basket contained a full holiday meal: turkey or ham, stuffing, canned vegetables, cranberry sauce, gravy, dinner rolls, and a dessert — enough for a family of four to enjoy a festive meal together.",
+                    "marks": [],
+                    "data": {}
+                  }
+                ]
+              },
+              {
+                "nodeType": "paragraph",
+                "data": {},
+                "content": [
+                  {
+                    "nodeType": "text",
+                    "value": "By the numbers:",
+                    "marks": [{ "type": "bold" }],
+                    "data": {}
+                  }
+                ]
+              },
+              {
+                "nodeType": "paragraph",
+                "data": {},
+                "content": [
+                  {
+                    "nodeType": "text",
+                    "value": "• 187 holiday baskets distributed\n• 742 individuals served\n• 94 volunteer hours contributed\n• 28 local businesses participated in food and monetary donations",
+                    "marks": [],
+                    "data": {}
+                  }
+                ]
+              },
+              {
+                "nodeType": "paragraph",
+                "data": {},
+                "content": [
+                  {
+                    "nodeType": "text",
+                    "value": "Special thanks to the Holliston Elementary School PTA, the Holliston Rotary Club, and the many families who adopted a household through our sponsor-a-basket program. You made the holidays brighter for so many of our neighbors.",
+                    "marks": [],
+                    "data": {}
+                  }
+                ]
+              },
+              {
+                "nodeType": "paragraph",
+                "data": {},
+                "content": [
+                  {
+                    "nodeType": "text",
+                    "value": "Planning is already underway for the 2026 holiday season. If your organization would like to get involved early, please contact us — we'd love to hear from you.",
+                    "marks": [],
+                    "data": {}
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+
+    {
+      "sys": {
+        "id": "sectionNewsList-main",
+        "contentType": {
+          "sys": { "type": "Link", "linkType": "ContentType", "id": "sectionNewsList" }
+        }
+      },
+      "fields": {
+        "title": { "en-US": "News & Announcements" },
+        "leadParagraph": { "en-US": "Stay up to date with what's happening at the Holliston Pantry Shelf — food drives, volunteer opportunities, new programs, and community stories." },
+        "backgroundStyle": { "en-US": "Default Background" },
+        "posts": {
+          "en-US": [
+            { "sys": { "type": "Link", "linkType": "Entry", "id": "newsPost-spring-food-drive-2026" } },
+            { "sys": { "type": "Link", "linkType": "Entry", "id": "newsPost-volunteer-orientation-april-2026" } },
+            { "sys": { "type": "Link", "linkType": "Entry", "id": "newsPost-extended-saturday-hours" } },
+            { "sys": { "type": "Link", "linkType": "Entry", "id": "newsPost-medway-valley-farm-partnership" } },
+            { "sys": { "type": "Link", "linkType": "Entry", "id": "newsPost-holiday-baskets-2025-recap" } }
+          ]
+        }
+      }
+    }
+  ]
+}

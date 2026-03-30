@@ -1,5 +1,6 @@
 // Footer Component
 import { useContentfulInspectorMode } from '@contentful/live-preview/react';
+import SocialIcon from './SocialIcon';
 
 const Footer = ({ copyrightText, tagline, socialLinks, entryId }) => {
     const currentYear = new Date().getFullYear();
@@ -13,8 +14,8 @@ const Footer = ({ copyrightText, tagline, socialLinks, entryId }) => {
           {socialLinks && socialLinks.length > 0 && (
               <div className="social-links">
                   {socialLinks.map(link => (
-                      <a key={link.platformName} href={link.url} target="_blank" rel="noopener noreferrer">
-                          {link.platformName} {/* Replace with icons later if desired */}
+                      <a key={link.platformName} href={link.url} target="_blank" rel="noopener noreferrer" aria-label={link.platformName}>
+                          <SocialIcon platform={link.platformName} size={24} />
                       </a>
                   ))}
               </div>

@@ -3,9 +3,11 @@ import ContactSection from "./ContactSection"
 import HeroSection from "./HeroSection"
 import TextWithImageSection from "./TextWithImageSection"
 import IconGridSection from "./IconGridSection"
+import NewsListSection from "./NewsListSection"
+import NewsPostSection from "./NewsPostSection"
 
 // Section Renderer Component (Unchanged logic, just renders components with classes)
-const SectionRenderer = ({ section, entryId }) => {
+const SectionRenderer = ({ section, entryId, sitePhone, siteEmail }) => {
   switch (section.contentType) {
     case 'sectionHero':
       return <HeroSection {...section} entryId={entryId} />
@@ -14,7 +16,11 @@ const SectionRenderer = ({ section, entryId }) => {
     case 'sectionIconGrid':
       return <IconGridSection {...section} entryId={entryId} />
     case 'sectionContact':
-      return <ContactSection {...section} entryId={entryId} />
+      return <ContactSection {...section} entryId={entryId} sitePhone={sitePhone} siteEmail={siteEmail} />
+    case 'sectionNewsList':
+      return <NewsListSection {...section} entryId={entryId} />
+    case 'sectionNewsPost':
+      return <NewsPostSection {...section} entryId={entryId} />
     default:
       console.warn(`Unknown section type: ${section.contentType}`)
       return <div className="container"><div style={{ margin: '2rem 0', padding: '1rem', backgroundColor: '#fee2e2', color: '#b91c1c' }}>Unsupported section type: {section.contentType}</div></div>

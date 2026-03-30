@@ -25,40 +25,64 @@ const client = createClient({
   ...(usePreviewApi ? { host: 'preview.contentful.com' } : {}),
 });
 
+// Detect if the current URL is a news post route (/news/{slug})
+const getNewsPostSlug = () => {
+  const parts = window.location.pathname.split('/').filter(Boolean);
+  return parts[0] === 'news' && parts.length === 2 ? parts[1] : null;
+};
+
 // --- Custom Hook for Fetching Contentful Data ---
 // Returns full entry objects (not just .fields) so that useContentfulLiveUpdates
 // can subscribe to live updates in the consuming component.
 const useContentfulData = () => {
   const [pageEntry, setPageEntry] = useState(null);
+  const [newsPostEntry, setNewsPostEntry] = useState(null);
   const [siteSettingsEntry, setSiteSettingsEntry] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const PAGE_CONTENT_TYPE_ID = 'page';
     const SITE_SETTINGS_CONTENT_TYPE_ID = 'siteSettings';
-    const slug = window.location.pathname;
+    const newsPostSlug = getNewsPostSlug();
 
     const fetchData = async () => {
       setIsLoading(true);
       setError(null);
       try {
-        const pageResults = await client.getEntries({
-          content_type: PAGE_CONTENT_TYPE_ID,
-          'fields.slug': slug,
-          include: 10,
-          limit: 1
-        });
+        if (newsPostSlug) {
+          // News post route: fetch the newsPost entry directly by slug
+          const postResults = await client.getEntries({
+            content_type: 'newsPost',
+            'fields.slug': newsPostSlug,
+            include: 5,
+            limit: 1,
+          });
 
-        if (pageResults.items.length === 0) {
-          throw new Error(`No page found for slug '${slug}'.`);
+          if (postResults.items.length === 0) {
+            throw new Error(`No news post found for slug '${newsPostSlug}'.`);
+          }
+          setNewsPostEntry(postResults.items[0]);
+        } else {
+          // Normal page route: fetch by slug
+          const slug = window.location.pathname;
+          const pageResults = await client.getEntries({
+            content_type: 'page',
+            'fields.slug': slug,
+            include: 10,
+            limit: 1,
+          });
+
+          if (pageResults.items.length === 0) {
+            throw new Error(`No page found for slug '${slug}'.`);
+          }
+          setPageEntry(pageResults.items[0]);
         }
-        setPageEntry(pageResults.items[0]);
 
+        // Always fetch site settings
         const settingsEntries = await client.getEntries({
           content_type: SITE_SETTINGS_CONTENT_TYPE_ID,
           include: 10,
-          limit: 1
+          limit: 1,
         });
 
         if (settingsEntries.items.length > 0) {
@@ -72,6 +96,7 @@ const useContentfulData = () => {
         console.error("Error fetching Contentful data:", err);
         setError(err);
         setPageEntry(null);
+        setNewsPostEntry(null);
         setSiteSettingsEntry(null);
       } finally {
         setIsLoading(false);
@@ -81,7 +106,7 @@ const useContentfulData = () => {
     fetchData();
   }, []);
 
-  return { pageEntry, siteSettingsEntry, isLoading, error };
+  return { pageEntry, newsPostEntry, siteSettingsEntry, isLoading, error };
 };
 
 export { useContentfulData };
