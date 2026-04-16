@@ -1149,6 +1149,16 @@ section.bg-default {
     margin-bottom: 1.25rem;
 }
 
+.news-post-body ul,
+.news-post-body ol {
+    padding-left: 1.5rem;
+    margin-bottom: 1.25rem;
+}
+
+.news-post-body li {
+    margin-bottom: 0.5rem;
+}
+
 @media (min-width: 768px) {
     .news-post-title {
         font-size: 2.5rem;

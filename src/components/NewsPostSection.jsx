@@ -20,7 +20,7 @@ const NewsPostSection = ({ post, backgroundStyle, entryId }) => {
     return (
         <section className={`news-post-section ${bgClass}`}>
             <div className="container news-post-container">
-                <a href="/#news" className="link-subtle news-post-back">← Back to News</a>
+                <a href="/news" className="link-subtle news-post-back">← Back to News</a>
 
                 <header className="news-post-header">
                     {formattedDate && (
