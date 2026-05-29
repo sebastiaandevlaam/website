@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { ChevronDown, ChevronUp } from 'lucide-react';
+import { useContentfulInspectorMode } from '@contentful/live-preview/react';
 
 const FUNCTIONS_BASE_URL = import.meta.env.VITE_FUNCTIONS_BASE_URL;
 const DEFAULT_AMOUNTS = [10, 25, 50, 100, 250];
@@ -24,7 +25,9 @@ const DonationSection = ({
   acknowledgementIntroText,
   successHeadline,
   successBody,
+  entryId,
 }) => {
+  const inspectorProps = useContentfulInspectorMode({ entryId });
   const searchParams = new URLSearchParams(window.location.search);
   const isSuccess = searchParams.get('payment') === 'success';
   const paidAmount = parseFloat(searchParams.get('amount')) || 0;
@@ -113,14 +116,14 @@ const DonationSection = ({
         <div className="donate-form-wrapper">
           <div className="donate-success-card">
             <div className="donate-success-icon" aria-hidden="true">✓</div>
-            <h2>{successHeadline || 'Thank You!'}</h2>
+            <h2 {...inspectorProps({ fieldId: 'successHeadline' })}>{successHeadline || 'Thank You!'}</h2>
             {paidAmount > 0 && (
               <p className="donate-success-amount">
                 Your donation of <strong>${paidAmount.toFixed(2)}</strong> has been received.
               </p>
             )}
             {successBody && (
-              <div className="markdown-content">
+              <div className="markdown-content" {...inspectorProps({ fieldId: 'successBody' })}>
                 <ReactMarkdown>{successBody}</ReactMarkdown>
               </div>
             )}
@@ -147,9 +150,9 @@ const DonationSection = ({
         {/* Title + intro above the form card */}
         {(title || introText) && (
           <div className="donate-section-intro">
-            {title && <h2 className="donate-section-title">{title}</h2>}
+            {title && <h2 className="donate-section-title" {...inspectorProps({ fieldId: 'title' })}>{title}</h2>}
             {introText && (
-              <div className="markdown-content donate-intro-text">
+              <div className="markdown-content donate-intro-text" {...inspectorProps({ fieldId: 'introText' })}>
                 <ReactMarkdown>{introText}</ReactMarkdown>
               </div>
             )}
@@ -161,7 +164,7 @@ const DonationSection = ({
 
             {/* Reason — dropdown when multiple, plain text when only one */}
             {reasonList.length > 1 && (
-              <div className="donate-field-group">
+              <div className="donate-field-group" {...inspectorProps({ fieldId: 'reasons' })}>
                 <label className="donate-label" htmlFor="donation-reason">
                   I'm donating
                 </label>
@@ -182,7 +185,7 @@ const DonationSection = ({
               </div>
             )}
             {reasonList.length === 1 && (
-              <p className="donate-reason-display">{reasonList[0].label}</p>
+              <p className="donate-reason-display" {...inspectorProps({ fieldId: 'reasons' })}>{reasonList[0].label}</p>
             )}
 
             {/* Per-reason extra field */}
@@ -205,7 +208,7 @@ const DonationSection = ({
             )}
 
             {/* Preset amount buttons */}
-            <div className="donate-field-group">
+            <div className="donate-field-group" {...inspectorProps({ fieldId: 'presetAmounts' })}>
               <label className="donate-label">Choose an Amount</label>
               <div className="donate-amounts">
                 {amounts.map(amount => (
@@ -251,7 +254,7 @@ const DonationSection = ({
 
             {/* Cover fees checkbox */}
             {coverFeesEnabled !== false && donationAmount > 0 && (
-              <label className="donate-fee-label">
+              <label className="donate-fee-label" {...inspectorProps({ fieldId: 'coverFeesLabel' })}>
                 <input
                   type="checkbox"
                   className="donate-checkbox"
@@ -282,14 +285,14 @@ const DonationSection = ({
                   onClick={() => setAckExpanded(v => !v)}
                   aria-expanded={ackExpanded}
                 >
-                  <span>{acknowledgementTitle || 'Acknowledgement Letter'}</span>
+                  <span {...inspectorProps({ fieldId: 'acknowledgementTitle' })}>{acknowledgementTitle || 'Acknowledgement Letter'}</span>
                   {ackExpanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
                 </button>
 
                 {ackExpanded && (
                   <div className="donate-ack-body">
                     {acknowledgementIntroText && (
-                      <div className="markdown-content donate-ack-intro">
+                      <div className="markdown-content donate-ack-intro" {...inspectorProps({ fieldId: 'acknowledgementIntroText' })}>
                         <ReactMarkdown>{acknowledgementIntroText}</ReactMarkdown>
                       </div>
                     )}
