@@ -31,6 +31,7 @@ const getNewsPostSlug = () => {
   return parts[0] === 'news' && parts.length === 2 ? parts[1] : null;
 };
 
+
 // --- Custom Hook for Fetching Contentful Data ---
 // Returns full entry objects (not just .fields) so that useContentfulLiveUpdates
 // can subscribe to live updates in the consuming component.

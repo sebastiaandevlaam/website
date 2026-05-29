@@ -1,0 +1,21 @@
+{
+  "name": "functions",
+  "description": "Cloud Functions for Firebase — Holliston Pantry Shelf donations",
+  "scripts": {
+    "serve": "firebase emulators:start --only functions",
+    "deploy": "firebase deploy --only functions"
+  },
+  "engines": {
+    "node": "20"
+  },
+  "main": "index.js",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "firebase-functions": "^6.0.0",
+    "stripe": "^17.0.0"
+  },
+  "devDependencies": {
+    "firebase-admin": "^13.0.0"
+  },
+  "private": true
+}
