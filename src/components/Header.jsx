@@ -34,7 +34,7 @@ const NavMenuItem = ({ item, isMobile, onMobileClick }) => {
   );
 };
 
-const Header = ({ siteName, logoText, navigationMenu, entryId }) => {
+const Header = ({ siteName, logoText, tagline, navigationMenu, entryId }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const inspectorProps = useContentfulInspectorMode({ entryId });
 
@@ -50,7 +50,12 @@ const Header = ({ siteName, logoText, navigationMenu, entryId }) => {
             alt={logoAltText}
             className="logo-image"
           />
-          <span {...inspectorProps({ fieldId: 'logoText' })}>{logoText || siteName}</span>
+          <div className="logo-text">
+            <span {...inspectorProps({ fieldId: 'logoText' })}>{logoText || siteName}</span>
+            {tagline && (
+              <span className="logo-tagline" {...inspectorProps({ fieldId: 'tagline' })}>{tagline}</span>
+            )}
+          </div>
         </a>
 
         {/* Desktop Navigation Links */}

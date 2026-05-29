@@ -243,6 +243,21 @@ a:hover {
     transition: color 0.3s ease;
 }
 
+.header .logo-text {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.header .logo-tagline {
+    font-size: clamp(1.1rem, 2.2vw, 1.9rem);
+    font-weight: 400;
+    font-style: italic;
+    color: var(--pantry-text);
+    white-space: nowrap;
+    margin-top: -0.75em;
+}
+
 .header .logo img.logo-image {
     height: clamp(50px, 10vw, 150px);
     width: auto;

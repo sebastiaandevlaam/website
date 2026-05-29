@@ -82,6 +82,7 @@ function App() {
             <Header
                 siteName={siteSettings.siteName}
                 logoText={siteSettings.logoText}
+                tagline={siteSettings.tagline}
                 navigationMenu={siteSettings.headerNavigationMenu?.fields || siteSettings.headerNavigationMenu}
                 entryId={liveSiteSettingsEntry?.sys?.id}
             />
