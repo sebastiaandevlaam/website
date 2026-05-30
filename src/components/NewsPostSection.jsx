@@ -1,6 +1,17 @@
 import { useContentfulInspectorMode } from '@contentful/live-preview/react'
 import RichTextRenderer from './RichTextRenderer';
 
+const handleBack = (e) => {
+    e.preventDefault();
+    const referrer = document.referrer;
+    const isSameOrigin = referrer && new URL(referrer).origin === window.location.origin;
+    if (isSameOrigin) {
+        window.history.back();
+    } else {
+        window.location.href = '/news';
+    }
+};
+
 const NewsPostSection = ({ post, backgroundStyle, entryId }) => {
     const { title, summary, publishDate, featuredImage, body, author } = post?.fields || {};
 
@@ -20,7 +31,7 @@ const NewsPostSection = ({ post, backgroundStyle, entryId }) => {
     return (
         <section className={`news-post-section ${bgClass}`}>
             <div className="container news-post-container">
-                <a href="/news" className="link-subtle news-post-back">← Back to News</a>
+                <a href="/news" onClick={handleBack} className="link-subtle news-post-back">← Back to Previous Page</a>
 
                 <header className="news-post-header">
                     {formattedDate && (

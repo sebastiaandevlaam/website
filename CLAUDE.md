@@ -81,6 +81,17 @@ All layout uses plain CSS classes — no utility classes, no CSS modules. Add ne
 - Anchor/scroll IDs are auto-generated from button URLs or section titles; no manual IDs needed.
 - External links should have `rel="noopener noreferrer"` and open in a new tab when `openInNewTab` is set.
 - Image `alt` text comes from Contentful `description` field with a sensible fallback string.
+- Body text font size is `1rem` across all section types (e.g. `TextWithImageSection`, `IconGridSection` cards) for visual consistency.
+
+## Navigation Conventions
+
+- The project does **not** use React Router. Page navigation uses plain `<a href>` links and `window.location`.
+- The "Back to Previous Page" link in `NewsPostSection` uses `window.history.back()` with a fallback to `/news` when no same-origin referrer is present (e.g. direct link or external source).
+
+## Mobile Header Layout
+
+- The hamburger menu appears on the **top left** in mobile view (below 540px), achieved via `order: -1` and `margin-right: auto` on `.header .mobile-menu-button`.
+- At 540px+ the hamburger is hidden and the full desktop nav is shown.
 
 ## Firebase Deployment
 

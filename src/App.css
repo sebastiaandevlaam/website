@@ -304,7 +304,8 @@ a:hover {
     border: none;
     cursor: pointer;
     color: var(--pantry-text);
-    margin-left: auto; /* pushes hamburger to the right in the row layout */
+    order: -1; /* places hamburger before the logo in the flex row */
+    margin-right: auto; /* pushes logo to the right */
 }
 
 .header .mobile-menu {
@@ -480,7 +481,7 @@ section.bg-default {
 
 .text-image-section .text-content .body-text p,
 .text-image-section .text-content .body-text li {
-    font-size: 1.125rem;
+    font-size: 1rem;
     line-height: 1.7;
     margin-bottom: 1rem;
 }
@@ -724,6 +725,8 @@ section.bg-default {
 
     .header .mobile-menu-button {
         display: none;
+        order: 0;
+        margin-right: 0;
     }
 
     .header .mobile-menu {
@@ -792,9 +795,7 @@ section.bg-default {
     }
 
     p.lead,
-    .hero-section p,
-    .text-image-section .text-content .body-text p,
-    .text-image-section .text-content .body-text li {
+    .hero-section p {
         font-size: 1.25rem;
     }
 }
