@@ -1,7 +1,12 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npm install:*)"
+      "Bash(npm install:*)",
+      "Read(//Users/sebastiaan/Documents/Holliston Pantry Shelf/holliston-pantry-shelf/souperbowl-2026/app/**)",
+      "Read(//Users/sebastiaan/Documents/Holliston Pantry Shelf/holliston-pantry-shelf/souperbowl-2026/components/**)",
+      "Read(//Users/sebastiaan/Documents/Holliston Pantry Shelf/holliston-pantry-shelf/souperbowl-2026/**)",
+      "Bash(cat \"/Users/sebastiaan/Documents/Holliston Pantry Shelf/holliston-pantry-shelf/website/firebase.json\" 2>/dev/null || cat \"/Users/sebastiaan/Documents/Holliston Pantry Shelf/holliston-pantry-shelf/firebase.json\" 2>/dev/null || echo \"not found\")",
+      "Read(//Users/sebastiaan/Documents/Holliston Pantry Shelf/holliston-pantry-shelf/**)"
     ]
   }
 }

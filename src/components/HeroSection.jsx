@@ -1,5 +1,6 @@
 import { useContentfulInspectorMode } from '@contentful/live-preview/react'
 import ButtonLink from "./ButtonLink"
+import { toHttpsUrl } from '@/utils/url'
 
 const HeroSection = ({ headline, description, primaryButton, secondaryButton, backgroundStyle, backgroundImage, entryId }) => {
   const primaryButtonId = primaryButton?.sys?.id
@@ -20,8 +21,7 @@ const HeroSection = ({ headline, description, primaryButton, secondaryButton, ba
   };
   const bgClass = bgMap[backgroundStyle] || 'bg-red';
 
-  const imageUrl = backgroundImage?.fields?.file?.url;
-  const fullImageUrl = imageUrl?.startsWith('//') ? `https:${imageUrl}` : imageUrl;
+  const fullImageUrl = toHttpsUrl(backgroundImage?.fields?.file?.url);
   const bgStyle = bgClass === 'bg-image' && fullImageUrl
     ? { backgroundImage: `url(${fullImageUrl})` }
     : undefined;

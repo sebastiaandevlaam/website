@@ -1,14 +1,12 @@
 import { useContentfulInspectorMode } from '@contentful/live-preview/react'
 import RichTextRenderer from "./RichTextRenderer";
 import ButtonLink from "./ButtonLink";
+import { toHttpsUrl } from '@/utils/url';
 
 const TextWithImageSection = ({ title, leadParagraph, body, image, imagePosition, optionalLink, backgroundStyle, entryId }) => {
 
-    const imageUrl = image?.fields?.file?.url;
-    const imageDescription = image?.fields?.description;
-    const imageTitle = image?.fields?.title;
-    const imageAlt = imageDescription || imageTitle || title || 'Section image';
-    const fullImageUrl = imageUrl?.startsWith('//') ? `https:${imageUrl}` : imageUrl;
+    const imageAlt = image?.fields?.description || image?.fields?.title || title || 'Section image';
+    const fullImageUrl = toHttpsUrl(image?.fields?.file?.url);
 
     const bgClass = backgroundStyle === "Beige Background" ? "bg-beige" : "bg-default";
     const imagePosClass = imagePosition === 'Left' ? 'image-left' : 'image-right';
