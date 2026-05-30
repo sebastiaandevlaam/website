@@ -1,28 +1,28 @@
-// Import Lucide icons needed for the components
-import { 
-    ShoppingBasket, 
-    HandHeart, 
-    Users, 
-    Mail, 
-    DollarSign, 
-    PackageCheck, 
+import {
+    ShoppingBasket,
+    HandHeart,
+    Users,
+    Mail,
+    DollarSign,
+    PackageCheck,
     ArrowRight,
-    Home, // Example for nav
-    Info, // Example for nav
-    Phone, // Example for nav
-    Menu, // Mobile menu icon
-    X, // Close icon
-    Apple, // Apple logo
+    Home,
+    Info,
+    Phone,
+    Menu,
+    X,
+    Apple,
     Megaphone
 } from 'lucide-react';
 
-// Helper component to dynamically render icons (Unchanged)
+const ICONS = {
+    ShoppingBasket, HandHeart, Users, Mail, DollarSign, PackageCheck,
+    ArrowRight, Home, Info, Phone, Menu, X, Apple, Megaphone
+};
+
 const Icon = ({ name, ...props }) => {
-    const icons = {
-      ShoppingBasket, HandHeart, Users, Mail, DollarSign, PackageCheck, ArrowRight, Home, Info, Phone, Menu, X, Apple, Megaphone
-    };
-    const LucideIcon = icons[name];
+    const LucideIcon = ICONS[name];
     return LucideIcon ? <LucideIcon {...props} /> : null;
-  };
-  
-  export default Icon;
+};
+
+export default Icon;

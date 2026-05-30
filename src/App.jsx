@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { useContentfulLiveUpdates } from '@contentful/live-preview/react';
 
 //import styles
@@ -29,27 +29,22 @@ function App() {
 
     // Set SEO data
     useEffect(() => {
+        const setMeta = (title, description) => {
+            document.title = title;
+            let el = document.querySelector('meta[name="description"]');
+            if (!el) {
+                el = document.createElement('meta');
+                el.name = 'description';
+                document.head.appendChild(el);
+            }
+            el.setAttribute('content', description || '');
+        };
         if (liveNewsPostEntry) {
             const post = liveNewsPostEntry.fields;
-            document.title = post?.title
-                ? `${post.title} | ${siteSettings?.siteName || 'News'}`
-                : siteSettings?.siteName || 'News';
-            let metaDesc = document.querySelector('meta[name="description"]');
-            if (!metaDesc) {
-                metaDesc = document.createElement('meta');
-                metaDesc.name = 'description';
-                document.head.appendChild(metaDesc);
-            }
-            metaDesc.setAttribute('content', post?.summary || '');
+            const title = post?.title ? `${post.title} | ${siteSettings?.siteName || 'News'}` : siteSettings?.siteName || 'News';
+            setMeta(title, post?.summary);
         } else {
-            document.title = pageData?.seoTitle || siteSettings?.siteName || 'Website';
-            let metaDesc = document.querySelector('meta[name="description"]');
-            if (!metaDesc) {
-                metaDesc = document.createElement('meta');
-                metaDesc.name = 'description';
-                document.head.appendChild(metaDesc);
-            }
-            metaDesc.setAttribute('content', pageData?.seoDescription || '');
+            setMeta(pageData?.seoTitle || siteSettings?.siteName || 'Website', pageData?.seoDescription);
         }
     }, [pageData, liveNewsPostEntry, siteSettings]);
 

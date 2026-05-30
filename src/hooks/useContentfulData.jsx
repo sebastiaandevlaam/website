@@ -43,57 +43,38 @@ const useContentfulData = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const SITE_SETTINGS_CONTENT_TYPE_ID = 'siteSettings';
     const newsPostSlug = getNewsPostSlug();
 
     const fetchData = async () => {
       setIsLoading(true);
       setError(null);
       try {
-        if (newsPostSlug) {
-          // News post route: fetch the newsPost entry directly by slug
-          const postResults = await client.getEntries({
-            content_type: 'newsPost',
-            'fields.slug': newsPostSlug,
-            include: 5,
-            limit: 1,
-          });
+        const contentPromise = newsPostSlug
+          ? client.getEntries({ content_type: 'newsPost', 'fields.slug': newsPostSlug, include: 5, limit: 1 })
+          : client.getEntries({ content_type: 'page', 'fields.slug': window.location.pathname, include: 10, limit: 1 });
 
-          if (postResults.items.length === 0) {
-            const err = new Error(`No news post found for slug '${newsPostSlug}'.`);
-            err.notFound = true;
-            throw err;
-          }
-          setNewsPostEntry(postResults.items[0]);
-        } else {
-          // Normal page route: fetch by slug
-          const slug = window.location.pathname;
-          const pageResults = await client.getEntries({
-            content_type: 'page',
-            'fields.slug': slug,
-            include: 10,
-            limit: 1,
-          });
+        const settingsPromise = client.getEntries({ content_type: 'siteSettings', include: 10, limit: 1 });
 
-          if (pageResults.items.length === 0) {
-            const err = new Error(`No page found for slug '${slug}'.`);
-            err.notFound = true;
-            throw err;
-          }
-          setPageEntry(pageResults.items[0]);
+        const [contentResult, settingsResult] = await Promise.all([contentPromise, settingsPromise]);
+
+        if (contentResult.items.length === 0) {
+          const type = newsPostSlug ? 'news post' : 'page';
+          const slug = newsPostSlug || window.location.pathname;
+          const err = new Error(`No ${type} found for slug '${slug}'.`);
+          err.notFound = true;
+          throw err;
         }
 
-        // Always fetch site settings
-        const settingsEntries = await client.getEntries({
-          content_type: SITE_SETTINGS_CONTENT_TYPE_ID,
-          include: 10,
-          limit: 1,
-        });
-
-        if (settingsEntries.items.length > 0) {
-          setSiteSettingsEntry(settingsEntries.items[0]);
+        if (newsPostSlug) {
+          setNewsPostEntry(contentResult.items[0]);
         } else {
-          console.warn(`No Site Settings entry found with content type ID '${SITE_SETTINGS_CONTENT_TYPE_ID}'.`);
+          setPageEntry(contentResult.items[0]);
+        }
+
+        if (settingsResult.items.length > 0) {
+          setSiteSettingsEntry(settingsResult.items[0]);
+        } else {
+          console.warn('No Site Settings entry found.');
           setSiteSettingsEntry(null);
         }
 

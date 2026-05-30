@@ -1,3 +1,5 @@
+import { toHttpsUrl } from '@/utils/url';
+
 // Renders inline content nodes (text, hyperlinks) within a block
 const renderInline = (node, index) => {
     if (node.nodeType === 'text') {
@@ -24,6 +26,8 @@ const renderInline = (node, index) => {
     return null;
 };
 
+const HEADING_TAGS = { 'heading-2': 'h2', 'heading-3': 'h3', 'heading-4': 'h4', 'heading-5': 'h5', 'heading-6': 'h6' };
+
 // Helper to render basic rich text structure
 const RichTextRenderer = ({ body }) => {
     if (!body || !body.content) return null;
@@ -31,20 +35,9 @@ const RichTextRenderer = ({ body }) => {
         if (node.nodeType === 'paragraph') {
             return <p key={index}>{node.content?.map(renderInline)}</p>;
         }
-        if (node.nodeType === 'heading-2') {
-            return <h2 key={index}>{node.content?.map(renderInline)}</h2>;
-        }
-        if (node.nodeType === 'heading-3') {
-            return <h3 key={index}>{node.content?.map(renderInline)}</h3>;
-        }
-        if (node.nodeType === 'heading-4') {
-            return <h4 key={index}>{node.content?.map(renderInline)}</h4>;
-        }
-        if (node.nodeType === 'heading-5') {
-            return <h5 key={index}>{node.content?.map(renderInline)}</h5>;
-        }
-        if (node.nodeType === 'heading-6') {
-            return <h6 key={index}>{node.content?.map(renderInline)}</h6>;
+        if (node.nodeType in HEADING_TAGS) {
+            const Tag = HEADING_TAGS[node.nodeType];
+            return <Tag key={index}>{node.content?.map(renderInline)}</Tag>;
         }
         if (node.nodeType === 'unordered-list') {
             return <ul key={index}>{node.content?.map((item, i) => <li key={i}>{item.content?.map((p) => p.content?.map(renderInline))}</li>)}</ul>;
@@ -57,7 +50,7 @@ const RichTextRenderer = ({ body }) => {
             const title = node.data?.target?.fields?.title;
             const description = node.data?.target?.fields?.description;
             if (!file?.url) return null;
-            const url = file.url.startsWith('//') ? `https:${file.url}` : file.url;
+            const url = toHttpsUrl(file.url);
             const contentType = file.contentType || '';
             if (contentType.startsWith('image/')) {
                 return (

@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
 import { useContentfulInspectorMode } from '@contentful/live-preview/react';
 import Icon from './Icon';
+import { toHttpsUrl } from '@/utils/url';
 
 const ITEMS_PER_PAGE = 10;
 
@@ -26,8 +27,7 @@ const NewsPost = ({ post }) => {
     const formattedDate = formatDate(publishDate);
     const inspectorProps = useContentfulInspectorMode({ entryId: post?.sys?.id });
 
-    const imageUrl = featuredImage?.fields?.file?.url;
-    const fullImageUrl = imageUrl?.startsWith('//') ? `https:${imageUrl}` : imageUrl;
+    const fullImageUrl = toHttpsUrl(featuredImage?.fields?.file?.url);
 
     return (
         <article className="news-list-item">
@@ -157,9 +157,8 @@ const NewsListSection = ({ title, leadParagraph, posts, displayLimit, displaySty
                         {pagedPosts.map(post => {
                             const { title: postTitle, slug, summary, publishDate, featuredImage } = post?.fields || {};
                             const formattedDate = formatDate(publishDate);
-                            const imageUrl = featuredImage?.fields?.file?.url;
                             const imageAlt = featuredImage?.fields?.description || featuredImage?.fields?.title || postTitle || '';
-                            const fullImageUrl = imageUrl?.startsWith('//') ? `https:${imageUrl}` : imageUrl;
+                            const fullImageUrl = toHttpsUrl(featuredImage?.fields?.file?.url);
                             return (
                                 <article key={post.sys.id} className="card news-grid-card">
                                     {fullImageUrl && (
