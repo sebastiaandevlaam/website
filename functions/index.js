@@ -14,7 +14,7 @@ exports.createDonationCheckout = onRequest((req, res) => {
     const SITE_URL = process.env.SITE_URL || 'https://hollistonpantryshelf.org';
 
     try {
-      const { donationAmount, processingFee, coverFees, reason, honoree, acknowledgement, returnUrl } = req.body;
+      const { donationAmount, processingFee, coverFees, reason, honoree, amountTagline, acknowledgement, returnUrl } = req.body;
 
       if (!donationAmount || donationAmount < 1) {
         return res.status(400).json({ error: 'Invalid donation amount' });
@@ -51,6 +51,7 @@ exports.createDonationCheckout = onRequest((req, res) => {
       const sharedMetadata = {
         reason: reason || 'general',
         honoree: honoree || '',
+        amount_tagline: amountTagline || '',
         ...(acknowledgement ? {
           ack_first_name: acknowledgement.firstName || '',
           ack_last_name: acknowledgement.lastName || '',

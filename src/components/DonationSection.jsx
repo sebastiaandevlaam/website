@@ -13,16 +13,24 @@ const EMPTY_ACK = {
   additionalText: '',
 };
 
+function getPresetsForReason(reasonData) {
+  const fromReason = reasonData?.presetAmounts?.map(p => p.fields).filter(Boolean) || [];
+  return fromReason.length > 0
+    ? fromReason
+    : DEFAULT_AMOUNTS.map(amount => ({ amount, tagline: '' }));
+}
+
+function getDefaultAmount(reasonData) {
+  const presets = getPresetsForReason(reasonData);
+  return presets.find(p => p.default)?.amount ?? null;
+}
+
 const DonationSection = ({
   title,
   introText,
   reasons,
-  presetAmounts,
   coverFeesEnabled,
   coverFeesLabel,
-  collectAcknowledgement,
-  acknowledgementTitle,
-  acknowledgementIntroText,
   successHeadline,
   successBody,
   entryId,
@@ -33,12 +41,10 @@ const DonationSection = ({
   const paidAmount = parseFloat(searchParams.get('amount')) || 0;
 
   const reasonList = reasons?.map(r => r.fields).filter(Boolean) || [];
-  const amounts = presetAmounts?.length
-    ? presetAmounts.map(n => parseInt(n)).filter(n => !isNaN(n))
-    : DEFAULT_AMOUNTS;
 
-  const defaultReason = reasonList[0]?.value || '';
-  const defaultAmount = amounts[Math.floor(amounts.length / 2)] ?? amounts[0];
+  const defaultReasonData = reasonList[0];
+  const defaultReason = defaultReasonData?.value || '';
+  const defaultAmount = getDefaultAmount(defaultReasonData);
 
   const [selectedReason, setSelectedReason] = useState(defaultReason);
   const [extraFieldValue, setExtraFieldValue] = useState('');
@@ -52,6 +58,13 @@ const DonationSection = ({
   const [error, setError] = useState('');
 
   const currentReason = reasonList.find(r => r.value === selectedReason);
+  const presetAmounts = getPresetsForReason(currentReason);
+  const hasTaglines = presetAmounts.some(p => p.tagline);
+  const collectAcknowledgement = currentReason?.collectAcknowledgement;
+  const acknowledgementTitle = currentReason?.acknowledgementTitle;
+  const acknowledgementIntroText = currentReason?.acknowledgementIntroText;
+  const selectedPreset = !isCustom ? presetAmounts.find(p => p.amount === selectedAmount) : null;
+
   const donationAmount = isCustom ? (parseFloat(customAmount) || 0) : selectedAmount;
   // Gross-up so the org receives exactly donationAmount after Stripe takes 2.9% + $0.30
   const grossTotal = donationAmount > 0
@@ -62,6 +75,17 @@ const DonationSection = ({
   const total = coverFeesActive ? grossTotal : donationAmount;
 
   const setAck = (field, value) => setAckData(prev => ({ ...prev, [field]: value }));
+
+  const handleReasonChange = (newValue) => {
+    const newReasonData = reasonList.find(r => r.value === newValue);
+    setSelectedReason(newValue);
+    setExtraFieldValue('');
+    setError('');
+    setSelectedAmount(getDefaultAmount(newReasonData));
+    setIsCustom(false);
+    setCustomAmount('');
+    setAckExpanded(false);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -89,7 +113,8 @@ const DonationSection = ({
           coverFees: coverFeesActive,
           reason: currentReason?.label || selectedReason,
           honoree: extraFieldValue.trim(),
-          acknowledgement: ackExpanded ? ackData : null,
+          amountTagline: selectedPreset?.tagline || '',
+          acknowledgement: (collectAcknowledgement && ackExpanded) ? ackData : null,
           returnUrl: window.location.origin + window.location.pathname,
         }),
       });
@@ -172,11 +197,7 @@ const DonationSection = ({
                   id="donation-reason"
                   className="donate-select"
                   value={selectedReason}
-                  onChange={(e) => {
-                    setSelectedReason(e.target.value);
-                    setExtraFieldValue('');
-                    setError('');
-                  }}
+                  onChange={(e) => handleReasonChange(e.target.value)}
                 >
                   {reasonList.map(r => (
                     <option key={r.value} value={r.value}>{r.label}</option>
@@ -208,27 +229,50 @@ const DonationSection = ({
             )}
 
             {/* Preset amount buttons */}
-            <div className="donate-field-group" {...inspectorProps({ fieldId: 'presetAmounts' })}>
+            <div className="donate-field-group">
               <label className="donate-label">Choose an Amount</label>
-              <div className="donate-amounts">
-                {amounts.map(amount => (
+              {hasTaglines ? (
+                <div className="donate-amounts donate-amounts-tagged">
+                  {presetAmounts.map(({ amount, tagline }) => (
+                    <button
+                      key={amount}
+                      type="button"
+                      className={`donate-amount-btn donate-amount-btn-tagged${!isCustom && selectedAmount === amount ? ' selected' : ''}`}
+                      onClick={() => { setSelectedAmount(amount); setIsCustom(false); setCustomAmount(''); setError(''); }}
+                    >
+                      <span className="donate-amount-value">${amount}</span>
+                      {tagline && <span className="donate-amount-tagline">{tagline}</span>}
+                    </button>
+                  ))}
                   <button
-                    key={amount}
                     type="button"
-                    className={`donate-amount-btn${!isCustom && selectedAmount === amount ? ' selected' : ''}`}
-                    onClick={() => { setSelectedAmount(amount); setIsCustom(false); setCustomAmount(''); setError(''); }}
+                    className={`donate-amount-btn donate-amount-btn-tagged${isCustom ? ' selected' : ''}`}
+                    onClick={() => { setIsCustom(true); setSelectedAmount(null); setError(''); }}
                   >
-                    ${amount}
+                    <span className="donate-amount-value">Custom</span>
                   </button>
-                ))}
-                <button
-                  type="button"
-                  className={`donate-amount-btn${isCustom ? ' selected' : ''}`}
-                  onClick={() => { setIsCustom(true); setSelectedAmount(null); setError(''); }}
-                >
-                  Custom
-                </button>
-              </div>
+                </div>
+              ) : (
+                <div className="donate-amounts">
+                  {presetAmounts.map(({ amount }) => (
+                    <button
+                      key={amount}
+                      type="button"
+                      className={`donate-amount-btn${!isCustom && selectedAmount === amount ? ' selected' : ''}`}
+                      onClick={() => { setSelectedAmount(amount); setIsCustom(false); setCustomAmount(''); setError(''); }}
+                    >
+                      ${amount}
+                    </button>
+                  ))}
+                  <button
+                    type="button"
+                    className={`donate-amount-btn${isCustom ? ' selected' : ''}`}
+                    onClick={() => { setIsCustom(true); setSelectedAmount(null); setError(''); }}
+                  >
+                    Custom
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* Custom amount input */}
@@ -285,14 +329,14 @@ const DonationSection = ({
                   onClick={() => setAckExpanded(v => !v)}
                   aria-expanded={ackExpanded}
                 >
-                  <span {...inspectorProps({ fieldId: 'acknowledgementTitle' })}>{acknowledgementTitle || 'Acknowledgement Letter'}</span>
+                  <span>{acknowledgementTitle || 'Acknowledgement Letter'}</span>
                   {ackExpanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
                 </button>
 
                 {ackExpanded && (
                   <div className="donate-ack-body">
                     {acknowledgementIntroText && (
-                      <div className="markdown-content donate-ack-intro" {...inspectorProps({ fieldId: 'acknowledgementIntroText' })}>
+                      <div className="markdown-content donate-ack-intro">
                         <ReactMarkdown>{acknowledgementIntroText}</ReactMarkdown>
                       </div>
                     )}
