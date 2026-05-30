@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { useContentfulInspectorMode } from '@contentful/live-preview/react';
@@ -63,6 +63,7 @@ const DonationSection = ({
   const collectAcknowledgement = currentReason?.collectAcknowledgement;
   const acknowledgementTitle = currentReason?.acknowledgementTitle;
   const acknowledgementIntroText = currentReason?.acknowledgementIntroText;
+  const sendConfirmationEmail = currentReason?.sendConfirmationEmail || false;
   const selectedPreset = !isCustom ? presetAmounts.find(p => p.amount === selectedAmount) : null;
 
   const donationAmount = isCustom ? (parseFloat(customAmount) || 0) : selectedAmount;
@@ -95,6 +96,11 @@ const DonationSection = ({
       return;
     }
 
+    if (!Number.isInteger(donationAmount)) {
+      setError('Please enter a whole dollar amount — no cents.');
+      return;
+    }
+
     if (currentReason?.extraFieldRequired && !extraFieldValue.trim()) {
       setError(`Please enter ${currentReason.extraFieldLabel || 'the required information'}.`);
       return;
@@ -115,6 +121,7 @@ const DonationSection = ({
           honoree: extraFieldValue.trim(),
           amountTagline: selectedPreset?.tagline || '',
           acknowledgement: (collectAcknowledgement && ackExpanded) ? ackData : null,
+          sendConfirmationEmail,
           returnUrl: window.location.origin + window.location.pathname,
         }),
       });
@@ -135,9 +142,16 @@ const DonationSection = ({
 
   // ── Success state ─────────────────────────────────────────────────────────
 
+  const successRef = useRef(null);
+  useEffect(() => {
+    if (isSuccess && successRef.current) {
+      successRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [isSuccess]);
+
   if (isSuccess) {
     return (
-      <section className="donate-section">
+      <section className="donate-section" ref={successRef}>
         <div className="donate-form-wrapper">
           <div className="donate-success-card">
             <div className="donate-success-icon" aria-hidden="true">✓</div>

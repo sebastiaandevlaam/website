@@ -45,6 +45,7 @@ Contentful API → useContentfulData (hook) → App.jsx → SectionRenderer → 
 | `sectionTextWithImage` | `TextWithImageSection` |
 | `sectionIconGrid` | `IconGridSection` |
 | `sectionContact` | `ContactSection` |
+| `sectionVolunteer` | `VolunteerSection` |
 
 To add a new section type: create the component, add the mapping in `SectionRenderer.jsx`, and define the content type in Contentful.
 
@@ -82,6 +83,31 @@ All layout uses plain CSS classes — no utility classes, no CSS modules. Add ne
 - External links should have `rel="noopener noreferrer"` and open in a new tab when `openInNewTab` is set.
 - Image `alt` text comes from Contentful `description` field with a sensible fallback string.
 - Body text font size is `1rem` across all section types (e.g. `TextWithImageSection`, `IconGridSection` cards) for visual consistency.
+
+## Volunteer Form
+
+`VolunteerSection` submits to the `submitVolunteerApplication` Cloud Function, which emails the application via the Resend API. Required env vars on the function:
+
+- `RESEND_API_KEY` — API key from resend.com
+- `RESEND_FROM` — verified sender address (e.g. `volunteers@hollistonpantryshelf.org`)
+- `VOLUNTEER_EMAIL_TO` — recipient address for incoming applications
+
+**Contentful setup required:**
+
+1. Content type `volunteerOpportunity` — field: `label` (Short text)
+2. Content type `availabilityShift` — field: `label` (Short text)
+3. Content type `sectionVolunteer` — fields:
+   - `title` (Short text)
+   - `introText` (Long text / Markdown)
+   - `volunteerOpportunities` (References, Many → `volunteerOpportunity`)
+   - `availabilityShifts` (References, Many → `availabilityShift`)
+   - `availabilityHint` (Short text, optional) — sub-label shown below the availability legend
+   - `studentOptions` (Short text, list) — e.g. Yes, No, Part-time
+   - `successHeadline` (Short text, optional)
+   - `successBody` (Long text / Markdown, optional)
+   - `backgroundStyle` (Short text, optional — same values as other sections)
+
+The contact time checkboxes (Morning / Afternoon / Evening) and all field labels are hardcoded. Everything else is Contentful-driven.
 
 ## Navigation Conventions
 
