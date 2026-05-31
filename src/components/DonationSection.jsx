@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
-import { ChevronDown, ChevronUp } from 'lucide-react';
 import { useContentfulInspectorMode } from '@contentful/live-preview/react';
 
 const FUNCTIONS_BASE_URL = import.meta.env.VITE_FUNCTIONS_BASE_URL;
@@ -52,7 +51,7 @@ const DonationSection = ({
   const [isCustom, setIsCustom] = useState(false);
   const [customAmount, setCustomAmount] = useState('');
   const [coverFees, setCoverFees] = useState(true);
-  const [ackExpanded, setAckExpanded] = useState(false);
+  const [wantsAcknowledgement, setWantsAcknowledgement] = useState(null);
   const [ackData, setAckData] = useState(EMPTY_ACK);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -85,7 +84,7 @@ const DonationSection = ({
     setSelectedAmount(getDefaultAmount(newReasonData));
     setIsCustom(false);
     setCustomAmount('');
-    setAckExpanded(false);
+    setWantsAcknowledgement(null);
   };
 
   const handleSubmit = async (e) => {
@@ -106,6 +105,24 @@ const DonationSection = ({
       return;
     }
 
+    if (collectAcknowledgement && wantsAcknowledgement === true) {
+      const requiredAckFields = {
+        firstName: 'First Name',
+        lastName: 'Last Name',
+        streetAddress: 'Street Address',
+        city: 'City',
+        state: 'State',
+        postalCode: 'Postal Code',
+        country: 'Country',
+      };
+      for (const [field, label] of Object.entries(requiredAckFields)) {
+        if (!ackData[field].trim()) {
+          setError(`Please enter your ${label} for the acknowledgement letter.`);
+          return;
+        }
+      }
+    }
+
     setIsLoading(true);
     setError('');
 
@@ -120,7 +137,7 @@ const DonationSection = ({
           reason: currentReason?.label || selectedReason,
           honoree: extraFieldValue.trim(),
           amountTagline: selectedPreset?.tagline || '',
-          acknowledgement: (collectAcknowledgement && ackExpanded) ? ackData : null,
+          acknowledgement: (collectAcknowledgement && wantsAcknowledgement === true) ? ackData : null,
           sendConfirmationEmail,
           returnUrl: window.location.origin + window.location.pathname,
         }),
@@ -144,9 +161,11 @@ const DonationSection = ({
 
   const successRef = useRef(null);
   useEffect(() => {
-    if (isSuccess && successRef.current) {
-      successRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
+    if (!isSuccess) return;
+    const timer = setTimeout(() => {
+      successRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 300);
+    return () => clearTimeout(timer);
   }, [isSuccess]);
 
   if (isSuccess) {
@@ -337,17 +356,35 @@ const DonationSection = ({
             {/* Acknowledgement section */}
             {collectAcknowledgement && (
               <div className="donate-ack-section">
-                <button
-                  type="button"
-                  className="donate-ack-toggle"
-                  onClick={() => setAckExpanded(v => !v)}
-                  aria-expanded={ackExpanded}
-                >
-                  <span>{acknowledgementTitle || 'Acknowledgement Letter'}</span>
-                  {ackExpanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
-                </button>
+                <div className="donate-field-group">
+                  <label className="donate-label">
+                    Would you like to receive {acknowledgementTitle ? `${/^[aeiou]/i.test(acknowledgementTitle) ? 'an' : 'a'} ${acknowledgementTitle}` : 'an acknowledgement letter'}?
+                  </label>
+                  <div className="donate-ack-yesno">
+                    <label className="donate-radio-label">
+                      <input
+                        type="radio"
+                        name="wantsAcknowledgement"
+                        value="yes"
+                        checked={wantsAcknowledgement === true}
+                        onChange={() => setWantsAcknowledgement(true)}
+                      />
+                      Yes
+                    </label>
+                    <label className="donate-radio-label">
+                      <input
+                        type="radio"
+                        name="wantsAcknowledgement"
+                        value="no"
+                        checked={wantsAcknowledgement === false}
+                        onChange={() => setWantsAcknowledgement(false)}
+                      />
+                      No
+                    </label>
+                  </div>
+                </div>
 
-                {ackExpanded && (
+                {wantsAcknowledgement === true && (
                   <div className="donate-ack-body">
                     {acknowledgementIntroText && (
                       <div className="markdown-content donate-ack-intro">
@@ -357,20 +394,26 @@ const DonationSection = ({
 
                     <div className="donate-address-grid">
                       <div className="donate-field-group">
-                        <label className="donate-label" htmlFor="ack-first-name">First Name</label>
+                        <label className="donate-label" htmlFor="ack-first-name">
+                          First Name<span className="donate-required"> *</span>
+                        </label>
                         <input id="ack-first-name" type="text" className="donate-text-input"
-                          value={ackData.firstName} onChange={e => setAck('firstName', e.target.value)} />
+                          value={ackData.firstName} onChange={e => { setAck('firstName', e.target.value); setError(''); }} />
                       </div>
                       <div className="donate-field-group">
-                        <label className="donate-label" htmlFor="ack-last-name">Last Name</label>
+                        <label className="donate-label" htmlFor="ack-last-name">
+                          Last Name<span className="donate-required"> *</span>
+                        </label>
                         <input id="ack-last-name" type="text" className="donate-text-input"
-                          value={ackData.lastName} onChange={e => setAck('lastName', e.target.value)} />
+                          value={ackData.lastName} onChange={e => { setAck('lastName', e.target.value); setError(''); }} />
                       </div>
 
                       <div className="donate-field-group donate-address-grid-full">
-                        <label className="donate-label" htmlFor="ack-street">Street Address</label>
+                        <label className="donate-label" htmlFor="ack-street">
+                          Street Address<span className="donate-required"> *</span>
+                        </label>
                         <input id="ack-street" type="text" className="donate-text-input"
-                          value={ackData.streetAddress} onChange={e => setAck('streetAddress', e.target.value)} />
+                          value={ackData.streetAddress} onChange={e => { setAck('streetAddress', e.target.value); setError(''); }} />
                       </div>
 
                       <div className="donate-field-group donate-address-grid-full">
@@ -380,26 +423,34 @@ const DonationSection = ({
                       </div>
 
                       <div className="donate-field-group">
-                        <label className="donate-label" htmlFor="ack-city">City</label>
+                        <label className="donate-label" htmlFor="ack-city">
+                          City<span className="donate-required"> *</span>
+                        </label>
                         <input id="ack-city" type="text" className="donate-text-input"
-                          value={ackData.city} onChange={e => setAck('city', e.target.value)} />
+                          value={ackData.city} onChange={e => { setAck('city', e.target.value); setError(''); }} />
                       </div>
                       <div className="donate-field-group">
-                        <label className="donate-label" htmlFor="ack-state">State</label>
+                        <label className="donate-label" htmlFor="ack-state">
+                          State<span className="donate-required"> *</span>
+                        </label>
                         <input id="ack-state" type="text" className="donate-text-input"
-                          value={ackData.state} onChange={e => setAck('state', e.target.value)} />
+                          value={ackData.state} onChange={e => { setAck('state', e.target.value); setError(''); }} />
                       </div>
 
                       <div className="donate-field-group">
-                        <label className="donate-label" htmlFor="ack-postal">Postal Code</label>
+                        <label className="donate-label" htmlFor="ack-postal">
+                          Postal Code<span className="donate-required"> *</span>
+                        </label>
                         <input id="ack-postal" type="text" className="donate-text-input"
-                          value={ackData.postalCode} onChange={e => setAck('postalCode', e.target.value)} />
+                          value={ackData.postalCode} onChange={e => { setAck('postalCode', e.target.value); setError(''); }} />
                       </div>
                       <div className="donate-field-group">
-                        <label className="donate-label" htmlFor="ack-country">Country</label>
+                        <label className="donate-label" htmlFor="ack-country">
+                          Country<span className="donate-required"> *</span>
+                        </label>
                         <input id="ack-country" type="text" className="donate-text-input"
                           placeholder="United States"
-                          value={ackData.country} onChange={e => setAck('country', e.target.value)} />
+                          value={ackData.country} onChange={e => { setAck('country', e.target.value); setError(''); }} />
                       </div>
 
                       <div className="donate-field-group donate-address-grid-full">
