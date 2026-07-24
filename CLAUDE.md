@@ -109,6 +109,16 @@ All layout uses plain CSS classes — no utility classes, no CSS modules. Add ne
 
 The contact time checkboxes (Morning / Afternoon / Evening) and all field labels are hardcoded. Everything else is Contentful-driven.
 
+## Footer
+
+The `Footer` component renders three columns inside `.footer-inner` on the dark footer, followed by a full-width `.footer-bar` with the copyright line:
+
+1. **Brand** — site name (`siteSettings.siteName`), tagline, social links.
+2. **Contact** — address, phone, email. Phone/email come from `siteSettings.defaultContactPhone` / `defaultContactEmail`; the address comes from `siteSettings.footerAddress`.
+3. **Affiliate badge** — the Greater Boston Food Bank "Powered By" logo, shown on a white "badge card" (`src/assets/gbfb-affiliate-logo.png` — an optimized, transparent, Pantry-Red-framed version of the CMYK master JPG). The card exists because the badge is designed for a light background and reads poorly directly on the dark footer.
+
+**Contentful setup:** add a `footerAddress` field (Short or Long text) to the `siteSettings` content type. Line breaks are preserved (`white-space: pre-line`). The contact block hides any missing line and hides entirely if all three are empty.
+
 ## Navigation Conventions
 
 - The project does **not** use React Router. Page navigation uses plain `<a href>` links and `window.location`.

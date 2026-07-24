@@ -86,9 +86,13 @@ function App() {
 
     const sharedFooter = (
         <Footer
+            siteName={siteSettings.siteName}
             copyrightText={siteSettings.footerCopyrightText}
             tagline={siteSettings.footerTagline}
             socialLinks={siteSettings.socialMediaLinks?.map(link => link.fields) || []}
+            address={siteSettings.footerAddress}
+            phone={siteSettings.defaultContactPhone}
+            email={siteSettings.defaultContactEmail}
             entryId={liveSiteSettingsEntry?.sys?.id}
         />
     );
