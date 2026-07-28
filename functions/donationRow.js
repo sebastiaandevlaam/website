@@ -7,6 +7,7 @@ const DONATION_HEADER = [
   'Stripe Session ID',
   'Donor Name',
   'Donor Email',
+  'Donation Amount (USD)',
   'Amount Paid (USD)',
   'Fees Covered',
   'Reason',
@@ -43,7 +44,12 @@ function buildDonationRow(session, meta) {
   meta = meta || session.metadata || {};
   const donorName = session.customer_details?.name || '';
   const donorEmail = session.customer_details?.email || '';
-  const amountPaid = Number((session.amount_total / 100).toFixed(2)); // numeric so the column sums
+  const amountPaid = Number((session.amount_total / 100).toFixed(2)); // total charged (incl. covered fees)
+  // Base donation the donor chose. Older donations predate this metadata, so
+  // fall back to the total paid.
+  const donationAmount = meta.donation_amount
+    ? Number(meta.donation_amount)
+    : amountPaid;
   const hasAck = !!(meta.ack_first_name || meta.ack_last_name);
 
   return [
@@ -51,6 +57,7 @@ function buildDonationRow(session, meta) {
     session.id,
     donorName,
     donorEmail,
+    donationAmount,
     amountPaid,
     meta.cover_fees === 'true' ? 'Yes' : 'No',
     meta.reason || '',

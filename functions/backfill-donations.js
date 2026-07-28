@@ -1,10 +1,13 @@
 /**
- * One-time historical backfill of Stripe donations into the donations Google Sheet.
+ * One-time historical backfill / reconcile of Stripe donations into the
+ * donations Google Sheet.
  *
- * Pulls every PAID Checkout Session created on/after the cutoff date and appends
- * a row (same columns as the live webhook). It reads the Stripe Session IDs
- * already in the sheet and skips them, so running it more than once will not
- * create duplicates.
+ * Pulls every PAID Checkout Session created on/after the cutoff date and, for
+ * each one, either appends a new row or corrects the existing row in place
+ * (matched by Stripe Session ID). It also refreshes the header to the current
+ * column layout. This makes it safe to re-run: it never duplicates rows, and it
+ * repairs rows written under an older column layout (e.g. before the Donation
+ * Amount column was added).
  *
  * Run from the functions/ directory:
  *     node backfill-donations.js
@@ -70,22 +73,26 @@ async function getSheetsClient() {
   return google.sheets({ version: 'v4', auth });
 }
 
-async function ensureHeader(sheets, spreadsheetId) {
-  const res = await sheets.spreadsheets.values.get({ spreadsheetId, range: 'Sheet1!A1:R1' });
-  if (!res.data.values || res.data.values.length === 0) {
-    await sheets.spreadsheets.values.update({
-      spreadsheetId,
-      range: 'Sheet1!A1',
-      valueInputOption: 'RAW',
-      requestBody: { values: [DONATION_HEADER] },
-    });
-    console.log('• Wrote header row (sheet was empty).');
-  }
+// (Re)writes the header row to the current column layout so it always matches
+// the rows we write (e.g. after adding the Donation Amount column).
+async function writeHeader(sheets, spreadsheetId) {
+  await sheets.spreadsheets.values.update({
+    spreadsheetId,
+    range: 'Sheet1!A1',
+    valueInputOption: 'RAW',
+    requestBody: { values: [DONATION_HEADER] },
+  });
 }
 
-async function existingSessionIds(sheets, spreadsheetId) {
+// Maps each Stripe Session ID already in the sheet to its 1-based row number
+// (data starts at row 2, under the header).
+async function existingSessionRows(sheets, spreadsheetId) {
   const res = await sheets.spreadsheets.values.get({ spreadsheetId, range: 'Sheet1!B2:B' });
-  return new Set((res.data.values || []).flat().filter(Boolean));
+  const map = new Map();
+  (res.data.values || []).forEach((r, i) => {
+    if (r[0]) map.set(r[0], i + 2);
+  });
+  return map;
 }
 
 // --- Main -------------------------------------------------------------------
@@ -119,47 +126,73 @@ async function main() {
     throw new Error(`No tab named "Sheet1" (found: ${tabs.join(', ')}). Rename your tab to Sheet1.`);
   }
 
-  if (!DRY_RUN) await ensureHeader(sheets, spreadsheetId);
-  const already = await existingSessionIds(sheets, spreadsheetId);
+  const existingRows = await existingSessionRows(sheets, spreadsheetId);
 
-  const collected = [];
+  // Sort every paid session since the cutoff into either an in-place correction
+  // (already in the sheet) or a new row to append.
+  const toAppend = [];
+  const toUpdate = [];
   let scanned = 0;
+  let paidCount = 0;
   const pager = stripe.checkout.sessions.list({ created: { gte: cutoffUnix }, limit: 100 });
   for await (const session of pager) {
     scanned++;
     if (session.payment_status !== 'paid') continue;
-    if (already.has(session.id)) continue;
-    collected.push({ created: session.created, row: buildDonationRow(session, session.metadata) });
+    paidCount++;
+    const row = buildDonationRow(session, session.metadata);
+    const rowNum = existingRows.get(session.id);
+    if (rowNum) {
+      toUpdate.push({ range: `Sheet1!A${rowNum}`, values: [row] });
+    } else {
+      toAppend.push({ created: session.created, row });
+    }
   }
 
-  // Oldest first, so the sheet reads chronologically.
-  collected.sort((a, b) => a.created - b.created);
-  const rows = collected.map((c) => c.row);
+  // Oldest first, so newly added rows read chronologically.
+  toAppend.sort((a, b) => a.created - b.created);
+  const appendRows = toAppend.map((c) => c.row);
 
-  console.log(`Scanned ${scanned} sessions · ${rows.length} new paid donation(s) to add · ${already.size} already in sheet.`);
-
-  if (rows.length === 0) {
-    console.log('Nothing to add. Done.');
-    return;
-  }
+  console.log(
+    `Scanned ${scanned} sessions · ${paidCount} paid · ${appendRows.length} to add · ${toUpdate.length} existing row(s) to correct.`
+  );
 
   if (DRY_RUN) {
-    for (const c of collected) {
-      console.log(`  [dry-run] ${c.row[0]}  ${c.row[2] || '(no name)'}  $${c.row[4]}  ${c.row[1]}`);
+    for (const c of toAppend) {
+      console.log(`  [add]    ${c.row[0]}  ${c.row[2] || '(no name)'}  donation $${c.row[4]} / paid $${c.row[5]}  ${c.row[1]}`);
     }
-    console.log('Dry run complete — no rows written.');
+    for (const u of toUpdate) {
+      console.log(`  [correct] ${u.range.replace('Sheet1!', '')}  ${u.values[0][2] || '(no name)'}  donation $${u.values[0][4]} / paid $${u.values[0][5]}`);
+    }
+    console.log('Dry run complete — no changes written.');
     return;
   }
 
-  await sheets.spreadsheets.values.append({
-    spreadsheetId,
-    range: 'Sheet1!A1',
-    valueInputOption: 'RAW',
-    insertDataOption: 'INSERT_ROWS',
-    requestBody: { values: rows },
-  });
+  // Refresh the header to the current layout, then correct existing rows and
+  // append new ones.
+  await writeHeader(sheets, spreadsheetId);
 
-  console.log(`✓ Added ${rows.length} donation(s) to the sheet.`);
+  if (toUpdate.length > 0) {
+    await sheets.spreadsheets.values.batchUpdate({
+      spreadsheetId,
+      requestBody: { valueInputOption: 'RAW', data: toUpdate },
+    });
+    console.log(`✓ Corrected ${toUpdate.length} existing row(s).`);
+  }
+
+  if (appendRows.length > 0) {
+    await sheets.spreadsheets.values.append({
+      spreadsheetId,
+      range: 'Sheet1!A1',
+      valueInputOption: 'RAW',
+      insertDataOption: 'INSERT_ROWS',
+      requestBody: { values: appendRows },
+    });
+    console.log(`✓ Added ${appendRows.length} new donation(s).`);
+  }
+
+  if (toUpdate.length === 0 && appendRows.length === 0) {
+    console.log('Sheet already complete — nothing to change.');
+  }
 }
 
 main().catch((err) => {

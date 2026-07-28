@@ -5,6 +5,10 @@ const { DONATION_HEADER, buildDonationRow } = require('./donationRow');
 
 setGlobalOptions({ maxInstances: 10, region: 'us-east1' });
 
+// Donations at or above this amount (USD) always trigger a notification email,
+// even when the donation reason does not have sendConfirmationEmail enabled.
+const LARGE_DONATION_EMAIL_THRESHOLD = 500;
+
 exports.createDonationCheckout = onRequest((req, res) => {
   cors(req, res, async () => {
     if (req.method !== 'POST') {
@@ -55,6 +59,7 @@ exports.createDonationCheckout = onRequest((req, res) => {
         amount_tagline: amountTagline || '',
         send_email: sendConfirmationEmail ? 'true' : 'false',
         cover_fees: coverFees ? 'true' : 'false',
+        donation_amount: String(donationAmount),
         ...(acknowledgement ? {
           ack_first_name: acknowledgement.firstName || '',
           ack_last_name: acknowledgement.lastName || '',
@@ -114,7 +119,12 @@ exports.stripeWebhook = onRequest((req, res) => {
 
     appendDonationRow(session, meta).catch(err => console.error('Sheets error:', err));
 
-    if (meta.send_email === 'true') {
+    // Base donation amount (excludes any fee-coverage line item). Falls back to
+    // the total paid for older donations that predate the donation_amount metadata.
+    const donationAmount = Number(meta.donation_amount) || (session.amount_total / 100);
+    const isLargeDonation = donationAmount >= LARGE_DONATION_EMAIL_THRESHOLD;
+
+    if (meta.send_email === 'true' || isLargeDonation) {
       sendDonationEmail(session, meta).catch(err => console.error('Resend error:', err));
     }
   }
@@ -149,7 +159,7 @@ async function appendDonationRow(session, meta) {
 async function ensureHeaderRow(sheets, spreadsheetId) {
   const existing = await sheets.spreadsheets.values.get({
     spreadsheetId,
-    range: 'Sheet1!A1:R1',
+    range: 'Sheet1!A1:S1',
   });
   if (!existing.data.values || existing.data.values.length === 0) {
     await sheets.spreadsheets.values.update({
