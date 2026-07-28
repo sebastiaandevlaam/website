@@ -1,6 +1,7 @@
 const { setGlobalOptions } = require('firebase-functions');
 const { onRequest } = require('firebase-functions/https');
 const cors = require('cors')({ origin: true });
+const { DONATION_HEADER, buildDonationRow } = require('./donationRow');
 
 setGlobalOptions({ maxInstances: 10, region: 'us-east1' });
 
@@ -53,6 +54,7 @@ exports.createDonationCheckout = onRequest((req, res) => {
         honoree: honoree || '',
         amount_tagline: amountTagline || '',
         send_email: sendConfirmationEmail ? 'true' : 'false',
+        cover_fees: coverFees ? 'true' : 'false',
         ...(acknowledgement ? {
           ack_first_name: acknowledgement.firstName || '',
           ack_last_name: acknowledgement.lastName || '',
@@ -110,55 +112,100 @@ exports.stripeWebhook = onRequest((req, res) => {
     const session = event.data.object;
     const meta = session.metadata || {};
 
+    appendDonationRow(session, meta).catch(err => console.error('Sheets error:', err));
+
     if (meta.send_email === 'true') {
-      const { Resend } = require('resend');
-      const resend = new Resend(process.env.RESEND_API_KEY);
-
-      const donorName = session.customer_details?.name || '—';
-      const donorEmail = session.customer_details?.email || '—';
-      const amountPaid = (session.amount_total / 100).toFixed(2);
-
-      const row = (label, value) => value
-        ? `<tr><td style="padding:6px 12px 6px 0;font-weight:600;white-space:nowrap;vertical-align:top">${label}</td><td style="padding:6px 0">${value}</td></tr>`
-        : '';
-
-      const ackRows = [
-        meta.ack_first_name || meta.ack_last_name
-          ? row('Acknowledgement name', `${meta.ack_first_name} ${meta.ack_last_name}`.trim())
-          : '',
-        row('Street', meta.ack_street),
-        meta.ack_apt ? row('Apt / Unit', meta.ack_apt) : '',
-        row('City', meta.ack_city),
-        row('State', meta.ack_state),
-        row('Postal code', meta.ack_postal),
-        row('Country', meta.ack_country),
-        row('Notes', meta.ack_notes),
-      ].join('');
-
-      const html = `
-        <h2 style="font-family:sans-serif;color:#A00405">New Donation Received</h2>
-        <table style="font-family:sans-serif;font-size:15px;border-collapse:collapse">
-          ${row('Donor name', donorName)}
-          ${row('Donor email', `<a href="mailto:${donorEmail}">${donorEmail}</a>`)}
-          ${row('Amount paid', `$${amountPaid}`)}
-          ${row('Reason', meta.reason)}
-          ${row('Honoree', meta.honoree)}
-          ${row('Amount note', meta.amount_tagline)}
-          ${ackRows}
-        </table>
-      `;
-
-      resend.emails.send({
-        from: process.env.RESEND_FROM,
-        to: process.env.DONATION_EMAIL_TO,
-        subject: `New Donation — $${amountPaid} from ${donorName}`,
-        html,
-      }).catch(err => console.error('Resend error:', err));
+      sendDonationEmail(session, meta).catch(err => console.error('Resend error:', err));
     }
   }
 
   res.json({ received: true });
 });
+
+async function appendDonationRow(session, meta) {
+  const { google } = require('googleapis');
+  const auth = new google.auth.GoogleAuth({
+    credentials: JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_JSON),
+    scopes: ['https://www.googleapis.com/auth/spreadsheets'],
+  });
+  const sheets = google.sheets({ version: 'v4', auth });
+  const spreadsheetId = process.env.DONATION_SHEET_ID;
+
+  await ensureHeaderRow(sheets, spreadsheetId);
+
+  const row = buildDonationRow(session, meta);
+
+  await sheets.spreadsheets.values.append({
+    spreadsheetId,
+    range: 'Sheet1!A1',
+    valueInputOption: 'RAW',
+    insertDataOption: 'INSERT_ROWS',
+    requestBody: { values: [row] },
+  });
+}
+
+// Writes the header row once if the sheet is still empty, so the first
+// donation doesn't land in row 1 without column titles.
+async function ensureHeaderRow(sheets, spreadsheetId) {
+  const existing = await sheets.spreadsheets.values.get({
+    spreadsheetId,
+    range: 'Sheet1!A1:R1',
+  });
+  if (!existing.data.values || existing.data.values.length === 0) {
+    await sheets.spreadsheets.values.update({
+      spreadsheetId,
+      range: 'Sheet1!A1',
+      valueInputOption: 'RAW',
+      requestBody: { values: [DONATION_HEADER] },
+    });
+  }
+}
+
+async function sendDonationEmail(session, meta) {
+  const { Resend } = require('resend');
+  const resend = new Resend(process.env.RESEND_API_KEY);
+
+  const donorName = session.customer_details?.name || '—';
+  const donorEmail = session.customer_details?.email || '—';
+  const amountPaid = (session.amount_total / 100).toFixed(2);
+
+  const row = (label, value) => value
+    ? `<tr><td style="padding:6px 12px 6px 0;font-weight:600;white-space:nowrap;vertical-align:top">${label}</td><td style="padding:6px 0">${value}</td></tr>`
+    : '';
+
+  const ackRows = [
+    meta.ack_first_name || meta.ack_last_name
+      ? row('Acknowledgement name', `${meta.ack_first_name} ${meta.ack_last_name}`.trim())
+      : '',
+    row('Street', meta.ack_street),
+    meta.ack_apt ? row('Apt / Unit', meta.ack_apt) : '',
+    row('City', meta.ack_city),
+    row('State', meta.ack_state),
+    row('Postal code', meta.ack_postal),
+    row('Country', meta.ack_country),
+    row('Notes', meta.ack_notes),
+  ].join('');
+
+  const html = `
+    <h2 style="font-family:sans-serif;color:#A00405">New Donation Received</h2>
+    <table style="font-family:sans-serif;font-size:15px;border-collapse:collapse">
+      ${row('Donor name', donorName)}
+      ${row('Donor email', `<a href="mailto:${donorEmail}">${donorEmail}</a>`)}
+      ${row('Amount paid', `$${amountPaid}`)}
+      ${row('Reason', meta.reason)}
+      ${row('Honoree', meta.honoree)}
+      ${row('Amount note', meta.amount_tagline)}
+      ${ackRows}
+    </table>
+  `;
+
+  await resend.emails.send({
+    from: process.env.RESEND_FROM,
+    to: process.env.DONATION_EMAIL_TO,
+    subject: `New Donation — $${amountPaid} from ${donorName}`,
+    html,
+  });
+}
 
 exports.submitVolunteerApplication = onRequest((req, res) => {
   cors(req, res, async () => {
