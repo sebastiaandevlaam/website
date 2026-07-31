@@ -36,7 +36,7 @@ const TextWithImageSection = ({ title, leadParagraph, body, image, imagePosition
                     <TitleTag className="section-title" {...inspectorProps({ fieldId: 'title' })}>{title}</TitleTag>
                     {leadParagraph && <p className="lead-paragraph" {...inspectorProps({ fieldId: 'leadParagraph' })}>{leadParagraph}</p>}
                     <div className="body-text" {...inspectorProps({ fieldId: 'body' })}>
-                        <RichTextRenderer body={body} />
+                        <RichTextRenderer body={body} baseLevel={TitleTag === 'h1' ? 1 : 2} />
                     </div>
                     {optionalLink && <div className="section-link"><ButtonLink {...optionalLink.fields} entryId={optionalLink.sys?.id} /></div>}
                 </div>

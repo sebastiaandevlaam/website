@@ -31,29 +31,35 @@ const renderInline = (node, index) => {
 
 const HEADING_LEVELS = { 'heading-2': 2, 'heading-3': 3, 'heading-4': 4, 'heading-5': 5, 'heading-6': 6 };
 
-// A rich-text body always sits beneath its section's <h2>, so its headings have
-// to start at <h3> and may not skip a level. Editors reach for "Heading 4"
-// freely, which produced an h2 -> h4 jump on /volunteer. Rather than police the
-// content, shift every heading in the body by the same amount so the shallowest
-// authored level lands on h3; relative depth is preserved.
-const headingShift = (content) => {
+// A rich-text body sits beneath the heading that introduces it, so its own
+// headings must start one level below that and may not skip a level. Editors
+// reach for "Heading 4" freely, which produced an h2 -> h4 jump on /volunteer.
+// Rather than police the content, shift every heading in the body by the same
+// amount so the shallowest authored level lands on the first allowed level;
+// relative depth is preserved.
+//
+// `baseLevel` is the level of the heading above this body: 2 for a normal
+// section title, 1 where that title was promoted to <h1> (a page with no hero)
+// or where the body follows an <h1> directly, as on a news post.
+const headingShift = (content, baseLevel) => {
     const levels = content
         .filter((n) => n.nodeType in HEADING_LEVELS)
         .map((n) => HEADING_LEVELS[n.nodeType]);
-    return levels.length ? 3 - Math.min(...levels) : 0;
+    return levels.length ? baseLevel + 1 - Math.min(...levels) : 0;
 };
 
 // Helper to render basic rich text structure
-const RichTextRenderer = ({ body }) => {
+const RichTextRenderer = ({ body, baseLevel = 2 }) => {
     if (!body || !body.content) return null;
-    const shift = headingShift(body.content);
+    const topLevel = baseLevel + 1;
+    const shift = headingShift(body.content, baseLevel);
     return body.content.map((node, index) => {
         if (node.nodeType === 'paragraph') {
             return <p key={index}>{node.content?.map(renderInline)}</p>;
         }
         if (node.nodeType in HEADING_LEVELS) {
             const authored = HEADING_LEVELS[node.nodeType];
-            const Tag = `h${Math.min(6, Math.max(3, authored + shift))}`;
+            const Tag = `h${Math.min(6, Math.max(topLevel, authored + shift))}`;
             // The rt-h* class keeps the size the editor picked, so re-levelling
             // is a semantic change only.
             return <Tag key={index} className={`rt-h${authored}`}>{node.content?.map(renderInline)}</Tag>;

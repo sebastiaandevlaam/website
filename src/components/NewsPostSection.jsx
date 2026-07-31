@@ -55,7 +55,8 @@ const NewsPostSection = ({ post, backgroundStyle, entryId }) => {
                 )}
 
                 <div className="news-post-body" {...inspectorProps({ fieldId: 'body' })}>
-                    <RichTextRenderer body={body} />
+                    {/* The post title above is an <h1>, so body headings start at h2. */}
+                    <RichTextRenderer body={body} baseLevel={1} />
                 </div>
             </div>
         </section>

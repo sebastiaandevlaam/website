@@ -13,7 +13,13 @@ const Footer = ({ siteName, copyrightText, tagline, socialLinks, entryId, addres
       <footer className="footer">
         <div className="container footer-inner">
           <div className="footer-brand">
-            {siteName && <h3 className="footer-sitename" {...inspectorProps({ fieldId: 'siteName' })}>{siteName}</h3>}
+            {/* The footer columns are siblings of the page's top-level content,
+                so both headings are h2. They were h3/h4, which skipped a level
+                on pages whose main content has no h2 at all — a news post, for
+                instance, went h1 straight to the footer's h3. Both classes set
+                their own size, weight and colour, so the tag change is
+                visually inert. */}
+            {siteName && <h2 className="footer-sitename" {...inspectorProps({ fieldId: 'siteName' })}>{siteName}</h2>}
             {tagline && <p className="tagline" {...inspectorProps({ fieldId: 'footerTagline' })}>{tagline}</p>}
             {socialLinks && socialLinks.length > 0 && (
                 <div className="social-links">
@@ -28,7 +34,7 @@ const Footer = ({ siteName, copyrightText, tagline, socialLinks, entryId, addres
 
           {hasContact && (
             <div className="footer-contact">
-              <h4 className="footer-heading">Visit &amp; Contact</h4>
+              <h2 className="footer-heading">Visit &amp; Contact</h2>
               <ul>
                 {address && (
                   <li {...inspectorProps({ fieldId: 'footerAddress' })}>
@@ -64,6 +70,12 @@ const Footer = ({ siteName, copyrightText, tagline, socialLinks, entryId, addres
         </div>
         <div className="container footer-bar">
           <p className="copyright" {...inspectorProps({ fieldId: 'footerCopyrightText' })}>&copy; {currentYear} {copyrightText}</p>
+          {/* An accessibility statement has to be findable; the footer is where
+              people look for it. Requires the /accessibility page entry to be
+              published in Contentful — see docs/accessibility-statement.md. */}
+          <p className="footer-legal">
+            <a href="/accessibility">Accessibility Statement</a>
+          </p>
         </div>
       </footer>
     );
