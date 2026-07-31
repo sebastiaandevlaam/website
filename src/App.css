@@ -892,6 +892,22 @@ section.bg-default {
     margin: 0;
 }
 
+.footer-legal {
+    font-size: 0.85rem;
+    margin: 0.4rem 0 0;
+}
+
+/* Underlined, not colour-only: the tan link on the dark footer would otherwise
+   be distinguished from the copyright line by hue alone (WCAG 1.4.1). */
+.footer-legal a {
+    color: var(--gray-300);
+    text-decoration: underline;
+}
+
+.footer-legal a:hover {
+    color: var(--white);
+}
+
 /* Stack and center the footer on smaller screens */
 @media (max-width: 760px) {
     .footer-inner {
