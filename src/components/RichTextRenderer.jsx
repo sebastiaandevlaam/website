@@ -13,13 +13,16 @@ const renderInline = (node, index) => {
     if (node.nodeType === 'hyperlink') {
         const href = node.data?.uri || '#';
         const isExternal = href.startsWith('http') || href.startsWith('//');
+        const text = node.content?.map((child) => child.value).join('') ?? '';
         return (
             <a
                 key={index}
                 href={href}
                 {...(isExternal ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
             >
-                {node.content?.map((child) => child.value)}
+                {/* Fall back to the href so an editor linking whitespace can't
+                    produce a link with no accessible name. */}
+                {text.trim() ? text : href}
             </a>
         );
     }

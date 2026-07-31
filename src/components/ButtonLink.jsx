@@ -1,10 +1,24 @@
 import { useContentfulInspectorMode } from '@contentful/live-preview/react';
 import Icon from "./Icon"
 
+// Last-resort accessible name for a link an editor left unlabelled, so the
+// markup can never contain a nameless link (WCAG 2.4.4 / 4.1.2).
+const labelFromUrl = (url) => {
+  if (!url) return null;
+  if (url.startsWith('mailto:')) return url.slice('mailto:'.length);
+  if (url.startsWith('tel:')) return url.slice('tel:'.length);
+  return url;
+};
+
 const ButtonLink = ({ textLabel, url, style, openInNewTab, arrow = true, entryId }) => {
   const inspectorProps = useContentfulInspectorMode({ entryId });
   const target = openInNewTab ? "_blank" : "_self";
   const rel = openInNewTab ? "noopener noreferrer" : null;
+
+  const label = textLabel?.trim() ? textLabel : labelFromUrl(url);
+  // Nothing to link to and nothing to say — render nothing rather than an
+  // empty tab stop.
+  if (!label) return null;
 
   // Determine base and style-specific classes
   let className = "";
@@ -29,7 +43,7 @@ const ButtonLink = ({ textLabel, url, style, openInNewTab, arrow = true, entryId
 
   return (
     <a href={url} target={target} rel={rel} className={className} {...inspectorProps({ fieldId: 'textLabel' })}>
-      {textLabel} {(style === 'Subtle Link' && arrow === true) && <Icon name="ArrowRight" />}
+      {label}{(style === 'Subtle Link' && arrow === true) && <> <Icon name="ArrowRight" aria-hidden="true" /></>}
     </a>
   );
 };

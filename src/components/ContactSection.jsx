@@ -8,7 +8,10 @@ const ContactSection = ({ sectionIcon, title, leadParagraph, contactInfoSource, 
     const bgClass = backgroundStyle === "Beige Background" ? "bg-beige" : "bg-default";
     const phone = contactInfoSource === 'Custom' ? customPhone : sitePhone;
     const email = contactInfoSource === 'Custom' ? customEmail : siteEmail;
-    const emailButton = {...button, url: `mailto:${email}`};
+    // Only build the mail button when the editor actually configured one —
+    // spreading an absent `button` produced a link with no label and no
+    // accessible name (WCAG 2.4.4 / 4.1.2).
+    const emailButton = button && email ? { ...button, url: `mailto:${email}` } : null;
     const sectionId = button?.url?.startsWith('#') ? button.url.substring(1) : 'contact';
 
     const inspectorProps = useContentfulInspectorMode({ entryId });
