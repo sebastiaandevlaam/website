@@ -6,6 +6,11 @@
     --pantry-red: #A00405;
     --pantry-beige: #F0EAD6;
     --pantry-gold: #C19A6B;
+    /* Decorative tan only — 2.59:1 on white, never use for text or UI borders */
+    --pantry-gold-dark: #8A6134;
+    /* Accessible tan: 5.47:1 on white, 4.54:1 on beige — text, links, focus rings */
+    --pantry-gold-darker: #6E4D29;
+    /* Hover/active variant: 7.62:1 on white */
     --pantry-text: #4A4A4A;
     --pantry-bg: #FAF8F0;
     --white: #FFFFFF;
@@ -15,7 +20,7 @@
     /* Footer text */
     --shadow-color: rgba(0, 0, 0, 0.1);
     --shadow-color-lg: rgba(0, 0, 0, 0.15);
-    --announcement-bg: var(--pantry-gold);
+    --announcement-bg: var(--pantry-gold-dark);
     /* Announcement background */
     --announcement-text: var(--white);
     /* Announcement text color */
@@ -87,7 +92,7 @@ p.lead {
 
 /* Links */
 a {
-    color: var(--pantry-gold);
+    color: var(--pantry-gold-dark);
     text-decoration: none;
     transition: color 0.3s ease;
 }
@@ -98,13 +103,13 @@ a:hover {
 }
 
 .link-subtle {
-    color: var(--pantry-gold);
+    color: var(--pantry-gold-dark);
     font-weight: 700;
 }
 
 .link-subtle:hover {
     text-decoration: underline;
-    color: var(--pantry-gold);
+    color: var(--pantry-gold-darker);
 }
 
 .link-subtle .lucide {
@@ -149,12 +154,16 @@ a:hover {
 }
 
 .button.primary-button {
-    background-color: var(--pantry-gold);
+    background-color: var(--pantry-gold-dark);
     color: var(--white);
 }
 
+/* Darken on hover rather than fading via .button:hover's opacity — compositing
+   the tan at 0.9 over a light page drops white-on-tan back below 4.5:1. */
 .button.primary-button:hover {
+    background-color: var(--pantry-gold-darker);
     color: var(--white);
+    opacity: 1;
 }
 
 .button.secondary-button {
@@ -210,7 +219,10 @@ a:hover {
     transition: opacity 0.3s ease;
 }
 .announcement-header a:hover {
-    opacity: 0.85;
+    /* Thicken the underline instead of fading — opacity 0.85 over the tan bar
+       drops white text to 4.46:1, just under the 4.5:1 minimum. */
+    opacity: 1;
+    text-decoration-thickness: 2px;
     color: var(--announcement-text); /* Keep color on hover */
 }
 
@@ -268,7 +280,7 @@ a:hover {
 }
 
 .header .logo:hover {
-    color: var(--pantry-gold);
+    color: var(--pantry-gold-dark);
     text-decoration: none;
 }
 
@@ -512,7 +524,7 @@ section.bg-default {
 .body-text .rich-text-image figcaption {
     margin-top: 0.5rem;
     font-size: 0.875rem;
-    color: var(--pantry-gold);
+    color: var(--pantry-gold-dark);
     font-style: italic;
 }
 
@@ -1012,7 +1024,7 @@ section.bg-default {
 .volunteer-input:focus,
 .volunteer-select:focus {
     outline: none;
-    border-color: var(--pantry-gold);
+    border-color: var(--pantry-gold-dark);
 }
 
 .volunteer-select {
@@ -1168,7 +1180,7 @@ section.bg-default {
 .news-date {
     display: block;
     font-size: 0.875rem;
-    color: var(--pantry-gold);
+    color: var(--pantry-gold-dark);
     font-weight: 700;
     margin-bottom: 0.4rem;
     text-transform: uppercase;
@@ -1186,7 +1198,7 @@ section.bg-default {
 }
 
 .news-item-title a:hover {
-    color: var(--pantry-gold);
+    color: var(--pantry-gold-dark);
     text-decoration: none;
 }
 
@@ -1243,7 +1255,7 @@ section.bg-default {
 
 .news-filter-select:hover,
 .news-filter-select:focus {
-    border-color: var(--pantry-gold);
+    border-color: var(--pantry-gold-dark);
     outline: none;
 }
 
@@ -1308,8 +1320,8 @@ section.bg-default {
 }
 
 .pagination-btn:hover:not(:disabled) {
-    border-color: var(--pantry-gold);
-    color: var(--pantry-gold);
+    border-color: var(--pantry-gold-dark);
+    color: var(--pantry-gold-dark);
     background: var(--pantry-bg);
 }
 
@@ -1415,7 +1427,7 @@ section.bg-default {
 
 .news-post-author {
     font-size: 0.95rem;
-    color: var(--pantry-gold);
+    color: var(--pantry-gold-dark);
     font-weight: 700;
     margin-bottom: 1rem;
 }
@@ -1519,7 +1531,7 @@ section.bg-default {
 
 .markdown-content a {
     /* Inherits global link styles, but you can override */
-    color: var(--pantry-gold);
+    color: var(--pantry-gold-dark);
     text-decoration: underline;
 }
 
@@ -1651,7 +1663,7 @@ section.bg-default {
 
 .donate-select:focus,
 .donate-text-input:focus {
-    border-color: var(--pantry-gold);
+    border-color: var(--pantry-gold-dark);
 }
 
 /* Amount grid */
@@ -1675,7 +1687,7 @@ section.bg-default {
 }
 
 .donate-amount-btn:hover {
-    border-color: var(--pantry-gold);
+    border-color: var(--pantry-gold-dark);
     background-color: var(--pantry-beige);
 }
 
@@ -1724,7 +1736,7 @@ section.bg-default {
 }
 
 .donate-custom-input-wrapper:focus-within {
-    border-color: var(--pantry-gold);
+    border-color: var(--pantry-gold-dark);
 }
 
 .donate-currency-symbol {
