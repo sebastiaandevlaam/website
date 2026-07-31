@@ -1183,8 +1183,9 @@ section.bg-default {
 }
 
 /* News List Section */
-.news-list-section h2,
-.news-list-section h1.section-title {
+/* Matched on the class, not the tag: post titles shift to <h2> when the
+   section title is promoted to <h1>, and a bare `h2` selector centred them. */
+.news-list-section .section-title {
     text-align: center;
 }
 
