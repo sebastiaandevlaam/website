@@ -113,6 +113,13 @@ function App() {
         );
     }
 
+    // The hero supplies the page's <h1>. Pages built without one (e.g. /about,
+    // /news) would otherwise have no level-one heading, so the first section's
+    // title is promoted instead of adding a second, hidden heading.
+    const hasHero = pageData?.sections?.some(
+        (s) => s.sys?.contentType?.sys?.id === 'sectionHero'
+    );
+
     // Normal page — requires a matching page entry in Contentful
     if (!pageData) {
         return (
@@ -128,13 +135,14 @@ function App() {
         <div>
             {sharedHeader}
             <main>
-                {pageData.sections?.map((section) => {
+                {pageData.sections?.map((section, i) => {
                     section.fields.contentType = section.sys.contentType.sys.id
                     return (
                         <SectionRenderer
                             key={section.sys.id}
                             entryId={section.sys.id}
                             section={section.fields}
+                            titleTag={!hasHero && i === 0 ? 'h1' : 'h2'}
                             sitePhone={siteSettings.defaultContactPhone}
                             siteEmail={siteSettings.defaultContactEmail}
                         />

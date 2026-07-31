@@ -29,18 +29,34 @@ const renderInline = (node, index) => {
     return null;
 };
 
-const HEADING_TAGS = { 'heading-2': 'h2', 'heading-3': 'h3', 'heading-4': 'h4', 'heading-5': 'h5', 'heading-6': 'h6' };
+const HEADING_LEVELS = { 'heading-2': 2, 'heading-3': 3, 'heading-4': 4, 'heading-5': 5, 'heading-6': 6 };
+
+// A rich-text body always sits beneath its section's <h2>, so its headings have
+// to start at <h3> and may not skip a level. Editors reach for "Heading 4"
+// freely, which produced an h2 -> h4 jump on /volunteer. Rather than police the
+// content, shift every heading in the body by the same amount so the shallowest
+// authored level lands on h3; relative depth is preserved.
+const headingShift = (content) => {
+    const levels = content
+        .filter((n) => n.nodeType in HEADING_LEVELS)
+        .map((n) => HEADING_LEVELS[n.nodeType]);
+    return levels.length ? 3 - Math.min(...levels) : 0;
+};
 
 // Helper to render basic rich text structure
 const RichTextRenderer = ({ body }) => {
     if (!body || !body.content) return null;
+    const shift = headingShift(body.content);
     return body.content.map((node, index) => {
         if (node.nodeType === 'paragraph') {
             return <p key={index}>{node.content?.map(renderInline)}</p>;
         }
-        if (node.nodeType in HEADING_TAGS) {
-            const Tag = HEADING_TAGS[node.nodeType];
-            return <Tag key={index}>{node.content?.map(renderInline)}</Tag>;
+        if (node.nodeType in HEADING_LEVELS) {
+            const authored = HEADING_LEVELS[node.nodeType];
+            const Tag = `h${Math.min(6, Math.max(3, authored + shift))}`;
+            // The rt-h* class keeps the size the editor picked, so re-levelling
+            // is a semantic change only.
+            return <Tag key={index} className={`rt-h${authored}`}>{node.content?.map(renderInline)}</Tag>;
         }
         if (node.nodeType === 'unordered-list') {
             return <ul key={index}>{node.content?.map((item, i) => <li key={i}>{item.content?.map((p) => p.content?.map(renderInline))}</li>)}</ul>;

@@ -70,7 +70,10 @@ h1 {
     font-weight: 800;
 }
 
-h2 {
+h2,
+h1.section-title {
+    /* A section title promoted to <h1> (pages with no hero) keeps h2 sizing,
+       so correcting the outline changes nothing visually. */
     font-size: 2rem;
     font-weight: 700;
 }
@@ -548,6 +551,15 @@ section.bg-default {
     margin-top: 1.5rem;
 }
 
+/* RichTextRenderer re-levels headings for a valid document outline. These hold
+   each heading at the size its authored level used to render, so the corrected
+   markup looks identical to before. */
+.body-text .rt-h2 { font-size: 2rem; }
+.body-text .rt-h3 { font-size: 1.25rem; }
+.body-text .rt-h4 { font-size: 1rem; }
+.body-text .rt-h5 { font-size: 0.83rem; }
+.body-text .rt-h6 { font-size: 0.67rem; }
+
 .text-image-section .text-content .section-link {
     margin-top: 1.5rem;
     display: flex;
@@ -895,7 +907,8 @@ section.bg-default {
         font-size: 3rem;
     }
 
-    h2 {
+    h2,
+    h1.section-title {
         font-size: 2.25rem;
     }
 
@@ -1130,7 +1143,8 @@ section.bg-default {
 }
 
 /* News List Section */
-.news-list-section h2 {
+.news-list-section h2,
+.news-list-section h1.section-title {
     text-align: center;
 }
 

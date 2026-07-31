@@ -13,7 +13,8 @@ const getYouTubeEmbedUrl = (url) => {
     return null;
 };
 
-const TextWithImageSection = ({ title, leadParagraph, body, image, imagePosition, videoUrl, optionalLink, backgroundStyle, entryId }) => {
+const TextWithImageSection = ({ title, leadParagraph, body, image, imagePosition, videoUrl, optionalLink, backgroundStyle, entryId, titleTag }) => {
+    const TitleTag = titleTag || 'h2';
 
     const imageAlt = image?.fields?.description || image?.fields?.title || title || 'Section image';
     const fullImageUrl = toHttpsUrl(image?.fields?.file?.url);
@@ -32,7 +33,7 @@ const TextWithImageSection = ({ title, leadParagraph, body, image, imagePosition
         <section className={`text-image-section ${bgClass}`} id={sectionId}>
             <div className={`container content-wrapper ${imagePosClass}${!hasMedia ? ' no-image' : ''}`}>
                 <div className="text-content">
-                    <h2 {...inspectorProps({ fieldId: 'title' })}>{title}</h2>
+                    <TitleTag className="section-title" {...inspectorProps({ fieldId: 'title' })}>{title}</TitleTag>
                     {leadParagraph && <p className="lead-paragraph" {...inspectorProps({ fieldId: 'leadParagraph' })}>{leadParagraph}</p>}
                     <div className="body-text" {...inspectorProps({ fieldId: 'body' })}>
                         <RichTextRenderer body={body} />

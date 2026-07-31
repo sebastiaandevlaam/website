@@ -2,7 +2,8 @@ import { useContentfulInspectorMode } from '@contentful/live-preview/react'
 import ButtonLink from "./ButtonLink";
 import Icon from "./Icon";
 
-const ContactSection = ({ sectionIcon, title, leadParagraph, contactInfoSource, customPhone, customEmail, button, backgroundStyle, entryId, sitePhone, siteEmail }) => {
+const ContactSection = ({ sectionIcon, title, leadParagraph, contactInfoSource, customPhone, customEmail, button, backgroundStyle, entryId, titleTag, sitePhone, siteEmail }) => {
+    const TitleTag = titleTag || 'h2';
     const buttonId = button?.sys?.id
     button = button?.fields
     const bgClass = backgroundStyle === "Beige Background" ? "bg-beige" : "bg-default";
@@ -20,7 +21,7 @@ const ContactSection = ({ sectionIcon, title, leadParagraph, contactInfoSource, 
         <section className={`contact-section ${bgClass}`} id={sectionId}>
             <div className="container">
                 {sectionIcon && <Icon name={sectionIcon} className="section-icon" />}
-                <h2 {...inspectorProps({ fieldId: 'title' })}>{title}</h2>
+                <TitleTag className="section-title" {...inspectorProps({ fieldId: 'title' })}>{title}</TitleTag>
                 {leadParagraph && <p className="lead-paragraph" {...inspectorProps({ fieldId: 'leadParagraph' })}>{leadParagraph}</p>}
                 <div className="contact-info">
                     {phone && <p {...inspectorProps({ fieldId: 'customPhone' })}>Phone: {phone}</p>}
