@@ -12,6 +12,9 @@
     --pantry-gold-darker: #6E4D29;
     /* Hover/active variant: 7.62:1 on white */
     --pantry-text: #4A4A4A;
+    --pantry-text-muted: #666666;
+    /* De-emphasised copy: 5.74:1 on white, 4.77:1 on beige. Use instead of
+       fading --pantry-text with opacity, which drops below 4.5:1. */
     --pantry-bg: #FAF8F0;
     --white: #FFFFFF;
     --gray-100: #f3f4f6;
@@ -564,6 +567,14 @@ section.bg-default {
     font-style: italic;
 }
 
+/* Inline prose links are underlined so they are not signalled by colour alone
+   (WCAG 1.4.1). The accessible tan sits close enough to the body grey that the
+   two are under 3:1 apart, which is exactly the case the rule covers. Matches
+   .markdown-content a, which already underlines. */
+.body-text a {
+    text-decoration: underline;
+}
+
 /* Clear floats after body text */
 .body-text::after {
     content: '';
@@ -1050,8 +1061,9 @@ section.bg-default {
 
 .volunteer-required {
     font-weight: 400;
-    color: var(--pantry-text);
-    opacity: 0.65;
+    /* Was pantry-text at 0.65 opacity, compositing to roughly #898989 —
+       3.19:1 on beige, failing 1.4.3. */
+    color: var(--pantry-text-muted);
 }
 
 .volunteer-input,
@@ -1101,8 +1113,8 @@ section.bg-default {
 
 .volunteer-field-hint {
     font-size: 0.875rem;
-    color: var(--pantry-text);
-    opacity: 0.75;
+    /* Was pantry-text at 0.75 opacity — 4.48:1 on white, just short of 4.5. */
+    color: var(--pantry-text-muted);
     margin: 0 0 0.25rem;
     line-height: 1.5;
 }
@@ -1236,6 +1248,10 @@ section.bg-default {
 
 .news-item-title {
     margin-bottom: 0.5rem;
+    /* Pinned so the tag can shift with the section's heading level without
+       changing how the card looks. */
+    font-size: 1.25rem;
+    font-weight: 700;
 }
 
 .news-item-title a {
