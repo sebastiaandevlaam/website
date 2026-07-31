@@ -36,13 +36,22 @@ Content type: **Text with Image Section** (`sectionTextWithImage`)
 
 Content type: **Page** (`page`)
 
-| Field | Value |
-|---|---|
-| Internal title | `Accessibility` |
-| Slug | `/accessibility` |
-| SEO title | `Accessibility Statement \| Holliston Pantry Shelf` |
-| SEO description | `How the Holliston Pantry Shelf website supports accessibility, its WCAG 2.1 AA conformance status, known limitations, and how to report a problem.` |
-| Sections | the section entry from step 1 |
+- **Internal title** — `Accessibility`
+- **Slug** — `/accessibility`
+- **SEO title** — copy the line below exactly. The separator is a vertical bar
+  (pipe), not a backslash:
+
+```
+Accessibility Statement | Holliston Pantry Shelf
+```
+
+- **SEO description**:
+
+```
+How the Holliston Pantry Shelf website supports accessibility, its WCAG 2.1 AA conformance status, known limitations, and how to report a problem.
+```
+
+- **Sections** — the section entry from step 1
 
 ### Two things the renderers do for you
 
@@ -63,11 +72,17 @@ The footer already links to `/accessibility`. That link ships in the code, so
 
 ## Lead paragraph
 
+Goes in the section's **Lead paragraph** field, not the body.
+
 > The Holliston Pantry Shelf is committed to making this website usable by
 > everyone in our community, including people with disabilities. Getting help
 > with food should never depend on how you browse the web.
 
 ## Body copy
+
+Everything from here to the end of this section is the body, verbatim. Each
+`###` below is an actual **Heading 3** in the rich-text field. There are no
+labels or instructions mixed in — if you see it here, it goes on the page.
 
 ### Measures we take
 
@@ -129,9 +144,7 @@ navigation testing. We have not yet completed a full audit with screen readers
 and other assistive technology, which is why the conformance status above says
 partially conformant.
 
-### Closing line
-
-> This statement was last reviewed on July 31, 2026.
+This statement was last reviewed on July 31, 2026.
 
 ---
 
