@@ -201,6 +201,11 @@ a:hover {
     margin-bottom: 0; /* Remove default margin */
     display: inline; /* Keep icon and text inline */
 }
+.announcement-header .announcement-text {
+    /* Block-level element (it wraps a <p>) rendered inline so the bar keeps
+       its single-line icon + text + link layout. */
+    display: inline;
+}
 .announcement-header .icon { /* Style icon */
     display: inline-block;
     vertical-align: middle;
