@@ -126,6 +126,34 @@ a:hover {
 }
 
 
+/* Skip link — off-screen until it takes focus (WCAG 2.4.1). Not display:none,
+   which would take it out of the tab order entirely. */
+.skip-link {
+    position: absolute;
+    top: 0;
+    left: -9999px;
+    z-index: 1000;
+    padding: 0.75rem 1.5rem;
+    background-color: var(--pantry-red);
+    color: var(--white);
+    font-weight: 700;
+    border-bottom-right-radius: 0.5rem;
+}
+
+.skip-link:focus {
+    left: 0;
+    color: var(--white);
+    text-decoration: none;
+    outline: 3px solid var(--pantry-gold-dark);
+    outline-offset: 2px;
+}
+
+/* The skip link's target is a container, not a control — no focus ring needed
+   when it receives focus programmatically. */
+main:focus {
+    outline: none;
+}
+
 /* Container */
 .container {
     max-width: 1140px;

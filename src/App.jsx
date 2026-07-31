@@ -14,6 +14,17 @@ import NotFoundSection from './components/NotFoundSection';
 
 import { useContentfulData } from './hooks/useContentfulData';
 
+// First focusable element on the page, so keyboard users can jump the header
+// and nav straight to the content (WCAG 2.4.1). Visually hidden until focused.
+const SkipLink = () => (
+    <a className="skip-link" href="#main-content">Skip to main content</a>
+);
+
+// tabIndex -1 lets the skip link actually move focus here, not just scroll.
+const Main = ({ children }) => (
+    <main id="main-content" tabIndex={-1}>{children}</main>
+);
+
 // Main App Component
 function App() {
 
@@ -50,7 +61,20 @@ function App() {
 
     // Handle Loading State
     if (isLoading) {
-        return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>Loading Content...</div>;
+        return (
+            <Main>
+                {/* role/aria-live go on a child, not on <main> — putting them on
+                    <main> would replace the landmark role and leave the page
+                    with no main region at all. */}
+                <div
+                    role="status"
+                    aria-live="polite"
+                    style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}
+                >
+                    Loading Content...
+                </div>
+            </Main>
+        );
     }
 
     // Handle Error State
@@ -58,15 +82,28 @@ function App() {
         if (error.notFound) {
             return (
                 <div>
-                    <main><NotFoundSection /></main>
+                    <SkipLink />
+                    <Main><NotFoundSection /></Main>
                 </div>
             );
         }
-        return <div style={{ padding: '2rem', color: 'red' }}>Error loading content: {error.message}</div>;
+        return (
+            <Main>
+                <p role="alert" style={{ padding: '2rem', color: 'var(--pantry-red)' }}>
+                    Error loading content: {error.message}
+                </p>
+            </Main>
+        );
     }
 
     if (!siteSettings) {
-        return <div style={{ padding: '2rem', color: 'orange' }}>Content could not be fully loaded.</div>;
+        return (
+            <Main>
+                <p role="alert" style={{ padding: '2rem', color: 'var(--pantry-red)' }}>
+                    Content could not be fully loaded.
+                </p>
+            </Main>
+        );
     }
 
     const sharedHeader = (
@@ -101,13 +138,14 @@ function App() {
     if (liveNewsPostEntry) {
         return (
             <div>
+                <SkipLink />
                 {sharedHeader}
-                <main>
+                <Main>
                     <NewsPostSection
                         post={liveNewsPostEntry}
                         entryId={liveNewsPostEntry.sys?.id}
                     />
-                </main>
+                </Main>
                 {sharedFooter}
             </div>
         );
@@ -124,8 +162,9 @@ function App() {
     if (!pageData) {
         return (
             <div>
+                <SkipLink />
                 {sharedHeader}
-                <main><NotFoundSection /></main>
+                <Main><NotFoundSection /></Main>
                 {sharedFooter}
             </div>
         );
@@ -133,8 +172,9 @@ function App() {
 
     return (
         <div>
+            <SkipLink />
             {sharedHeader}
-            <main>
+            <Main>
                 {pageData.sections?.map((section, i) => {
                     section.fields.contentType = section.sys.contentType.sys.id
                     return (
@@ -148,7 +188,7 @@ function App() {
                         />
                     )
                 })}
-            </main>
+            </Main>
             {sharedFooter}
         </div>
     )
