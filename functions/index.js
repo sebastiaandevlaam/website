@@ -1,7 +1,12 @@
 const { setGlobalOptions } = require('firebase-functions');
 const { onRequest } = require('firebase-functions/https');
 const cors = require('cors')({ origin: true });
-const { DONATION_HEADER, buildDonationRow } = require('./donationRow');
+const { DONATION_HEADER, buildDonationRow, formatDateEastern } = require('./donationRow');
+const {
+  OPERATION_MITTEN_HEADER,
+  buildOperationMittenRows,
+  makeSubmissionId,
+} = require('./operationMittenRow');
 
 setGlobalOptions({ maxInstances: 10, region: 'us-east1' });
 
@@ -133,40 +138,60 @@ exports.stripeWebhook = onRequest((req, res) => {
 });
 
 async function appendDonationRow(session, meta) {
+  const sheets = getSheetsClient();
+  const spreadsheetId = process.env.DONATION_SHEET_ID;
+
+  await ensureHeaderRow(sheets, spreadsheetId, DONATION_HEADER);
+
+  const row = buildDonationRow(session, meta);
+
+  await appendSheetRows(sheets, spreadsheetId, [row]);
+}
+
+function getSheetsClient() {
   const { google } = require('googleapis');
   const auth = new google.auth.GoogleAuth({
     credentials: JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_JSON),
     scopes: ['https://www.googleapis.com/auth/spreadsheets'],
   });
-  const sheets = google.sheets({ version: 'v4', auth });
-  const spreadsheetId = process.env.DONATION_SHEET_ID;
+  return google.sheets({ version: 'v4', auth });
+}
 
-  await ensureHeaderRow(sheets, spreadsheetId);
-
-  const row = buildDonationRow(session, meta);
-
-  await sheets.spreadsheets.values.append({
+function appendSheetRows(sheets, spreadsheetId, rows) {
+  return sheets.spreadsheets.values.append({
     spreadsheetId,
     range: 'Sheet1!A1',
     valueInputOption: 'RAW',
     insertDataOption: 'INSERT_ROWS',
-    requestBody: { values: [row] },
+    requestBody: { values: rows },
   });
 }
 
+// 1 -> 'A', 19 -> 'S', 27 -> 'AA'
+function columnLetter(index) {
+  let letters = '';
+  while (index > 0) {
+    const remainder = (index - 1) % 26;
+    letters = String.fromCharCode(65 + remainder) + letters;
+    index = Math.floor((index - 1) / 26);
+  }
+  return letters;
+}
+
 // Writes the header row once if the sheet is still empty, so the first
-// donation doesn't land in row 1 without column titles.
-async function ensureHeaderRow(sheets, spreadsheetId) {
+// submission doesn't land in row 1 without column titles.
+async function ensureHeaderRow(sheets, spreadsheetId, header) {
+  const lastColumn = columnLetter(header.length);
   const existing = await sheets.spreadsheets.values.get({
     spreadsheetId,
-    range: 'Sheet1!A1:S1',
+    range: `Sheet1!A1:${lastColumn}1`,
   });
   if (!existing.data.values || existing.data.values.length === 0) {
     await sheets.spreadsheets.values.update({
       spreadsheetId,
       range: 'Sheet1!A1',
       valueInputOption: 'RAW',
-      requestBody: { values: [DONATION_HEADER] },
+      requestBody: { values: [header] },
     });
   }
 }
@@ -259,6 +284,69 @@ exports.submitVolunteerApplication = onRequest((req, res) => {
     } catch (err) {
       console.error('Resend error:', err);
       res.status(500).json({ error: 'Failed to send application. Please try again.' });
+    }
+  });
+});
+
+// ── Operation Mitten ────────────────────────────────────────────────────────
+// Holiday gift request form. Unlike donations there is no payment step, so the
+// form posts straight here and we append to the sheet in the request — one row
+// per child, so the shoppers can work the sheet line by line.
+
+// Guard against a malformed or hostile payload asking us to write thousands of
+// rows. The Contentful `maxChildren` field controls what the form offers; this
+// is the hard ceiling.
+const MAX_CHILDREN_PER_SUBMISSION = 12;
+
+exports.submitOperationMitten = onRequest((req, res) => {
+  cors(req, res, async () => {
+    if (req.method !== 'POST') {
+      return res.status(405).send('Method Not Allowed');
+    }
+
+    const submission = req.body || {};
+    const { pantryNumber, parentFirstName, phone, children } = submission;
+
+    if (!pantryNumber || !parentFirstName || !phone) {
+      return res.status(400).json({ error: 'Missing required family details.' });
+    }
+
+    if (!Array.isArray(children) || children.length === 0) {
+      return res.status(400).json({ error: 'Please add at least one child.' });
+    }
+
+    if (children.length > MAX_CHILDREN_PER_SUBMISSION) {
+      return res.status(400).json({
+        error: `This form accepts up to ${MAX_CHILDREN_PER_SUBMISSION} children. Please contact us directly for a larger family.`,
+      });
+    }
+
+    for (const [index, child] of children.entries()) {
+      if (!child?.gender || !String(child.age ?? '').trim()) {
+        return res.status(400).json({ error: `Please complete the gender and age for child ${index + 1}.` });
+      }
+      const age = Number(child.age);
+      if (!Number.isInteger(age) || age < 0 || age > 18) {
+        return res.status(400).json({ error: `Child ${index + 1} must be 18 years or younger.` });
+      }
+    }
+
+    const submittedAt = new Date();
+    const submissionId = makeSubmissionId(submittedAt);
+
+    try {
+      const sheets = getSheetsClient();
+      const spreadsheetId = process.env.OPERATION_MITTEN_SHEET_ID;
+
+      await ensureHeaderRow(sheets, spreadsheetId, OPERATION_MITTEN_HEADER);
+
+      const rows = buildOperationMittenRows(submission, submissionId, submittedAt, formatDateEastern);
+      await appendSheetRows(sheets, spreadsheetId, rows);
+
+      res.json({ success: true, submissionId });
+    } catch (err) {
+      console.error('Operation Mitten sheet error:', err);
+      res.status(500).json({ error: 'Failed to submit the form. Please try again.' });
     }
   });
 });

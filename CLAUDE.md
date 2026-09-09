@@ -46,6 +46,7 @@ Contentful API → useContentfulData (hook) → App.jsx → SectionRenderer → 
 | `sectionIconGrid` | `IconGridSection` |
 | `sectionContact` | `ContactSection` |
 | `sectionVolunteer` | `VolunteerSection` |
+| `sectionOperationMitten` | `OperationMittenSection` |
 
 To add a new section type: create the component, add the mapping in `SectionRenderer.jsx`, and define the content type in Contentful.
 
@@ -108,6 +109,40 @@ All layout uses plain CSS classes — no utility classes, no CSS modules. Add ne
    - `backgroundStyle` (Short text, optional — same values as other sections)
 
 The contact time checkboxes (Morning / Afternoon / Evening) and all field labels are hardcoded. Everything else is Contentful-driven.
+
+## Operation Mitten Form
+
+`OperationMittenSection` is the web version of the paper "Operation Mitten Participation Form" — the holiday gift request families fill in for their children. It submits to the `submitOperationMitten` Cloud Function, which appends the submission to a Google Sheet using the same service-account setup as the donations sheet.
+
+**Key difference from the paper form:** the parent picks the number of children from a dropdown and the child block repeats that many times, instead of the paper form's fixed four. Changing the number preserves anything already filled in for the children that remain.
+
+**Sheet layout — one row per child.** Gift shoppers work child by child, so a submission is flattened: the family columns (pantry #, parent, phones, holiday) repeat on each of that family's rows, tied together by a shared `Submission ID` (e.g. `OM-MVZLG280-XACX`). Column order lives in `functions/operationMittenRow.js` (`OPERATION_MITTEN_HEADER`, 24 columns) — the single source of truth, so never reorder columns in the sheet by hand.
+
+Required env vars on the function:
+
+- `OPERATION_MITTEN_SHEET_ID` — the spreadsheet id for the Operation Mitten sheet
+- `GOOGLE_SERVICE_ACCOUNT_JSON` — already set for donations; share the new sheet with that service account's email as an Editor
+
+Sheet writing is shared with donations via `getSheetsClient()`, `appendSheetRows()` and `ensureHeaderRow(sheets, id, header)` in `functions/index.js`. `ensureHeaderRow` writes the header only when the sheet is empty and derives its range from the header length, so it works for both sheets.
+
+**Contentful setup required** — content type `sectionOperationMitten`:
+
+- `title` (Short text)
+- `introText` (Long text / Markdown)
+- `eligibilityNote` (Long text / Markdown, optional) — the "18 years or younger" and "complete in English" rules, rendered as a callout
+- `pickupInformation` (Long text / Markdown, optional) — callout below the form
+- `maxChildren` (Integer, optional — defaults to 8, capped at 12)
+- `genderOptions` (Short text, list — defaults to Boy, Girl)
+- `holidayOptions` (Short text, list — defaults to Christmas, Hanukkah, Other). The literal value `Other` reveals a free-text "Which holiday?" input; that text is what lands in the sheet's Holiday column.
+- `colorOptions` (Short text, list) — favourite colour dropdown; the whole field hides when empty
+- `interestOptions` (Short text, list) — activity checkboxes; the whole fieldset hides when empty
+- `openDate` / `closeDate` (Date & time, both optional) — outside the window the form is replaced by `closedMessage`. Leave both empty and the form is always open.
+- `closedMessage` (Long text / Markdown, optional)
+- `successHeadline` (Short text, optional)
+- `successBody` (Long text / Markdown, optional)
+- `backgroundStyle` (Short text, optional — same values as other sections)
+
+Field labels, the youth/adult size choice, and the three gift-idea slots are hardcoded. Validation requires pantry #, parent first name, phone, holiday, and a gender plus an age of 0–18 for every child; the function re-checks all of it and refuses more than 12 children.
 
 ## Footer
 
