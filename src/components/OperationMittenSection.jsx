@@ -33,7 +33,7 @@ const EMPTY_CHILD = {
 };
 
 const EMPTY_FAMILY = {
-    pantryNumber: '',
+    shopperNumber: '',
     parentFirstName: '',
     phone: '',
     additionalPhone: '',
@@ -125,7 +125,7 @@ const OperationMittenSection = ({
     };
 
     const validate = () => {
-        if (!family.pantryNumber.trim()) return 'Please enter your Food Pantry number.';
+        if (!family.shopperNumber.trim()) return 'Please enter your Shopper number.';
         if (!family.parentFirstName.trim()) return "Please enter the parent's or guardian's first name.";
         if (!family.phone.trim()) return 'Please enter a phone number so we can reach you about pick-up.';
         if (!family.holiday) return 'Please tell us which holiday these gifts are for.';
@@ -237,12 +237,12 @@ const OperationMittenSection = ({
 
                         <div className="mitten-grid">
                             <div className="mitten-field">
-                                <label className="mitten-label" htmlFor="mitten-pantry-number">
-                                    Food Pantry # <span className="mitten-required">(required)</span>
+                                <label className="mitten-label" htmlFor="mitten-shopper-number">
+                                    Shopper # <span className="mitten-required">(required)</span>
                                 </label>
-                                <input id="mitten-pantry-number" type="text" className="mitten-input"
-                                    value={family.pantryNumber}
-                                    onChange={e => setFamilyField('pantryNumber', e.target.value)} />
+                                <input id="mitten-shopper-number" type="text" className="mitten-input"
+                                    value={family.shopperNumber}
+                                    onChange={e => setFamilyField('shopperNumber', e.target.value)} />
                             </div>
 
                             <div className="mitten-field">

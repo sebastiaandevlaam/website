@@ -305,9 +305,9 @@ exports.submitOperationMitten = onRequest((req, res) => {
     }
 
     const submission = req.body || {};
-    const { pantryNumber, parentFirstName, phone, children } = submission;
+    const { shopperNumber, parentFirstName, phone, children } = submission;
 
-    if (!pantryNumber || !parentFirstName || !phone) {
+    if (!shopperNumber || !parentFirstName || !phone) {
       return res.status(400).json({ error: 'Missing required family details.' });
     }
 

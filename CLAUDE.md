@@ -116,7 +116,7 @@ The contact time checkboxes (Morning / Afternoon / Evening) and all field labels
 
 **Key difference from the paper form:** the parent picks the number of children from a dropdown and the child block repeats that many times, instead of the paper form's fixed four. Changing the number preserves anything already filled in for the children that remain.
 
-**Sheet layout — one row per child.** Gift shoppers work child by child, so a submission is flattened: the family columns (pantry #, parent, phones, holiday) repeat on each of that family's rows, tied together by a shared `Submission ID` (e.g. `OM-MVZLG280-XACX`). Column order lives in `functions/operationMittenRow.js` (`OPERATION_MITTEN_HEADER`, 24 columns) — the single source of truth, so never reorder columns in the sheet by hand.
+**Sheet layout — one row per child.** Gift shoppers work child by child, so a submission is flattened: the family columns (shopper #, parent, phones, holiday) repeat on each of that family's rows, tied together by a shared `Submission ID` (e.g. `OM-MVZLG280-XACX`). Column order lives in `functions/operationMittenRow.js` (`OPERATION_MITTEN_HEADER`, 24 columns) — the single source of truth, so never reorder columns in the sheet by hand.
 
 Required env vars on the function:
 
@@ -142,7 +142,7 @@ Sheet writing is shared with donations via `getSheetsClient()`, `appendSheetRows
 - `successBody` (Long text / Markdown, optional)
 - `backgroundStyle` (Short text, optional — same values as other sections)
 
-Field labels, the youth/adult size choice, and the three gift-idea slots are hardcoded. Validation requires pantry #, parent first name, phone, holiday, and a gender plus an age of 0–18 for every child; the function re-checks all of it and refuses more than 12 children.
+Field labels, the youth/adult size choice, and the three gift-idea slots are hardcoded. Validation requires shopper #, parent first name, phone, holiday, and a gender plus an age of 0–18 for every child; the function re-checks all of it and refuses more than 12 children.
 
 ## Footer
 

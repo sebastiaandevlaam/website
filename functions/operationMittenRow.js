@@ -2,13 +2,13 @@
 //
 // One submission covers a whole family, but the gift shoppers work child by
 // child, so a submission is flattened into ONE ROW PER CHILD. The family
-// columns (pantry #, parent, phones, holiday) repeat on each of a family's
+// columns (shopper #, parent, phones, holiday) repeat on each of a family's
 // rows, and the Submission ID ties them back together.
 
 const OPERATION_MITTEN_HEADER = [
   'Date (ET)',
   'Submission ID',
-  'Food Pantry #',
+  'Shopper #',
   'Parent / Guardian First Name',
   'Phone Number',
   'Additional Phone Number',
@@ -65,7 +65,7 @@ function buildOperationMittenRows(submission, submissionId, submittedAt, formatD
   const familyColumns = [
     timestamp,
     submissionId,
-    clean(submission.pantryNumber),
+    clean(submission.shopperNumber),
     clean(submission.parentFirstName),
     clean(submission.phone),
     clean(submission.additionalPhone),
