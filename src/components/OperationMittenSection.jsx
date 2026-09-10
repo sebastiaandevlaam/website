@@ -9,7 +9,9 @@ const FUNCTIONS_BASE_URL = import.meta.env.VITE_FUNCTIONS_BASE_URL;
 const SIZE_TYPES = ['Youth', 'Adult'];
 const WISHES_PER_CHILD = 3;
 
-const DEFAULT_MAX_CHILDREN = 8;
+// Matches the four child blocks on the paper form; raise it in Contentful
+// via `maxChildren` when a larger family needs it.
+const DEFAULT_MAX_CHILDREN = 4;
 const DEFAULT_GENDER_OPTIONS = ['Boy', 'Girl'];
 const DEFAULT_HOLIDAY_OPTIONS = ['Christmas', 'Hanukkah', 'Other'];
 

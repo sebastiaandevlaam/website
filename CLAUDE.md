@@ -131,7 +131,7 @@ Sheet writing is shared with donations via `getSheetsClient()`, `appendSheetRows
 - `introText` (Long text / Markdown)
 - `eligibilityNote` (Long text / Markdown, optional) — the "18 years or younger" and "complete in English" rules, rendered as a callout
 - `pickupInformation` (Long text / Markdown, optional) — callout below the form
-- `maxChildren` (Integer, optional — defaults to 8, capped at 12)
+- `maxChildren` (Integer, optional — defaults to 4, matching the paper form; capped at 12)
 - `genderOptions` (Short text, list — defaults to Boy, Girl)
 - `holidayOptions` (Short text, list — defaults to Christmas, Hanukkah, Other). The literal value `Other` reveals a free-text "Which holiday?" input; that text is what lands in the sheet's Holiday column.
 - `colorOptions` (Short text, list) — favourite colour dropdown; the whole field hides when empty
