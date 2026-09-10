@@ -33,7 +33,9 @@ const DonationSection = ({
   successHeadline,
   successBody,
   entryId,
+  titleTag,
 }) => {
+  const TitleTag = titleTag || 'h2';
   const inspectorProps = useContentfulInspectorMode({ entryId });
   const searchParams = new URLSearchParams(window.location.search);
   const isSuccess = searchParams.get('payment') === 'success';
@@ -208,7 +210,7 @@ const DonationSection = ({
         {/* Title + intro above the form card */}
         {(title || introText) && (
           <div className="donate-section-intro">
-            {title && <h2 className="donate-section-title" {...inspectorProps({ fieldId: 'title' })}>{title}</h2>}
+            {title && <TitleTag className="donate-section-title section-title" {...inspectorProps({ fieldId: 'title' })}>{title}</TitleTag>}
             {introText && (
               <div className="markdown-content donate-intro-text" {...inspectorProps({ fieldId: 'introText' })}>
                 <ReactMarkdown>{introText}</ReactMarkdown>

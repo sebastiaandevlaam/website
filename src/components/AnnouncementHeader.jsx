@@ -35,13 +35,19 @@ const AnnouncementHeader = ({ text, linkUrl, linkText, startDate, endDate, isAct
     }
 
     return (
-        <div className="announcement-header">
+        // <aside> makes the bar a complementary landmark; it previously sat
+        // outside every landmark region, so screen-reader users navigating by
+        // landmark skipped past it entirely.
+        <aside className="announcement-header" aria-label="Announcement">
             <div className="container">
-                <Icon name="Megaphone" className="icon" />
+                <Icon name="Megaphone" className="icon" aria-hidden="true" />
                 {text && (
-                    <span {...inspectorProps({ fieldId: 'text' })}>
+                    // A <div> rather than a <span>: this wraps ReactMarkdown's
+                    // <p>, which a <span> may not contain. Kept visually inline
+                    // by .announcement-text.
+                    <div className="announcement-text" {...inspectorProps({ fieldId: 'text' })}>
                         <ReactMarkdown>{text}</ReactMarkdown>
-                    </span>
+                    </div>
                 )}
                 {linkUrl && (
                     <a href={linkUrl} {...inspectorProps({ fieldId: 'linkUrl' })}>
@@ -50,7 +56,7 @@ const AnnouncementHeader = ({ text, linkUrl, linkText, startDate, endDate, isAct
                 )}
                 {/* Optional: Add a close button here with state to hide */}
             </div>
-        </div>
+        </aside>
     );
 };
 

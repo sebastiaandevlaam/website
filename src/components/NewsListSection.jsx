@@ -22,7 +22,7 @@ const getPageNumbers = (current, total) => {
     return [1, '...', current - 1, current, current + 1, '...', total];
 };
 
-const NewsPost = ({ post }) => {
+const NewsPost = ({ post, itemTag: ItemTag = 'h3' }) => {
     const { title: postTitle, slug, summary, publishDate, featuredImage } = post?.fields || {};
     const formattedDate = formatDate(publishDate);
     const inspectorProps = useContentfulInspectorMode({ entryId: post?.sys?.id });
@@ -42,9 +42,9 @@ const NewsPost = ({ post }) => {
                         {formattedDate}
                     </time>
                 )}
-                <h3 className="news-item-title" {...inspectorProps({ fieldId: 'title' })}>
+                <ItemTag className="news-item-title" {...inspectorProps({ fieldId: 'title' })}>
                     <a href={`/news/${slug}`}>{postTitle}</a>
-                </h3>
+                </ItemTag>
                 {summary && <p className="news-summary" {...inspectorProps({ fieldId: 'summary' })}>{summary}</p>}
                 <a href={`/news/${slug}`} className="link-subtle news-read-more">
                     Read more <Icon name="ArrowRight" />
@@ -54,7 +54,11 @@ const NewsPost = ({ post }) => {
     );
 };
 
-const NewsListSection = ({ title, leadParagraph, posts, displayLimit, displayStyle, backgroundStyle, entryId }) => {
+const NewsListSection = ({ title, leadParagraph, posts, displayLimit, displayStyle, backgroundStyle, entryId, titleTag }) => {
+    const TitleTag = titleTag || 'h2';
+    // Post titles sit one level under the section title, so promoting the
+    // section to <h1> on /news must not leave an h1 -> h3 gap.
+    const ItemTag = TitleTag === 'h1' ? 'h2' : 'h3';
     const [currentPage, setCurrentPage] = useState(1);
     const [selectedMonth, setSelectedMonth] = useState('');
     const topRef = useRef(null);
@@ -121,7 +125,7 @@ const NewsListSection = ({ title, leadParagraph, posts, displayLimit, displaySty
     return (
         <section className={`news-list-section ${bgClass}`} id="news">
             <div className="container">
-                <h2 ref={topRef} {...inspectorProps({ fieldId: 'title' })}>{title}</h2>
+                <TitleTag ref={topRef} className="section-title" {...inspectorProps({ fieldId: 'title' })}>{title}</TitleTag>
                 {leadParagraph && (
                     <p className="lead-paragraph" {...inspectorProps({ fieldId: 'leadParagraph' })}>
                         {leadParagraph}
@@ -170,9 +174,9 @@ const NewsListSection = ({ title, leadParagraph, posts, displayLimit, displaySty
                                         {formattedDate && (
                                             <time className="news-date" dateTime={publishDate}>{formattedDate}</time>
                                         )}
-                                        <h3 className="news-item-title">
+                                        <ItemTag className="news-item-title">
                                             <a href={`/news/${slug}`}>{postTitle}</a>
-                                        </h3>
+                                        </ItemTag>
                                         {summary && <p className="news-summary">{summary}</p>}
                                         <a href={`/news/${slug}`} className="link-subtle news-read-more">
                                             Read more <Icon name="ArrowRight" />
@@ -185,7 +189,7 @@ const NewsListSection = ({ title, leadParagraph, posts, displayLimit, displaySty
                 ) : pagedPosts.length > 0 ? (
                     <div className="news-list" {...inspectorProps({ fieldId: 'posts' })}>
                         {pagedPosts.map(post => (
-                            <NewsPost key={post.sys.id} post={post} />
+                            <NewsPost key={post.sys.id} post={post} itemTag={ItemTag} />
                         ))}
                     </div>
                 ) : (

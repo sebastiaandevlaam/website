@@ -29,7 +29,9 @@ const VolunteerSection = ({
     successBody,
     backgroundStyle,
     entryId,
+    titleTag,
 }) => {
+    const TitleTag = titleTag || 'h2';
     const [form, setForm] = useState(EMPTY_FORM);
     const [isSubmitted, setIsSubmitted] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
@@ -110,7 +112,7 @@ const VolunteerSection = ({
     return (
         <section className={`volunteer-section ${bgClass}`}>
             <div className="container volunteer-container">
-                {title && <h2 {...inspectorProps({ fieldId: 'title' })}>{title}</h2>}
+                {title && <TitleTag className="section-title" {...inspectorProps({ fieldId: 'title' })}>{title}</TitleTag>}
                 {introText && (
                     <div className="markdown-content volunteer-intro" {...inspectorProps({ fieldId: 'introText' })}>
                         <ReactMarkdown>{introText}</ReactMarkdown>

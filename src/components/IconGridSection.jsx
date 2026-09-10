@@ -3,7 +3,8 @@ import ButtonLink from './ButtonLink';
 import CardComponent from './CardComponent';
 import Icon from './Icon';
 
-const IconGridSection = ({ sectionIcon, title, leadParagraph, gridItems, optionalBottomButton, backgroundStyle, entryId }) => {
+const IconGridSection = ({ sectionIcon, title, leadParagraph, gridItems, optionalBottomButton, backgroundStyle, entryId, titleTag }) => {
+    const TitleTag = titleTag || 'h2';
     const optionalBottomButtonId = optionalBottomButton?.sys?.id
     optionalBottomButton = optionalBottomButton?.fields
     const bgClass = backgroundStyle === "Beige Background" ? "bg-beige" : "bg-default";
@@ -18,7 +19,7 @@ const IconGridSection = ({ sectionIcon, title, leadParagraph, gridItems, optiona
         <section className={`icon-grid-section ${bgClass}`} id={sectionId}>
             <div className="container">
                 {sectionIcon && <Icon name={sectionIcon} className="section-icon" />}
-                <h2 {...inspectorProps({ fieldId: 'title' })}>{title}</h2>
+                <TitleTag className="section-title" {...inspectorProps({ fieldId: 'title' })}>{title}</TitleTag>
                 {leadParagraph && <p className="lead-paragraph" {...inspectorProps({ fieldId: 'leadParagraph' })}>{leadParagraph}</p>}
 
                 {gridItems && gridItems.length > 0 && (
