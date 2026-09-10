@@ -19,7 +19,7 @@ Public-facing marketing website for the Holliston Pantry Shelf food pantry organ
 npm run dev        # Dev server (localhost:5173)
 npm run build      # Production build → dist/
 npm run preview    # Preview production build locally
-npm run lint       # ESLint
+npm run lint       # ESLint (front-end and functions/, both should be clean)
 firebase deploy    # Deploy dist/ to Firebase (from repo root or website/)
 ```
 
