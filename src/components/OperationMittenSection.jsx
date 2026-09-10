@@ -2,8 +2,11 @@ import { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { useContentfulInspectorMode } from '@contentful/live-preview/react';
 import { isValidUsPhone, formatUsPhone } from '@/utils/phone';
-
-const FUNCTIONS_BASE_URL = import.meta.env.VITE_FUNCTIONS_BASE_URL;
+import { useFunctionSubmit } from '@/hooks/useFunctionSubmit';
+import { backgroundClass, isWithinWindow } from '@/utils/contentful';
+import { trimMarkdown } from '@/utils/markdown';
+import HoneypotField from './form/HoneypotField';
+import SuccessCard from './form/SuccessCard';
 
 // Structural choices that describe how children's clothing is sized, not
 // editorial ones — these stay in code like the volunteer form's contact times.
@@ -52,11 +55,6 @@ const EMPTY_FAMILY = {
 
 // Grow or shrink the child list to `count`, keeping whatever the family has
 // already typed for the children that survive the change.
-// Contentful long-text fields often arrive with leading/trailing blank lines.
-// Trimming keeps react-markdown from emitting empty paragraphs around the real
-// content, which read as unexplained gaps on the live site.
-const md = (value) => String(value ?? '').trim();
-
 const resizeChildren = (children, count) =>
     Array.from({ length: count }, (_, i) => children[i] || { ...EMPTY_CHILD, wishes: Array(WISHES_PER_CHILD).fill('') });
 
@@ -81,7 +79,7 @@ const OperationMittenSection = ({
 }) => {
     const TitleTag = titleTag || 'h2';
     const inspectorProps = useContentfulInspectorMode({ entryId });
-    const bgClass = backgroundStyle === 'Beige Background' ? 'bg-beige' : 'bg-default';
+    const bgClass = backgroundClass(backgroundStyle);
 
     const childLimit = Math.min(maxChildren || DEFAULT_MAX_CHILDREN, 12);
     const genders = genderOptions?.length ? genderOptions : DEFAULT_GENDER_OPTIONS;
@@ -91,19 +89,15 @@ const OperationMittenSection = ({
 
     const [family, setFamily] = useState(EMPTY_FAMILY);
     const [children, setChildren] = useState(() => resizeChildren([], 1));
-    const [isSubmitted, setIsSubmitted] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState('');
+    const { submit, isLoading, isSubmitted, error, setError, honeypotProps } =
+        useFunctionSubmit('submitOperationMitten');
     // Id of the field that failed validation — drives the inline message, the
     // red border and aria-invalid.
     const [invalidField, setInvalidField] = useState('');
 
     // The drive runs on a schedule; outside the window the form is replaced by
     // the closed message rather than accepting entries nobody will shop for.
-    const now = new Date();
-    const notYetOpen = openDate && now < new Date(openDate);
-    const alreadyClosed = closeDate && now > new Date(closeDate);
-    const isClosed = notYetOpen || alreadyClosed;
+    const isClosed = !isWithinWindow(openDate, closeDate);
 
     // Once the parent starts fixing things, clear the complaint.
     const clearError = () => { setError(''); setInvalidField(''); };
@@ -115,7 +109,7 @@ const OperationMittenSection = ({
 
     // Inline message rendered directly beneath the offending field.
     const FieldError = ({ id }) => (invalidField === id
-        ? <p className="mitten-field-error" id={`${id}-error`}>{error}</p>
+        ? <p className="form-field-error" id={`${id}-error`}>{error}</p>
         : null);
 
     const setFamilyField = (field, value) => {
@@ -207,26 +201,8 @@ const OperationMittenSection = ({
             return;
         }
 
-        setIsLoading(true);
-        setError('');
         setInvalidField('');
-        try {
-            const response = await fetch(`${FUNCTIONS_BASE_URL}/submitOperationMitten`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ ...family, children }),
-            });
-            const data = await response.json();
-            if (response.ok) {
-                setIsSubmitted(true);
-            } else {
-                setError(data.error || 'Something went wrong. Please try again.');
-            }
-        } catch {
-            setError('Unable to submit the form. Please try again.');
-        } finally {
-            setIsLoading(false);
-        }
+        await submit({ ...family, children });
     };
 
     // ── Closed state ────────────────────────────────────────────────────────
@@ -234,11 +210,11 @@ const OperationMittenSection = ({
     if (isClosed) {
         return (
             <section className={`mitten-section ${bgClass}`}>
-                <div className="container mitten-container">
+                <div className="container form-container">
                     {title && <TitleTag className="section-title" {...inspectorProps({ fieldId: 'title' })}>{title}</TitleTag>}
                     <div className="mitten-closed markdown-content" {...inspectorProps({ fieldId: 'closedMessage' })}>
                         <ReactMarkdown>
-                            {md(closedMessage) || 'Sign-ups for Operation Mitten are closed right now. Please check back next season.'}
+                            {trimMarkdown(closedMessage) || 'Sign-ups for Operation Mitten are closed right now. Please check back next season.'}
                         </ReactMarkdown>
                     </div>
                 </div>
@@ -251,18 +227,12 @@ const OperationMittenSection = ({
     if (isSubmitted) {
         return (
             <section className={`mitten-section ${bgClass}`}>
-                <div className="container mitten-container">
-                    <div className="mitten-success">
-                        <div className="mitten-success-icon" aria-hidden="true">✓</div>
-                        <h2 {...inspectorProps({ fieldId: 'successHeadline' })}>
-                            {successHeadline || 'Thank you — your form has been received!'}
-                        </h2>
-                        {successBody && (
-                            <div className="markdown-content" {...inspectorProps({ fieldId: 'successBody' })}>
-                                <ReactMarkdown>{md(successBody)}</ReactMarkdown>
-                            </div>
-                        )}
-                    </div>
+                <div className="container form-container">
+                    <SuccessCard
+                        headline={successHeadline || 'Thank you — your form has been received!'}
+                        body={successBody}
+                        inspectorProps={inspectorProps}
+                    />
                 </div>
             </section>
         );
@@ -272,55 +242,56 @@ const OperationMittenSection = ({
 
     return (
         <section className={`mitten-section ${bgClass}`}>
-            <div className="container mitten-container">
+            <div className="container form-container">
                 {title && <TitleTag className="section-title" {...inspectorProps({ fieldId: 'title' })}>{title}</TitleTag>}
 
                 {introText && (
-                    <div className="markdown-content mitten-intro" {...inspectorProps({ fieldId: 'introText' })}>
-                        <ReactMarkdown>{md(introText)}</ReactMarkdown>
+                    <div className="markdown-content form-intro" {...inspectorProps({ fieldId: 'introText' })}>
+                        <ReactMarkdown>{trimMarkdown(introText)}</ReactMarkdown>
                     </div>
                 )}
 
                 {eligibilityNote && (
-                    <div className="mitten-callout markdown-content" {...inspectorProps({ fieldId: 'eligibilityNote' })}>
-                        <ReactMarkdown>{md(eligibilityNote)}</ReactMarkdown>
+                    <div className="form-callout markdown-content" {...inspectorProps({ fieldId: 'eligibilityNote' })}>
+                        <ReactMarkdown>{trimMarkdown(eligibilityNote)}</ReactMarkdown>
                     </div>
                 )}
 
-                <form className="mitten-form" onSubmit={handleSubmit} noValidate>
+                <form className="form mitten-form" onSubmit={handleSubmit} noValidate>
+                    <HoneypotField {...honeypotProps} />
 
                     {/* Family details */}
-                    <fieldset className="mitten-fieldset">
-                        <legend className="mitten-legend">Family Information</legend>
+                    <fieldset className="form-fieldset">
+                        <legend className="form-legend">Family Information</legend>
 
-                        <div className="mitten-grid">
-                            <div className="mitten-field">
-                                <label className="mitten-label" htmlFor="mitten-shopper-number">
-                                    Shopper # <span className="mitten-required">(required)</span>
+                        <div className="form-grid">
+                            <div className="form-field">
+                                <label className="form-label" htmlFor="mitten-shopper-number">
+                                    Shopper # <span className="form-required">(required)</span>
                                 </label>
-                                <input id="mitten-shopper-number" type="text" className="mitten-input"
+                                <input id="mitten-shopper-number" type="text" className="form-input"
                                     {...invalidProps('mitten-shopper-number')}
                                     value={family.shopperNumber}
                                     onChange={e => setFamilyField('shopperNumber', e.target.value)} />
                                 <FieldError id="mitten-shopper-number" />
                             </div>
 
-                            <div className="mitten-field">
-                                <label className="mitten-label" htmlFor="mitten-parent-name">
-                                    Parent&rsquo;s / Guardian&rsquo;s First Name <span className="mitten-required">(required)</span>
+                            <div className="form-field">
+                                <label className="form-label" htmlFor="mitten-parent-name">
+                                    Parent&rsquo;s / Guardian&rsquo;s First Name <span className="form-required">(required)</span>
                                 </label>
-                                <input id="mitten-parent-name" type="text" className="mitten-input"
+                                <input id="mitten-parent-name" type="text" className="form-input"
                                     {...invalidProps('mitten-parent-name')}
                                     value={family.parentFirstName}
                                     onChange={e => setFamilyField('parentFirstName', e.target.value)} />
                                 <FieldError id="mitten-parent-name" />
                             </div>
 
-                            <div className="mitten-field">
-                                <label className="mitten-label" htmlFor="mitten-phone">
-                                    Phone Number <span className="mitten-required">(required)</span>
+                            <div className="form-field">
+                                <label className="form-label" htmlFor="mitten-phone">
+                                    Phone Number <span className="form-required">(required)</span>
                                 </label>
-                                <input id="mitten-phone" type="tel" className="mitten-input"
+                                <input id="mitten-phone" type="tel" className="form-input"
                                     inputMode="tel" autoComplete="tel" placeholder="(508) 555-0101"
                                     value={family.phone}
                                     {...invalidProps('mitten-phone')}
@@ -329,11 +300,11 @@ const OperationMittenSection = ({
                                 <FieldError id="mitten-phone" />
                             </div>
 
-                            <div className="mitten-field">
-                                <label className="mitten-label" htmlFor="mitten-phone-2">
+                            <div className="form-field">
+                                <label className="form-label" htmlFor="mitten-phone-2">
                                     Additional Phone Number
                                 </label>
-                                <input id="mitten-phone-2" type="tel" className="mitten-input"
+                                <input id="mitten-phone-2" type="tel" className="form-input"
                                     inputMode="tel" autoComplete="tel" placeholder="(508) 555-0199"
                                     value={family.additionalPhone}
                                     {...invalidProps('mitten-phone-2')}
@@ -345,14 +316,14 @@ const OperationMittenSection = ({
                     </fieldset>
 
                     {/* Holiday */}
-                    <fieldset className="mitten-fieldset" {...inspectorProps({ fieldId: 'holidayOptions' })}>
-                        <legend className="mitten-legend">
-                            Are these gifts for&hellip; <span className="mitten-required">(required)</span>
+                    <fieldset className="form-fieldset" {...inspectorProps({ fieldId: 'holidayOptions' })}>
+                        <legend className="form-legend">
+                            Are these gifts for&hellip; <span className="form-required">(required)</span>
                         </legend>
-                        <div className="mitten-choice-row">
+                        <div className="form-choice-row">
                             {holidays.map((option, i) => (
-                                <label key={option} className="mitten-choice">
-                                    <input type="radio" name="mitten-holiday" className="mitten-radio"
+                                <label key={option} className="form-choice">
+                                    <input type="radio" name="mitten-holiday" className="form-radio"
                                         id={`mitten-holiday-${i}`}
                                         {...(i === 0 ? invalidProps('mitten-holiday-0') : {})}
                                         checked={family.holiday === option}
@@ -363,11 +334,11 @@ const OperationMittenSection = ({
                         </div>
                         <FieldError id="mitten-holiday-0" />
                         {family.holiday === 'Other' && (
-                            <div className="mitten-field mitten-other-field">
-                                <label className="mitten-label" htmlFor="mitten-holiday-other">
-                                    Which holiday? <span className="mitten-required">(required)</span>
+                            <div className="form-field mitten-other-field">
+                                <label className="form-label" htmlFor="mitten-holiday-other">
+                                    Which holiday? <span className="form-required">(required)</span>
                                 </label>
-                                <input id="mitten-holiday-other" type="text" className="mitten-input"
+                                <input id="mitten-holiday-other" type="text" className="form-input"
                                     {...invalidProps('mitten-holiday-other')}
                                     value={family.holidayOther}
                                     onChange={e => setFamilyField('holidayOther', e.target.value)} />
@@ -377,18 +348,18 @@ const OperationMittenSection = ({
                     </fieldset>
 
                     {/* Number of children — drives how many child blocks render */}
-                    <div className="mitten-field mitten-count-field">
-                        <label className="mitten-label" htmlFor="mitten-child-count">
-                            Number of children in family <span className="mitten-required">(required)</span>
+                    <div className="form-field mitten-count-field">
+                        <label className="form-label" htmlFor="mitten-child-count">
+                            Number of children in family <span className="form-required">(required)</span>
                         </label>
-                        <select id="mitten-child-count" className="mitten-select mitten-count-select"
+                        <select id="mitten-child-count" className="form-select mitten-count-select"
                             value={children.length}
                             onChange={e => handleChildCountChange(Number(e.target.value))}>
                             {Array.from({ length: childLimit }, (_, i) => i + 1).map(n => (
                                 <option key={n} value={n}>{n}</option>
                             ))}
                         </select>
-                        <p className="mitten-hint">
+                        <p className="form-hint">
                             We&rsquo;ll ask for details about each child below. Change this number and the
                             list updates &mdash; anything you have already filled in is kept.
                         </p>
@@ -404,12 +375,12 @@ const OperationMittenSection = ({
                                     Child {index + 1}
                                 </legend>
 
-                                <div className="mitten-grid">
-                                    <div className="mitten-field">
-                                        <label className="mitten-label" htmlFor={id('gender')}>
-                                            Gender <span className="mitten-required">(required)</span>
+                                <div className="form-grid">
+                                    <div className="form-field">
+                                        <label className="form-label" htmlFor={id('gender')}>
+                                            Gender <span className="form-required">(required)</span>
                                         </label>
-                                        <select id={id('gender')} className="mitten-select"
+                                        <select id={id('gender')} className="form-select"
                                             {...invalidProps(id('gender'))}
                                             value={child.gender}
                                             onChange={e => setChildField(index, 'gender', e.target.value)}>
@@ -421,11 +392,11 @@ const OperationMittenSection = ({
                                         <FieldError id={id('gender')} />
                                     </div>
 
-                                    <div className="mitten-field">
-                                        <label className="mitten-label" htmlFor={id('age')}>
-                                            Age <span className="mitten-required">(required)</span>
+                                    <div className="form-field">
+                                        <label className="form-label" htmlFor={id('age')}>
+                                            Age <span className="form-required">(required)</span>
                                         </label>
-                                        <input id={id('age')} type="number" min="0" max="18" className="mitten-input"
+                                        <input id={id('age')} type="number" min="0" max="18" className="form-input"
                                             {...invalidProps(id('age'))}
                                             value={child.age}
                                             onChange={e => setChildField(index, 'age', e.target.value)} />
@@ -435,22 +406,22 @@ const OperationMittenSection = ({
 
                                 {/* Sizes — sizes are one or two characters, so they all fit on
                                     one row with the youth/adult choice beside them. */}
-                                <fieldset className="mitten-subfieldset">
-                                    <legend className="mitten-sublegend">
-                                        Sizes <span className="mitten-legend-hint">&mdash; as specific as you can, these buy clothes that fit</span>
+                                <fieldset className="form-subfieldset">
+                                    <legend className="form-sublegend">
+                                        Sizes <span className="form-legend-hint">&mdash; as specific as you can, these buy clothes that fit</span>
                                     </legend>
                                     <div className="mitten-size-row">
                                         {SIZE_FIELDS.map(({ field, id: sizeId, label }) => (
                                             <div key={field} className="mitten-size-item">
-                                                <label className="mitten-label" htmlFor={id(sizeId)}>{label}</label>
-                                                <input id={id(sizeId)} type="text" className="mitten-input mitten-size-input"
+                                                <label className="form-label" htmlFor={id(sizeId)}>{label}</label>
+                                                <input id={id(sizeId)} type="text" className="form-input mitten-size-input"
                                                     value={child[field]}
                                                     onChange={e => setChildField(index, field, e.target.value)} />
                                             </div>
                                         ))}
                                         <div className="mitten-size-item mitten-size-type">
-                                            <label className="mitten-label" htmlFor={id('size-type')}>Youth / adult</label>
-                                            <select id={id('size-type')} className="mitten-select"
+                                            <label className="form-label" htmlFor={id('size-type')}>Youth / adult</label>
+                                            <select id={id('size-type')} className="form-select"
                                                 value={child.sizeType}
                                                 onChange={e => setChildField(index, 'sizeType', e.target.value)}>
                                                 <option value="">Select</option>
@@ -463,20 +434,20 @@ const OperationMittenSection = ({
                                 </fieldset>
 
                                 {/* Clothing preference and favourite colour share a row */}
-                                <div className="mitten-grid">
-                                    <div className="mitten-field">
-                                        <label className="mitten-label" htmlFor={id('clothing')}>
+                                <div className="form-grid">
+                                    <div className="form-field">
+                                        <label className="form-label" htmlFor={id('clothing')}>
                                             Preferred article(s) of clothing
                                         </label>
-                                        <input id={id('clothing')} type="text" className="mitten-input"
+                                        <input id={id('clothing')} type="text" className="form-input"
                                             placeholder="e.g. hoodies, leggings"
                                             value={child.clothingPreference}
                                             onChange={e => setChildField(index, 'clothingPreference', e.target.value)} />
                                     </div>
                                     {colors.length > 0 && (
-                                        <div className="mitten-field" {...inspectorProps({ fieldId: 'colorOptions' })}>
-                                            <label className="mitten-label" htmlFor={id('color')}>Favorite color</label>
-                                            <select id={id('color')} className="mitten-select"
+                                        <div className="form-field" {...inspectorProps({ fieldId: 'colorOptions' })}>
+                                            <label className="form-label" htmlFor={id('color')}>Favorite color</label>
+                                            <select id={id('color')} className="form-select"
                                                 value={child.favoriteColor}
                                                 onChange={e => setChildField(index, 'favoriteColor', e.target.value)}>
                                                 <option value="">Select</option>
@@ -490,63 +461,63 @@ const OperationMittenSection = ({
 
                                 {/* Interests */}
                                 {interests.length > 0 && (
-                                    <fieldset className="mitten-subfieldset" {...inspectorProps({ fieldId: 'interestOptions' })}>
-                                        <legend className="mitten-sublegend">
-                                            Favorite activities or interests <span className="mitten-legend-hint">&mdash; select all that apply</span>
+                                    <fieldset className="form-subfieldset" {...inspectorProps({ fieldId: 'interestOptions' })}>
+                                        <legend className="form-sublegend">
+                                            Favorite activities or interests <span className="form-legend-hint">&mdash; select all that apply</span>
                                         </legend>
-                                        <div className="mitten-checkbox-grid">
+                                        <div className="form-checkbox-grid">
                                             {interests.map(option => (
-                                                <label key={option} className="mitten-choice">
-                                                    <input type="checkbox" className="mitten-checkbox"
+                                                <label key={option} className="form-choice">
+                                                    <input type="checkbox" className="form-checkbox"
                                                         checked={child.interests.includes(option)}
                                                         onChange={() => toggleInterest(index, option)} />
                                                     {option}
                                                 </label>
                                             ))}
                                         </div>
-                                        <div className="mitten-field mitten-other-field">
-                                            <label className="mitten-label" htmlFor={id('interests-other')}>
+                                        <div className="form-field mitten-other-field">
+                                            <label className="form-label" htmlFor={id('interests-other')}>
                                                 Other interests
                                             </label>
-                                            <input id={id('interests-other')} type="text" className="mitten-input"
+                                            <input id={id('interests-other')} type="text" className="form-input"
                                                 value={child.interestsOther}
                                                 onChange={e => setChildField(index, 'interestsOther', e.target.value)} />
                                         </div>
                                     </fieldset>
                                 )}
 
-                                <div className="mitten-grid">
-                                    <div className="mitten-field">
-                                        <label className="mitten-label" htmlFor={id('character')}>
+                                <div className="form-grid">
+                                    <div className="form-field">
+                                        <label className="form-label" htmlFor={id('character')}>
                                             Favorite character or person
                                         </label>
-                                        <input id={id('character')} type="text" className="mitten-input"
+                                        <input id={id('character')} type="text" className="form-input"
                                             placeholder="e.g. Elsa, Spider-Man"
                                             value={child.favoriteCharacter}
                                             onChange={e => setChildField(index, 'favoriteCharacter', e.target.value)} />
                                     </div>
-                                    <div className="mitten-field">
-                                        <label className="mitten-label" htmlFor={id('sports')}>
+                                    <div className="form-field">
+                                        <label className="form-label" htmlFor={id('sports')}>
                                             Favorite sports team or figure
                                         </label>
-                                        <input id={id('sports')} type="text" className="mitten-input"
+                                        <input id={id('sports')} type="text" className="form-input"
                                             value={child.favoriteSportsTeam}
                                             onChange={e => setChildField(index, 'favoriteSportsTeam', e.target.value)} />
                                     </div>
                                 </div>
 
                                 {/* Specific gift ideas */}
-                                <fieldset className="mitten-subfieldset">
-                                    <legend className="mitten-sublegend">
+                                <fieldset className="form-subfieldset">
+                                    <legend className="form-sublegend">
                                         Specific books, games, toys or gift cards this child would like
-                                        <span className="mitten-legend-hint"> &mdash; up to {WISHES_PER_CHILD}</span>
+                                        <span className="form-legend-hint"> &mdash; up to {WISHES_PER_CHILD}</span>
                                     </legend>
                                     {/* Three near-identical labels would cost a row each, so the
                                         number lives in the placeholder and the accessible name. */}
                                     <div className="mitten-wish-list">
                                         {child.wishes.map((wish, wishIndex) => (
                                             <input key={wishIndex} id={id(`wish-${wishIndex + 1}`)}
-                                                type="text" className="mitten-input"
+                                                type="text" className="form-input"
                                                 placeholder={`Item ${wishIndex + 1}`}
                                                 aria-label={`Gift idea ${wishIndex + 1} for child ${index + 1}`}
                                                 value={wish}
@@ -559,17 +530,17 @@ const OperationMittenSection = ({
                     })}
 
                     {pickupInformation && (
-                        <div className="mitten-callout markdown-content" {...inspectorProps({ fieldId: 'pickupInformation' })}>
-                            <ReactMarkdown>{md(pickupInformation)}</ReactMarkdown>
+                        <div className="form-callout markdown-content" {...inspectorProps({ fieldId: 'pickupInformation' })}>
+                            <ReactMarkdown>{trimMarkdown(pickupInformation)}</ReactMarkdown>
                         </div>
                     )}
 
                     {/* Field problems are reported inline at the field itself, which
                         also takes focus — the summary is for everything else,
                         such as a failed request. */}
-                    {error && !invalidField && <p className="mitten-error" role="alert">{error}</p>}
+                    {error && !invalidField && <p className="form-error" role="alert">{error}</p>}
 
-                    <button type="submit" className="button primary-button mitten-submit" disabled={isLoading}>
+                    <button type="submit" className="button primary-button form-submit" disabled={isLoading}>
                         {isLoading ? 'Submitting…' : 'Submit Form'}
                     </button>
                 </form>

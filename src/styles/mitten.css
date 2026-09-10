@@ -1,0 +1,143 @@
+/* Operation Mitten specifics */
+
+/* Operation Mitten Section */
+/* Shares src/styles/forms.css; only what is genuinely specific to this form
+   lives here, plus the spacing variables that keep its tighter rhythm. */
+
+.mitten-form {
+    --form-gap: 1.25rem;
+    --form-stack-gap: 0.75rem;
+    --form-substack-gap: 0.5rem;
+    --form-legend-gap: 0.25rem;
+    --form-sublegend-gap: 0;
+    --form-hint-gap: 0;
+    --form-submit-gap: 0;
+}
+
+.mitten-section .form-intro {
+    --form-intro-gap: 1.5rem;
+}
+
+/* Clothing sizes are one or two characters ("7", "M", "10"), so the boxes are
+   sized to their content and the whole set plus the youth/adult choice fits on
+   one row, spread across the full form width. */
+.mitten-size-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 0.625rem 0.75rem;
+}
+
+.mitten-size-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.form-input.mitten-size-input {
+    width: 4rem;
+    text-align: center;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+}
+
+.mitten-size-type .form-select {
+    width: auto;
+    min-width: 7.5rem;
+}
+
+.form-subfieldset > .mitten-other-field {
+    margin-top: 0.25rem;
+}
+
+/* The three gift-idea boxes are numbered by placeholder rather than a label
+   each, which saves three rows per child. */
+.mitten-wish-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+/* The child-count select drives how many child cards render, so it is sized to
+   its content rather than stretched across the form. */
+.mitten-count-select {
+    max-width: 8rem;
+}
+
+.form-field.mitten-count-field {
+    gap: 0.5rem;
+}
+
+/* One card per child, repeated as many times as the family says. Kept
+   display:block for the same WebKit fieldset reason as the shared rules. */
+.mitten-child-card {
+    border: 2px solid var(--pantry-beige);
+    border-radius: 0.5rem;
+    background-color: var(--white);
+    padding: 1rem 1.25rem 1.125rem;
+    margin: 0;
+    display: block;
+}
+
+.mitten-child-card > * + * {
+    margin-top: 0.875rem;
+}
+
+.mitten-child-card > legend + * {
+    margin-top: 0;
+}
+
+.mitten-child-legend {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    font-family: 'Nunito Sans', sans-serif;
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: var(--pantry-red);
+    padding: 0 0.5rem;
+    margin-left: -0.5rem;
+}
+
+.mitten-child-number {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: 50%;
+    background-color: var(--pantry-red);
+    color: var(--white);
+    font-size: 0.95rem;
+    flex-shrink: 0;
+}
+
+.mitten-closed {
+    background-color: var(--white);
+    border-left: 4px solid var(--pantry-red);
+    border-radius: 0 0.375rem 0.375rem 0;
+    padding: 1.5rem;
+    font-size: 1.0625rem;
+    line-height: 1.7;
+}
+
+@media (max-width: 560px) {
+    .mitten-child-card {
+        padding: 1rem 0.875rem;
+    }
+
+    /* Four size boxes still fit across a phone at this width; the youth/adult
+       select wraps to its own line beneath them. */
+    .form-input.mitten-size-input {
+        width: 3.5rem;
+    }
+
+    .mitten-size-type {
+        flex-basis: 100%;
+    }
+
+    .mitten-size-type .form-select {
+        width: 100%;
+    }
+}

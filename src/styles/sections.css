@@ -1,0 +1,267 @@
+/* Shared section padding, TextWithImage, rich text, icon grid, cards, contact */
+
+/* General Section Padding */
+section {
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+}
+
+section.bg-beige {
+    background-color: var(--pantry-beige);
+}
+
+section.bg-default {
+    background-color: var(--pantry-bg);
+}
+
+
+/* About Section (TextWithImage) */
+/* reduce top and bottom padding 
+.text-image-section {
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+} */
+
+.text-image-section .content-wrapper {
+    display: flex;
+    flex-direction: column;
+    /* Mobile first */
+    align-items: center;
+    gap: 3rem;
+
+}
+
+.text-image-section .text-content,
+.text-image-section .image-content {
+    width: 100%;
+}
+
+.text-image-section .image-content img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: 0.5rem;
+    box-shadow: 0 10px 15px -3px var(--shadow-color), 0 4px 6px -2px var(--shadow-color);
+    object-fit: cover;
+}
+
+.text-image-section .text-content .lead-paragraph {
+    font-size: 1.125rem;
+    font-weight: 600;
+    /* Semibold Open Sans */
+    margin-bottom: 1rem;
+}
+
+.text-image-section .text-content .body-text p,
+.text-image-section .text-content .body-text li {
+    font-size: 1rem;
+    line-height: 1.7;
+    margin-bottom: 1rem;
+}
+
+.text-image-section .text-content .body-text ul,
+.text-image-section .text-content .body-text ol {
+    padding-left: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.text-image-section .text-content .body-text .rich-text-image,
+.body-text .rich-text-image {
+    float: right;
+    margin: 0.25rem 0 1rem 1.5rem;
+    max-width: 45%;
+}
+
+.text-image-section .text-content .body-text .rich-text-image img,
+.body-text .rich-text-image img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 6px -1px var(--shadow-color), 0 2px 4px -2px var(--shadow-color);
+}
+
+.text-image-section .text-content .body-text .rich-text-image figcaption,
+.body-text .rich-text-image figcaption {
+    margin-top: 0.5rem;
+    font-size: 0.875rem;
+    color: var(--pantry-gold-dark);
+    font-style: italic;
+}
+
+/* Inline prose links are underlined so they are not signalled by colour alone
+   (WCAG 1.4.1). The accessible tan sits close enough to the body grey that the
+   two are under 3:1 apart, which is exactly the case the rule covers. Matches
+   .markdown-content a, which already underlines. */
+.body-text a {
+    text-decoration: underline;
+}
+
+/* Clear floats after body text */
+.body-text::after {
+    content: '';
+    display: block;
+    clear: both;
+}
+
+.text-image-section .text-content .body-text h2,
+.text-image-section .text-content .body-text h3,
+.text-image-section .text-content .body-text h4,
+.text-image-section .text-content .body-text h5,
+.text-image-section .text-content .body-text h6 {
+    margin-top: 1.5rem;
+}
+
+/* RichTextRenderer re-levels headings for a valid document outline. These hold
+   each heading at the size its authored level used to render, so the corrected
+   markup looks identical to before. */
+.body-text .rt-h2 { font-size: 2rem; }
+.body-text .rt-h3 { font-size: 1.25rem; }
+.body-text .rt-h4 { font-size: 1rem; }
+.body-text .rt-h5 { font-size: 0.83rem; }
+.body-text .rt-h6 { font-size: 0.67rem; }
+
+.text-image-section .text-content .section-link {
+    margin-top: 1.5rem;
+    display: flex;
+    justify-content: center;
+}
+
+.video-embed {
+    position: relative;
+    padding-bottom: 56.25%; /* 16:9 */
+    height: 0;
+    overflow: hidden;
+    border-radius: 0.5rem;
+}
+
+.video-embed iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
+/* Icon Grid Section */
+.icon-grid-section {
+    text-align: center;
+}
+
+.icon-grid-section .section-icon {
+    height: 4rem;
+    width: 4rem;
+    margin: 0 auto 1rem auto;
+    color: var(--pantry-red);
+}
+
+.icon-grid-section .lead-paragraph {
+    max-width: 48rem;
+    margin: 0 auto 2.5rem auto;
+    font-size: 1.125rem;
+}
+
+.icon-grid-section .grid {
+    display: grid;
+    gap: 2rem;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Specific grid column classes */
+.icon-grid-section .grid.grid-cols-md-2 {
+    /* For Get Help */
+    max-width: 56rem;
+}
+
+.icon-grid-section .grid.grid-cols-md-3 {
+    /* For Support */
+    /* Default max-width from container is fine */
+}
+
+.icon-grid-section .bottom-button {
+    margin-top: 2.5rem;
+}
+
+/* Card Component */
+.card {
+    background-color: var(--white);
+    padding: 1.5rem;
+    text-align: left;
+    /* Base padding */
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 6px -1px var(--shadow-color), 0 2px 4px -2px var(--shadow-color);
+}
+
+.card.support-card {
+    /* Specific styling for support cards */
+    padding: 2rem;
+    box-shadow: 0 10px 15px -3px var(--shadow-color), 0 4px 6px -2px var(--shadow-color);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    text-align: center;
+}
+
+.card.support-card:hover {
+    transform: scale(1.05);
+    box-shadow: 0 20px 25px -5px var(--shadow-color-lg), 0 8px 10px -6px var(--shadow-color-lg);
+}
+
+.card .card-icon {
+    height: 3rem;
+    width: 3rem;
+    margin: 0 auto 1rem auto;
+    color: var(--pantry-gold);
+}
+
+.card h3 {
+    margin-bottom: 0.75rem;
+}
+
+.card .description {
+    color: var(--pantry-text);
+    margin-bottom: 1rem;
+    font-size: 1rem;
+    /* Base text size */
+    line-height: 1.6;
+}
+
+.card .description p {
+    /* Style paragraphs generated from newlines */
+    margin-bottom: 0.5rem;
+}
+
+.card .card-link {
+    display: flex;
+    justify-content: center;
+    margin-top: 1rem;
+}
+
+/* Contact Section */
+.contact-section {
+    text-align: center;
+}
+
+.contact-section .section-icon {
+    height: 4rem;
+    width: 4rem;
+    margin: 0 auto 1rem auto;
+    color: var(--pantry-red);
+}
+
+.contact-section .lead-paragraph {
+    max-width: 40rem;
+    margin: 0 auto 2rem auto;
+    font-size: 1.125rem;
+}
+
+.contact-section .contact-info {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: var(--pantry-text);
+    margin-bottom: 1.5rem;
+}
+
+.contact-section .contact-info p {
+    margin-bottom: 0.5rem;
+}

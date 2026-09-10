@@ -1,4 +1,4 @@
-import { toHttpsUrl } from '@/utils/url';
+import { toHttpsUrl, safeHref } from '@/utils/contentful';
 
 // Renders inline content nodes (text, hyperlinks) within a block
 const renderInline = (node, index) => {
@@ -17,7 +17,7 @@ const renderInline = (node, index) => {
         return (
             <a
                 key={index}
-                href={href}
+                href={safeHref(href)}
                 {...(isExternal ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
             >
                 {/* Fall back to the href so an editor linking whitespace can't

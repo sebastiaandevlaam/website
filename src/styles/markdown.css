@@ -1,0 +1,25 @@
+/* Markdown content rendering */
+
+/* Markdown */
+.markdown-content {
+    /* Base styling for the container */
+    line-height: 1.7;
+    font-size: 1.125rem;
+    /* Example size */
+}
+
+.markdown-content h1,
+.markdown-content h2,
+.markdown-content h3,
+.markdown-content h4,
+.markdown-content h5,
+.markdown-content h6 {
+    /* Inherit heading styles or define specific ones */
+    margin-top: 1.5em;
+    margin-bottom: 0.75em;
+    line-height: 1.3;
+    font-family: 'Nunito Sans', sans-serif;
+    /* Ensure correct font */
+    color: var(--pantry-red);
+    /* Ensure correct color */
+}

@@ -1,6 +1,6 @@
 import { useContentfulInspectorMode } from '@contentful/live-preview/react'
 import ButtonLink from "./ButtonLink"
-import { toHttpsUrl } from '@/utils/url'
+import { toHttpsUrl, backgroundClass, sectionId } from '@/utils/contentful'
 
 const HeroSection = ({ headline, description, primaryButton, secondaryButton, backgroundStyle, backgroundImage, entryId }) => {
   const primaryButtonId = primaryButton?.sys?.id
@@ -8,18 +8,11 @@ const HeroSection = ({ headline, description, primaryButton, secondaryButton, ba
   primaryButton = primaryButton?.fields
   secondaryButton = secondaryButton?.fields
 
-  const sectionId = primaryButton?.url?.startsWith('#') ? primaryButton.url.substring(1)
-    : secondaryButton?.url?.startsWith('#') ? secondaryButton.url.substring(1)
-      : 'hero';
+  const anchorUrl = primaryButton?.url?.startsWith('#') ? primaryButton.url : secondaryButton?.url;
+  const id = sectionId(anchorUrl, null, 'hero');
 
-  const bgMap = {
-    'Red Background': 'bg-red',
-    'Gray Background': 'bg-gray',
-    'Default Background': 'bg-default',
-    'Beige Background': 'bg-beige',
-    'Image Background': 'bg-image',
-  };
-  const bgClass = bgMap[backgroundStyle] || 'bg-red';
+  // The hero is the only section defaulting to red rather than the page bg.
+  const bgClass = backgroundClass(backgroundStyle, 'bg-red');
 
   const fullImageUrl = toHttpsUrl(backgroundImage?.fields?.file?.url);
   const bgStyle = bgClass === 'bg-image' && fullImageUrl
@@ -31,7 +24,7 @@ const HeroSection = ({ headline, description, primaryButton, secondaryButton, ba
   const inspectorProps = useContentfulInspectorMode({ entryId });
 
   return (
-    <section className={`hero-section ${bgClass}${isLight ? ' hero-light' : ''}`} id={sectionId} style={bgStyle}>
+    <section className={`hero-section ${bgClass}${isLight ? ' hero-light' : ''}`} id={id} style={bgStyle}>
       {bgClass === 'bg-image' && <div className="hero-image-overlay" />}
       <div className="container hero-content">
         <h1 {...inspectorProps({ fieldId: 'headline' })}>{headline}</h1>

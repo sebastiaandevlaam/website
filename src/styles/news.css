@@ -1,0 +1,361 @@
+/* News list, filter, pagination, grid and post */
+
+/* News List Section */
+/* Matched on the class, not the tag: post titles shift to <h2> when the
+   section title is promoted to <h1>, and a bare `h2` selector centred them. */
+.news-list-section .section-title {
+    text-align: center;
+}
+
+.news-list-section .lead-paragraph {
+    max-width: 48rem;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 2.5rem;
+    font-size: 1.125rem;
+    text-align: center;
+}
+
+.news-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.news-list-item {
+    background-color: var(--white);
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 6px -1px var(--shadow-color), 0 2px 4px -2px var(--shadow-color);
+    border-left: 4px solid var(--pantry-red);
+    display: flex;
+    align-items: stretch;
+    overflow: hidden;
+}
+
+.news-list-thumbnail {
+    flex: 0 0 5rem;
+    width: 5rem;
+    align-self: stretch;
+    position: relative;
+    overflow: hidden;
+}
+
+.news-list-thumbnail img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.news-list-content {
+    flex: 1 1 auto;
+    padding: 1.5rem;
+    min-width: 0;
+}
+
+.news-date {
+    display: block;
+    font-size: 0.875rem;
+    color: var(--pantry-gold-dark);
+    font-weight: 700;
+    margin-bottom: 0.4rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.news-item-title {
+    margin-bottom: 0.5rem;
+    /* Pinned so the tag can shift with the section's heading level without
+       changing how the card looks. */
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
+.news-item-title a {
+    color: var(--pantry-red);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.news-item-title a:hover {
+    color: var(--pantry-gold-dark);
+    text-decoration: none;
+}
+
+.news-summary {
+    color: var(--pantry-text);
+    margin-bottom: 1rem;
+    line-height: 1.6;
+}
+
+.news-read-more {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.news-read-more .lucide {
+    height: 1em;
+    width: 1em;
+    vertical-align: middle;
+}
+
+/* News Month Filter */
+.news-filter {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.news-filter-label {
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: var(--pantry-text);
+    white-space: nowrap;
+}
+
+.news-filter-select {
+    padding: 0.5rem 2rem 0.5rem 0.75rem;
+    border: 2px solid var(--gray-300);
+    border-radius: 0.4rem;
+    background-color: var(--white);
+    color: var(--pantry-text);
+    font-family: 'Open Sans', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%234A4A4A' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.5rem center;
+    transition: border-color 0.2s ease;
+}
+
+.news-filter-select:hover,
+.news-filter-select:focus {
+    border-color: var(--pantry-gold-dark);
+    outline: none;
+}
+
+.news-filter-clear {
+    padding: 0.5rem 0.9rem;
+    border: 2px solid var(--gray-300);
+    border-radius: 0.4rem;
+    background: none;
+    color: var(--pantry-text);
+    font-family: 'Open Sans', sans-serif;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: border-color 0.2s ease, color 0.2s ease;
+}
+
+.news-filter-clear:hover {
+    border-color: var(--pantry-red);
+    color: var(--pantry-red);
+}
+
+.news-no-results {
+    color: var(--pantry-text);
+    font-style: italic;
+    padding: 2rem 0;
+}
+
+/* News Pagination */
+.news-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 2.5rem;
+    flex-wrap: wrap;
+}
+
+.pagination-pages {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.pagination-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.5rem 0.9rem;
+    border: 2px solid var(--gray-300);
+    border-radius: 0.4rem;
+    background: var(--white);
+    color: var(--pantry-text);
+    font-family: 'Open Sans', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+    line-height: 1;
+}
+
+.pagination-btn:hover:not(:disabled) {
+    border-color: var(--pantry-gold-dark);
+    color: var(--pantry-gold-dark);
+    background: var(--pantry-bg);
+}
+
+.pagination-btn.active {
+    background-color: var(--pantry-red);
+    border-color: var(--pantry-red);
+    color: var(--white);
+}
+
+.pagination-btn:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+}
+
+.pagination-btn .lucide {
+    height: 0.9em;
+    width: 0.9em;
+}
+
+.pagination-btn.pagination-prev .lucide {
+    transform: rotate(180deg);
+}
+
+.pagination-ellipsis {
+    padding: 0 0.25rem;
+    color: var(--pantry-text);
+    font-weight: 600;
+    user-select: none;
+}
+
+/* News Grid (horizontal card layout) */
+.news-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 2rem;
+}
+
+.news-grid-card {
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    overflow: hidden;
+}
+
+.news-grid-thumbnail {
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+}
+
+.news-grid-thumbnail img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.3s ease;
+}
+
+.news-grid-thumbnail:hover img {
+    transform: scale(1.04);
+}
+
+.news-grid-content {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    padding: 1.5rem;
+}
+
+.news-grid-content .news-item-title {
+    flex-grow: 1;
+}
+
+.news-grid-content .news-summary {
+    flex-grow: 2;
+}
+
+/* News Post Section */
+.news-post-section {
+    padding-top: 3rem;
+    padding-bottom: 4rem;
+}
+
+.news-post-container {
+    max-width: 800px;
+}
+
+.news-post-back {
+    display: inline-block;
+    margin-bottom: 2rem;
+}
+
+.news-post-header {
+    margin-bottom: 2rem;
+}
+
+.news-post-title {
+    font-size: 2rem;
+    margin-top: 0.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.news-post-author {
+    font-size: 0.95rem;
+    color: var(--pantry-gold-dark);
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+.news-post-summary {
+    color: var(--pantry-text);
+    border-left: 3px solid var(--pantry-gold);
+    padding-left: 1rem;
+    margin-top: 1rem;
+}
+
+.news-post-image {
+    margin-bottom: 2rem;
+}
+
+.news-post-image img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: 0.5rem;
+    box-shadow: 0 10px 15px -3px var(--shadow-color), 0 4px 6px -2px var(--shadow-color);
+    object-fit: cover;
+}
+
+.news-post-body {
+    font-size: 1.125rem;
+    line-height: 1.8;
+    color: var(--pantry-text);
+}
+
+.news-post-body p {
+    margin-bottom: 1.25rem;
+}
+
+.news-post-body ul,
+.news-post-body ol {
+    padding-left: 1.5rem;
+    margin-bottom: 1.25rem;
+}
+
+.news-post-body li {
+    margin-bottom: 0.5rem;
+}
+
+@media (min-width: 768px) {
+    .news-post-title {
+        font-size: 2.5rem;
+    }
+}

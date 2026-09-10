@@ -1,8 +1,11 @@
 import { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { useContentfulInspectorMode } from '@contentful/live-preview/react';
-
-const FUNCTIONS_BASE_URL = import.meta.env.VITE_FUNCTIONS_BASE_URL;
+import { useFunctionSubmit } from '@/hooks/useFunctionSubmit';
+import { backgroundClass } from '@/utils/contentful';
+import { trimMarkdown } from '@/utils/markdown';
+import HoneypotField from './form/HoneypotField';
+import SuccessCard from './form/SuccessCard';
 
 const CONTACT_TIMES = ['Morning', 'Afternoon', 'Evening'];
 
@@ -33,12 +36,11 @@ const VolunteerSection = ({
 }) => {
     const TitleTag = titleTag || 'h2';
     const [form, setForm] = useState(EMPTY_FORM);
-    const [isSubmitted, setIsSubmitted] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState('');
+    const { submit, isLoading, isSubmitted, error, setError, honeypotProps } =
+        useFunctionSubmit('submitVolunteerApplication');
 
     const inspectorProps = useContentfulInspectorMode({ entryId });
-    const bgClass = backgroundStyle === 'Beige Background' ? 'bg-beige' : 'bg-default';
+    const bgClass = backgroundClass(backgroundStyle);
 
     const opportunities = volunteerOpportunities?.map(o => o.fields?.label).filter(Boolean) || [];
     const shifts = availabilityShifts?.map(s => s.fields?.label).filter(Boolean) || [];
@@ -69,41 +71,17 @@ const VolunteerSection = ({
         e.preventDefault();
         const validationError = validate();
         if (validationError) { setError(validationError); return; }
-
-        setIsLoading(true);
-        setError('');
-        try {
-            const response = await fetch(`${FUNCTIONS_BASE_URL}/submitVolunteerApplication`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(form),
-            });
-            const data = await response.json();
-            if (response.ok) {
-                setIsSubmitted(true);
-            } else {
-                setError(data.error || 'Something went wrong. Please try again.');
-            }
-        } catch {
-            setError('Unable to submit the form. Please try again.');
-        } finally {
-            setIsLoading(false);
-        }
+        await submit(form);
     };
 
     if (isSubmitted) {
         return (
             <section className={`volunteer-section ${bgClass}`}>
-                <div className="container volunteer-container">
-                    <div className="volunteer-success">
-                        <div className="volunteer-success-icon" aria-hidden="true">✓</div>
-                        <h2>{successHeadline || 'Thank you for applying!'}</h2>
-                        {successBody && (
-                            <div className="markdown-content">
-                                <ReactMarkdown>{successBody}</ReactMarkdown>
-                            </div>
-                        )}
-                    </div>
+                <div className="container form-container">
+                    <SuccessCard
+                        headline={successHeadline || 'Thank you for applying!'}
+                        body={successBody}
+                    />
                 </div>
             </section>
         );
@@ -111,65 +89,68 @@ const VolunteerSection = ({
 
     return (
         <section className={`volunteer-section ${bgClass}`}>
-            <div className="container volunteer-container">
+            <div className="container form-container">
                 {title && <TitleTag className="section-title" {...inspectorProps({ fieldId: 'title' })}>{title}</TitleTag>}
                 {introText && (
-                    <div className="markdown-content volunteer-intro" {...inspectorProps({ fieldId: 'introText' })}>
-                        <ReactMarkdown>{introText}</ReactMarkdown>
+                    <div className="markdown-content form-intro" {...inspectorProps({ fieldId: 'introText' })}>
+                        <ReactMarkdown>{trimMarkdown(introText)}</ReactMarkdown>
                     </div>
                 )}
 
-                <form className="volunteer-form" onSubmit={handleSubmit} noValidate>
+                <form className="form" onSubmit={handleSubmit} noValidate>
+                    <HoneypotField {...honeypotProps} />
 
                     {/* Name */}
-                    <fieldset className="volunteer-fieldset">
-                        <legend className="volunteer-legend">Name</legend>
-                        <div className="volunteer-name-grid">
-                            <div className="volunteer-field">
-                                <label className="volunteer-label" htmlFor="vol-first-name">
-                                    First Name <span className="volunteer-required">(required)</span>
+                    <fieldset className="form-fieldset">
+                        <legend className="form-sublegend">Name</legend>
+                        <div className="form-grid">
+                            <div className="form-field">
+                                <label className="form-label" htmlFor="vol-first-name">
+                                    First Name <span className="form-required">(required)</span>
                                 </label>
-                                <input id="vol-first-name" type="text" className="volunteer-input"
+                                <input id="vol-first-name" type="text" className="form-input"
+                                    autoComplete="given-name"
                                     value={form.firstName} onChange={e => setField('firstName', e.target.value)} />
                             </div>
-                            <div className="volunteer-field">
-                                <label className="volunteer-label" htmlFor="vol-last-name">
-                                    Last Name <span className="volunteer-required">(required)</span>
+                            <div className="form-field">
+                                <label className="form-label" htmlFor="vol-last-name">
+                                    Last Name <span className="form-required">(required)</span>
                                 </label>
-                                <input id="vol-last-name" type="text" className="volunteer-input"
+                                <input id="vol-last-name" type="text" className="form-input"
+                                    autoComplete="family-name"
                                     value={form.lastName} onChange={e => setField('lastName', e.target.value)} />
                             </div>
                         </div>
                     </fieldset>
 
                     {/* Email */}
-                    <div className="volunteer-field">
-                        <label className="volunteer-label" htmlFor="vol-email">
-                            Email Address <span className="volunteer-required">(required)</span>
+                    <div className="form-field">
+                        <label className="form-label" htmlFor="vol-email">
+                            Email Address <span className="form-required">(required)</span>
                         </label>
-                        <input id="vol-email" type="email" className="volunteer-input"
+                        <input id="vol-email" type="email" className="form-input" autoComplete="email"
                             value={form.email} onChange={e => setField('email', e.target.value)} />
                     </div>
 
                     {/* Phone */}
-                    <div className="volunteer-field">
-                        <label className="volunteer-label" htmlFor="vol-phone">
-                            Phone <span className="volunteer-required">(required)</span>
+                    <div className="form-field">
+                        <label className="form-label" htmlFor="vol-phone">
+                            Phone <span className="form-required">(required)</span>
                         </label>
-                        <input id="vol-phone" type="tel" className="volunteer-input"
+                        <input id="vol-phone" type="tel" className="form-input" autoComplete="tel"
                             value={form.phone} onChange={e => setField('phone', e.target.value)} />
                     </div>
 
                     {/* Contact Times */}
-                    <fieldset className="volunteer-fieldset">
-                        <legend className="volunteer-legend">
-                            When is a good time to reach you? <span className="volunteer-required">(required)</span>
+                    <fieldset className="form-fieldset">
+                        <legend className="form-sublegend">
+                            When is a good time to reach you? <span className="form-required">(required)</span>
                         </legend>
                         {CONTACT_TIMES.map(time => (
-                            <label key={time} className="volunteer-checkbox-label">
+                            <label key={time} className="form-choice">
                                 <input
                                     type="checkbox"
-                                    className="volunteer-checkbox"
+                                    className="form-checkbox"
                                     checked={form.contactTimes.includes(time)}
                                     onChange={() => toggleCheckbox('contactTimes', time)}
                                 />
@@ -180,15 +161,15 @@ const VolunteerSection = ({
 
                     {/* Volunteer Opportunities */}
                     {opportunities.length > 0 && (
-                        <fieldset className="volunteer-fieldset" {...inspectorProps({ fieldId: 'volunteerOpportunities' })}>
-                            <legend className="volunteer-legend">
+                        <fieldset className="form-fieldset" {...inspectorProps({ fieldId: 'volunteerOpportunities' })}>
+                            <legend className="form-sublegend">
                                 Which volunteer opportunities are you interested in?
                             </legend>
                             {opportunities.map(label => (
-                                <label key={label} className="volunteer-checkbox-label">
+                                <label key={label} className="form-choice">
                                     <input
                                         type="checkbox"
-                                        className="volunteer-checkbox"
+                                        className="form-checkbox"
                                         checked={form.opportunities.includes(label)}
                                         onChange={() => toggleCheckbox('opportunities', label)}
                                     />
@@ -200,18 +181,18 @@ const VolunteerSection = ({
 
                     {/* Availability */}
                     {shifts.length > 0 && (
-                        <fieldset className="volunteer-fieldset" {...inspectorProps({ fieldId: 'availabilityShifts' })}>
-                            <legend className="volunteer-legend">What's your availability?</legend>
+                        <fieldset className="form-fieldset" {...inspectorProps({ fieldId: 'availabilityShifts' })}>
+                            <legend className="form-sublegend">What's your availability?</legend>
                             {availabilityHint && (
-                                <p className="volunteer-field-hint" {...inspectorProps({ fieldId: 'availabilityHint' })}>
+                                <p className="form-hint" {...inspectorProps({ fieldId: 'availabilityHint' })}>
                                     {availabilityHint}
                                 </p>
                             )}
                             {shifts.map(label => (
-                                <label key={label} className="volunteer-checkbox-label">
+                                <label key={label} className="form-choice">
                                     <input
                                         type="checkbox"
-                                        className="volunteer-checkbox"
+                                        className="form-checkbox"
                                         checked={form.availability.includes(label)}
                                         onChange={() => toggleCheckbox('availability', label)}
                                     />
@@ -222,19 +203,19 @@ const VolunteerSection = ({
                     )}
 
                     {/* Languages */}
-                    <div className="volunteer-field">
-                        <label className="volunteer-label" htmlFor="vol-languages">Languages Spoken</label>
-                        <input id="vol-languages" type="text" className="volunteer-input"
+                    <div className="form-field">
+                        <label className="form-label" htmlFor="vol-languages">Languages Spoken</label>
+                        <input id="vol-languages" type="text" className="form-input"
                             value={form.languages} onChange={e => setField('languages', e.target.value)} />
                     </div>
 
                     {/* Student */}
                     {studentOpts.length > 0 && (
-                        <div className="volunteer-field" {...inspectorProps({ fieldId: 'studentOptions' })}>
-                            <label className="volunteer-label" htmlFor="vol-student">
+                        <div className="form-field" {...inspectorProps({ fieldId: 'studentOptions' })}>
+                            <label className="form-label" htmlFor="vol-student">
                                 Are you currently a student?
                             </label>
-                            <select id="vol-student" className="volunteer-select"
+                            <select id="vol-student" className="form-select"
                                 value={form.isStudent} onChange={e => setField('isStudent', e.target.value)}>
                                 <option value="">Select an option</option>
                                 {studentOpts.map(opt => (
@@ -244,11 +225,11 @@ const VolunteerSection = ({
                         </div>
                     )}
 
-                    {error && <p className="volunteer-error">{error}</p>}
+                    {error && <p className="form-error" role="alert">{error}</p>}
 
                     <button
                         type="submit"
-                        className="button primary-button volunteer-submit"
+                        className="button primary-button form-submit"
                         disabled={isLoading}
                     >
                         {isLoading ? 'Submitting…' : 'Submit Application'}

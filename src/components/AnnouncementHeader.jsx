@@ -1,38 +1,17 @@
-import { useState, useEffect } from 'react';
 import { useContentfulInspectorMode } from '@contentful/live-preview/react';
+import { isWithinWindow } from '@/utils/contentful';
 import ReactMarkdown from 'react-markdown'
 import Icon from './Icon';
 
 const AnnouncementHeader = ({ text, linkUrl, linkText, startDate, endDate, isActive, entryId }) => {
-    const [isVisible, setIsVisible] = useState(false);
     const inspectorProps = useContentfulInspectorMode({ entryId });
 
-    useEffect(() => {
-        if (!isActive || !text) {
-            setIsVisible(false);
-            return;
-        }
+    // Plain derivation rather than state + an effect: this is a pure function of
+    // the props, and the effect version rendered one frame hidden before
+    // correcting itself.
+    const isVisible = Boolean(isActive && text) && isWithinWindow(startDate, endDate);
 
-        const now = new Date();
-        const start = startDate ? new Date(startDate) : null;
-        const end = endDate ? new Date(endDate) : null;
-
-        let shouldShow = true;
-        if (start && now < start) {
-            shouldShow = false; // Start date is in the future
-        }
-        if (end && now > end) {
-            shouldShow = false; // End date has passed
-        }
-
-        setIsVisible(shouldShow);
-
-    }, [text, linkUrl, linkText, startDate, endDate, isActive]); // Re-check if props change
-
-
-    if (!isVisible) {
-        return null; // Don't render anything if not active or outside date range
-    }
+    if (!isVisible) return null;
 
     return (
         // <aside> makes the bar a complementary landmark; it previously sat

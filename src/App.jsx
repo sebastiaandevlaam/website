@@ -3,6 +3,8 @@ import { useContentfulLiveUpdates } from '@contentful/live-preview/react';
 
 //import styles
 import './App.css'
+// After App.css: these rules intentionally override the generic .container.
+import './styles/forms.css'
 
 //import components
 import SectionRenderer from './components/SectionRenderer';
@@ -11,6 +13,7 @@ import Footer from './components/Footer';
 import AnnouncementHeader from './components/AnnouncementHeader';
 import NewsPostSection from './components/NewsPostSection';
 import NotFoundSection from './components/NotFoundSection';
+import SectionErrorBoundary from './components/SectionErrorBoundary';
 
 import { useContentfulData } from './hooks/useContentfulData';
 
@@ -87,10 +90,13 @@ function App() {
                 </div>
             );
         }
+        // The SDK message can name internal hosts and request details, which
+        // helps nobody who is looking at this page. Log it, show a sentence.
+        console.error('Error loading Contentful content:', error);
         return (
             <Main>
                 <p role="alert" style={{ padding: '2rem', color: 'var(--pantry-red)' }}>
-                    Error loading content: {error.message}
+                    Sorry, this page could not be loaded right now. Please try again shortly.
                 </p>
             </Main>
         );
@@ -176,16 +182,21 @@ function App() {
             {sharedHeader}
             <Main>
                 {pageData.sections?.map((section, i) => {
-                    section.fields.contentType = section.sys.contentType.sys.id
+                    // Was `section.fields.contentType = …` — assigning into the
+                    // Contentful response mid-render, which mutates the object
+                    // live preview also holds. Pass it as a prop instead.
+                    const contentType = section.sys?.contentType?.sys?.id;
                     return (
-                        <SectionRenderer
-                            key={section.sys.id}
-                            entryId={section.sys.id}
-                            section={section.fields}
-                            titleTag={!hasHero && i === 0 ? 'h1' : 'h2'}
-                            sitePhone={siteSettings.defaultContactPhone}
-                            siteEmail={siteSettings.defaultContactEmail}
-                        />
+                        <SectionErrorBoundary key={section.sys.id} contentType={contentType}>
+                            <SectionRenderer
+                                entryId={section.sys.id}
+                                contentType={contentType}
+                                section={section.fields}
+                                titleTag={!hasHero && i === 0 ? 'h1' : 'h2'}
+                                sitePhone={siteSettings.defaultContactPhone}
+                                siteEmail={siteSettings.defaultContactEmail}
+                            />
+                        </SectionErrorBoundary>
                     )
                 })}
             </Main>

@@ -53,4 +53,16 @@ export default [
       'react-refresh/only-export-components': 'off',
     },
   },
+  // The tests next to them are ESM, and run under Node with vitest's globals.
+  {
+    files: ['**/*.test.{js,jsx}', 'vitest.config.js'],
+    languageOptions: {
+      ecmaVersion: 2022,
+      sourceType: 'module',
+      globals: { ...globals.node, ...globals.browser },
+    },
+    rules: {
+      'react-refresh/only-export-components': 'off',
+    },
+  },
 ]

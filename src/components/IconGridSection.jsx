@@ -2,21 +2,20 @@ import { useContentfulInspectorMode } from '@contentful/live-preview/react'
 import ButtonLink from './ButtonLink';
 import CardComponent from './CardComponent';
 import Icon from './Icon';
+import { backgroundClass, sectionId } from '@/utils/contentful';
 
 const IconGridSection = ({ sectionIcon, title, leadParagraph, gridItems, optionalBottomButton, backgroundStyle, entryId, titleTag }) => {
     const TitleTag = titleTag || 'h2';
     const optionalBottomButtonId = optionalBottomButton?.sys?.id
     optionalBottomButton = optionalBottomButton?.fields
-    const bgClass = backgroundStyle === "Beige Background" ? "bg-beige" : "bg-default";
+    const bgClass = backgroundClass(backgroundStyle);
     const gridColsClass = gridItems?.length === 2 ? 'grid-cols-md-2' : 'grid-cols-md-3';
-    const sectionId = optionalBottomButton?.url?.startsWith('#') ? optionalBottomButton.url.substring(1)
-                    : title ? title.toLowerCase().replace(/\s+/g, '-')
-                    : 'icon-grid';
+    const id = sectionId(optionalBottomButton?.url, title, 'icon-grid');
 
     const inspectorProps = useContentfulInspectorMode({ entryId });
 
     return (
-        <section className={`icon-grid-section ${bgClass}`} id={sectionId}>
+        <section className={`icon-grid-section ${bgClass}`} id={id}>
             <div className="container">
                 {sectionIcon && <Icon name={sectionIcon} className="section-icon" />}
                 <TitleTag className="section-title" {...inspectorProps({ fieldId: 'title' })}>{title}</TitleTag>

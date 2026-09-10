@@ -1,0 +1,266 @@
+/* Google Fonts Import */
+@import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@700;800&family=Open+Sans:wght@400;700&display=swap');
+
+/* CSS Custom Properties (Variables) for Colors */
+:root {
+    --pantry-red: #A00405;
+    --pantry-beige: #F0EAD6;
+    --pantry-gold: #C19A6B;
+    /* Decorative tan only — 2.59:1 on white, never use for text or UI borders */
+    --pantry-gold-dark: #8A6134;
+    /* Accessible tan: 5.47:1 on white, 4.54:1 on beige — text, links, focus rings */
+    --pantry-gold-darker: #6E4D29;
+    /* Hover/active variant: 7.62:1 on white */
+    --pantry-text: #4A4A4A;
+    --pantry-text-muted: #666666;
+    /* De-emphasised copy: 5.74:1 on white, 4.77:1 on beige. Use instead of
+       fading --pantry-text with opacity, which drops below 4.5:1. */
+    --pantry-bg: #FAF8F0;
+    --white: #FFFFFF;
+    --gray-100: #f3f4f6;
+    /* For hover states */
+    --gray-300: #d1d5db;
+    /* Footer text */
+    --shadow-color: rgba(0, 0, 0, 0.1);
+    --shadow-color-lg: rgba(0, 0, 0, 0.15);
+    --announcement-bg: var(--pantry-gold-dark);
+    /* Announcement background */
+    --announcement-text: var(--white);
+    /* Announcement text color */
+
+}
+
+/* Basic Reset & Body Styles */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: 'Open Sans', sans-serif;
+    /* Body font */
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--pantry-text);
+    background-color: var(--pantry-bg);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Headings Font */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-family: 'Nunito Sans', sans-serif;
+    /* Header font */
+    color: var(--pantry-red);
+    line-height: 1.3;
+    margin-bottom: 0.75em;
+}
+
+h1 {
+    font-size: 2.5rem;
+    font-weight: 800;
+}
+
+h2,
+h1.section-title {
+    /* A section title promoted to <h1> (pages with no hero) keeps h2 sizing,
+       so correcting the outline changes nothing visually. */
+    font-size: 2rem;
+    font-weight: 700;
+}
+
+h3 {
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
+/* Paragraph styling */
+p {
+    margin-bottom: 1rem;
+}
+
+p.lead {
+    font-size: 1.125rem;
+    line-height: 1.7;
+}
+
+/* Links */
+a {
+    color: var(--pantry-gold-dark);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+a:hover {
+    text-decoration: underline;
+    color: var(--pantry-red);
+}
+
+.link-subtle {
+    color: var(--pantry-gold-dark);
+    font-weight: 700;
+}
+
+.link-subtle:hover {
+    text-decoration: underline;
+    color: var(--pantry-gold-darker);
+}
+
+.link-subtle .lucide {
+    /* Style icon within link */
+    display: inline-block;
+    margin-left: 0.25rem;
+    height: 1em;
+    /* Adjust size relative to font */
+    width: 1em;
+    vertical-align: middle;
+}
+
+
+/* Skip link — off-screen until it takes focus (WCAG 2.4.1). Not display:none,
+   which would take it out of the tab order entirely. */
+.skip-link {
+    position: absolute;
+    top: 0;
+    left: -9999px;
+    z-index: 1000;
+    padding: 0.75rem 1.5rem;
+    background-color: var(--pantry-red);
+    color: var(--white);
+    font-weight: 700;
+    border-bottom-right-radius: 0.5rem;
+}
+
+.skip-link:focus {
+    left: 0;
+    color: var(--white);
+    text-decoration: none;
+    outline: 3px solid var(--pantry-gold-dark);
+    outline-offset: 2px;
+}
+
+/* The skip link's target is a container, not a control — no focus ring needed
+   when it receives focus programmatically. */
+main:focus {
+    outline: none;
+}
+
+/* Container */
+.container {
+    max-width: 1140px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+}
+
+/* Buttons */
+.button {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    font-weight: 700;
+    font-family: 'Open Sans', sans-serif;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease, opacity 0.3s ease, box-shadow 0.3s ease;
+    border: none;
+    box-shadow: 0 4px 6px -1px var(--shadow-color), 0 2px 4px -2px var(--shadow-color);
+}
+
+.button:hover {
+    text-decoration: none;
+    opacity: 0.9;
+    box-shadow: 0 10px 15px -3px var(--shadow-color), 0 4px 6px -2px var(--shadow-color);
+}
+
+.button.primary-button {
+    background-color: var(--pantry-gold-dark);
+    color: var(--white);
+}
+
+/* Darken on hover rather than fading via .button:hover's opacity — compositing
+   the tan at 0.9 over a light page drops white-on-tan back below 4.5:1. */
+.button.primary-button:hover {
+    background-color: var(--pantry-gold-darker);
+    color: var(--white);
+    opacity: 1;
+}
+
+.button.secondary-button {
+    background-color: var(--white);
+    color: var(--pantry-red);
+}
+
+.button.secondary-button:hover {
+    background-color: var(--gray-100);
+    color: var(--pantry-red);
+}
+
+/* Nav button variant */
+.button.nav-contact-button {
+    padding: 0.5rem 1rem;
+    box-shadow: 0 2px 4px -1px var(--shadow-color);
+    /* Lighter shadow */
+}
+
+.button.nav-contact-button:hover {
+    box-shadow: 0 4px 6px -1px var(--shadow-color), 0 2px 4px -2px var(--shadow-color);
+}
+
+.announcement-header {
+    background-color: var(--announcement-bg);
+    color: var(--announcement-text);
+    padding: 0.75rem 1.5rem;
+    text-align: center;
+    font-size: 0.95rem;
+    font-weight: 600; /* Semibold Open Sans */
+    position: relative; /* Optional: for potential close button */
+    z-index: 60; /* Above header */
+}
+.announcement-header p {
+    margin-bottom: 0; /* Remove default margin */
+    display: inline; /* Keep icon and text inline */
+}
+.announcement-header .announcement-text {
+    /* Block-level element (it wraps a <p>) rendered inline so the bar keeps
+       its single-line icon + text + link layout. */
+    display: inline;
+}
+.announcement-header .icon { /* Style icon */
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 0.5rem;
+    height: 1.2em; /* Size relative to font */
+    width: 1.2em;
+    /* Optional: Adjust position slightly */
+    position: relative;
+    top: -1px;
+}
+.announcement-header a {
+    color: var(--announcement-text);
+    text-decoration: underline;
+    font-weight: 700; /* Bold */
+    margin-left: 0.5rem; /* Space before link */
+    transition: opacity 0.3s ease;
+}
+.announcement-header a:hover {
+    /* Thicken the underline instead of fading — opacity 0.85 over the tan bar
+       drops white text to 4.46:1, just under the 4.5:1 minimum. */
+    opacity: 1;
+    text-decoration-thickness: 2px;
+    color: var(--announcement-text); /* Keep color on hover */
+}

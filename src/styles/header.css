@@ -1,0 +1,145 @@
+/* Site header and mobile navigation */
+
+/* Header */
+.header {
+    background-color: var(--white);
+    box-shadow: 0 4px 6px -1px var(--shadow-color), 0 2px 4px -2px var(--shadow-color);
+    position: sticky;
+    top: 0;
+    z-index: 50;
+}
+
+.header nav {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+}
+
+.header .logo {
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    font-size: clamp(1.5rem, 5vw, 6rem);
+    font-weight: 800;
+    font-family: 'Nunito Sans', sans-serif;
+    color: var(--pantry-red);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.header .logo-text {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.header .logo-tagline {
+    font-size: clamp(1.1rem, 2.2vw, 1.9rem);
+    font-weight: 400;
+    font-style: italic;
+    color: var(--pantry-text);
+    white-space: nowrap;
+    margin-top: -0.75em;
+}
+
+.header .logo img.logo-image {
+    height: clamp(50px, 10vw, 150px);
+    width: auto;
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: clamp(0.5rem, 2vw, 2rem);
+    flex-shrink: 0;
+}
+
+.header .logo:hover {
+    color: var(--pantry-gold-dark);
+    text-decoration: none;
+}
+
+.header .nav-links-desktop {
+    display: none;
+    list-style: none;
+    padding-left: 0;
+    flex-wrap: nowrap;
+    align-items: center;
+    white-space: nowrap;
+}
+
+.header .nav-links-desktop li {
+    margin-left: 1.5rem;
+}
+
+.header .nav-links-desktop a:not(.button) {
+    color: var(--pantry-text);
+    text-decoration: none;
+    transition: color 0.3s ease;
+    font-weight: 600;
+    font-size: clamp(1rem, 1.5vw, 1.5rem);
+}
+
+.header .nav-links-desktop a:not(.button):hover {
+    color: var(--pantry-red);
+    text-decoration: none;
+}
+
+.header .mobile-menu-button {
+    display: block;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--pantry-text);
+    order: -1; /* places hamburger before the logo in the flex row */
+    margin-right: auto; /* pushes logo to the right */
+}
+
+.header .mobile-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    background-color: var(--white);
+    box-shadow: 0 4px 6px -1px var(--shadow-color);
+    padding: 0.5rem 0;
+    z-index: 40;
+}
+
+.header .mobile-menu.open {
+    display: block;
+}
+
+.header .mobile-menu ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.header .mobile-menu li {
+    width: 100%;
+    text-align: center;
+}
+
+.header .mobile-menu a {
+    display: block;
+    padding: 0.75rem 1rem;
+    font-size: 1.125rem;
+    color: var(--pantry-text);
+    text-decoration: none;
+    width: 100%;
+    transition: background-color 0.2s ease;
+}
+
+.header .mobile-menu a:hover {
+    background-color: var(--gray-100);
+    text-decoration: none;
+}
+
+.header .mobile-menu a.mobile-contact-link {
+    font-weight: 700;
+    color: var(--pantry-red);
+}

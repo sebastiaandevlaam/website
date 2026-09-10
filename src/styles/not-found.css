@@ -1,0 +1,28 @@
+/* 404 section */
+
+/* Not Found Section */
+.not-found-section {
+    padding: 6rem 0;
+    text-align: center;
+}
+
+.not-found-container {
+    max-width: 36rem;
+}
+
+.not-found-icon {
+    height: 4rem;
+    width: 4rem;
+    color: var(--pantry-red);
+    margin: 0 auto 1.5rem;
+    display: block;
+}
+
+.not-found-title {
+    margin-bottom: 1rem;
+}
+
+.not-found-message {
+    margin-bottom: 2rem;
+    color: var(--pantry-text);
+}
