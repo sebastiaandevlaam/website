@@ -8,6 +8,14 @@ const FUNCTIONS_BASE_URL = import.meta.env.VITE_FUNCTIONS_BASE_URL;
 // Structural choices that describe how children's clothing is sized, not
 // editorial ones — these stay in code like the volunteer form's contact times.
 const SIZE_TYPES = ['Youth', 'Adult'];
+// Field name, input id and label are listed explicitly rather than derived
+// from one another — deriving them silently renamed the shoes input.
+const SIZE_FIELDS = [
+    { field: 'shirtSize', id: 'shirt', label: 'Shirt' },
+    { field: 'pantsSize', id: 'pants', label: 'Pants' },
+    { field: 'dressSize', id: 'dress', label: 'Dress' },
+    { field: 'shoeSize', id: 'shoes', label: 'Shoes' },
+];
 const WISHES_PER_CHILD = 3;
 
 // Matches the four child blocks on the paper form; raise it in Contentful
@@ -44,6 +52,11 @@ const EMPTY_FAMILY = {
 
 // Grow or shrink the child list to `count`, keeping whatever the family has
 // already typed for the children that survive the change.
+// Contentful long-text fields often arrive with leading/trailing blank lines.
+// Trimming keeps react-markdown from emitting empty paragraphs around the real
+// content, which read as unexplained gaps on the live site.
+const md = (value) => String(value ?? '').trim();
+
 const resizeChildren = (children, count) =>
     Array.from({ length: count }, (_, i) => children[i] || { ...EMPTY_CHILD, wishes: Array(WISHES_PER_CHILD).fill('') });
 
@@ -225,7 +238,7 @@ const OperationMittenSection = ({
                     {title && <TitleTag className="section-title" {...inspectorProps({ fieldId: 'title' })}>{title}</TitleTag>}
                     <div className="mitten-closed markdown-content" {...inspectorProps({ fieldId: 'closedMessage' })}>
                         <ReactMarkdown>
-                            {closedMessage || 'Sign-ups for Operation Mitten are closed right now. Please check back next season.'}
+                            {md(closedMessage) || 'Sign-ups for Operation Mitten are closed right now. Please check back next season.'}
                         </ReactMarkdown>
                     </div>
                 </div>
@@ -246,7 +259,7 @@ const OperationMittenSection = ({
                         </h2>
                         {successBody && (
                             <div className="markdown-content" {...inspectorProps({ fieldId: 'successBody' })}>
-                                <ReactMarkdown>{successBody}</ReactMarkdown>
+                                <ReactMarkdown>{md(successBody)}</ReactMarkdown>
                             </div>
                         )}
                     </div>
@@ -264,13 +277,13 @@ const OperationMittenSection = ({
 
                 {introText && (
                     <div className="markdown-content mitten-intro" {...inspectorProps({ fieldId: 'introText' })}>
-                        <ReactMarkdown>{introText}</ReactMarkdown>
+                        <ReactMarkdown>{md(introText)}</ReactMarkdown>
                     </div>
                 )}
 
                 {eligibilityNote && (
                     <div className="mitten-callout markdown-content" {...inspectorProps({ fieldId: 'eligibilityNote' })}>
-                        <ReactMarkdown>{eligibilityNote}</ReactMarkdown>
+                        <ReactMarkdown>{md(eligibilityNote)}</ReactMarkdown>
                     </div>
                 )}
 
@@ -420,39 +433,23 @@ const OperationMittenSection = ({
                                     </div>
                                 </div>
 
-                                {/* Sizes */}
+                                {/* Sizes — sizes are one or two characters, so they all fit on
+                                    one row with the youth/adult choice beside them. */}
                                 <fieldset className="mitten-subfieldset">
-                                    <legend className="mitten-sublegend">Sizes</legend>
-                                    <p className="mitten-hint">
-                                        Please be as specific as you can &mdash; these are used to buy clothing that fits.
-                                    </p>
-                                    <div className="mitten-size-grid">
-                                        <div className="mitten-field">
-                                            <label className="mitten-label" htmlFor={id('shirt')}>Shirt</label>
-                                            <input id={id('shirt')} type="text" className="mitten-input"
-                                                value={child.shirtSize}
-                                                onChange={e => setChildField(index, 'shirtSize', e.target.value)} />
-                                        </div>
-                                        <div className="mitten-field">
-                                            <label className="mitten-label" htmlFor={id('pants')}>Pants</label>
-                                            <input id={id('pants')} type="text" className="mitten-input"
-                                                value={child.pantsSize}
-                                                onChange={e => setChildField(index, 'pantsSize', e.target.value)} />
-                                        </div>
-                                        <div className="mitten-field">
-                                            <label className="mitten-label" htmlFor={id('dress')}>Dress</label>
-                                            <input id={id('dress')} type="text" className="mitten-input"
-                                                value={child.dressSize}
-                                                onChange={e => setChildField(index, 'dressSize', e.target.value)} />
-                                        </div>
-                                        <div className="mitten-field">
-                                            <label className="mitten-label" htmlFor={id('shoes')}>Shoes</label>
-                                            <input id={id('shoes')} type="text" className="mitten-input"
-                                                value={child.shoeSize}
-                                                onChange={e => setChildField(index, 'shoeSize', e.target.value)} />
-                                        </div>
-                                        <div className="mitten-field">
-                                            <label className="mitten-label" htmlFor={id('size-type')}>Youth or adult sizes</label>
+                                    <legend className="mitten-sublegend">
+                                        Sizes <span className="mitten-legend-hint">&mdash; as specific as you can, these buy clothes that fit</span>
+                                    </legend>
+                                    <div className="mitten-size-row">
+                                        {SIZE_FIELDS.map(({ field, id: sizeId, label }) => (
+                                            <div key={field} className="mitten-size-item">
+                                                <label className="mitten-label" htmlFor={id(sizeId)}>{label}</label>
+                                                <input id={id(sizeId)} type="text" className="mitten-input mitten-size-input"
+                                                    value={child[field]}
+                                                    onChange={e => setChildField(index, field, e.target.value)} />
+                                            </div>
+                                        ))}
+                                        <div className="mitten-size-item mitten-size-type">
+                                            <label className="mitten-label" htmlFor={id('size-type')}>Youth / adult</label>
                                             <select id={id('size-type')} className="mitten-select"
                                                 value={child.sizeType}
                                                 onChange={e => setChildField(index, 'sizeType', e.target.value)}>
@@ -465,36 +462,38 @@ const OperationMittenSection = ({
                                     </div>
                                 </fieldset>
 
-                                <div className="mitten-field">
-                                    <label className="mitten-label" htmlFor={id('clothing')}>
-                                        Preferred article(s) of clothing
-                                    </label>
-                                    <input id={id('clothing')} type="text" className="mitten-input"
-                                        placeholder="e.g. hoodies, leggings, warm socks"
-                                        value={child.clothingPreference}
-                                        onChange={e => setChildField(index, 'clothingPreference', e.target.value)} />
-                                </div>
-
-                                {/* Favourite colour */}
-                                {colors.length > 0 && (
-                                    <div className="mitten-field" {...inspectorProps({ fieldId: 'colorOptions' })}>
-                                        <label className="mitten-label" htmlFor={id('color')}>Favorite color</label>
-                                        <select id={id('color')} className="mitten-select"
-                                            value={child.favoriteColor}
-                                            onChange={e => setChildField(index, 'favoriteColor', e.target.value)}>
-                                            <option value="">Select</option>
-                                            {colors.map(option => (
-                                                <option key={option} value={option}>{option}</option>
-                                            ))}
-                                        </select>
+                                {/* Clothing preference and favourite colour share a row */}
+                                <div className="mitten-grid">
+                                    <div className="mitten-field">
+                                        <label className="mitten-label" htmlFor={id('clothing')}>
+                                            Preferred article(s) of clothing
+                                        </label>
+                                        <input id={id('clothing')} type="text" className="mitten-input"
+                                            placeholder="e.g. hoodies, leggings"
+                                            value={child.clothingPreference}
+                                            onChange={e => setChildField(index, 'clothingPreference', e.target.value)} />
                                     </div>
-                                )}
+                                    {colors.length > 0 && (
+                                        <div className="mitten-field" {...inspectorProps({ fieldId: 'colorOptions' })}>
+                                            <label className="mitten-label" htmlFor={id('color')}>Favorite color</label>
+                                            <select id={id('color')} className="mitten-select"
+                                                value={child.favoriteColor}
+                                                onChange={e => setChildField(index, 'favoriteColor', e.target.value)}>
+                                                <option value="">Select</option>
+                                                {colors.map(option => (
+                                                    <option key={option} value={option}>{option}</option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                    )}
+                                </div>
 
                                 {/* Interests */}
                                 {interests.length > 0 && (
                                     <fieldset className="mitten-subfieldset" {...inspectorProps({ fieldId: 'interestOptions' })}>
-                                        <legend className="mitten-sublegend">Favorite activities or interests</legend>
-                                        <p className="mitten-hint">Select all that apply.</p>
+                                        <legend className="mitten-sublegend">
+                                            Favorite activities or interests <span className="mitten-legend-hint">&mdash; select all that apply</span>
+                                        </legend>
                                         <div className="mitten-checkbox-grid">
                                             {interests.map(option => (
                                                 <label key={option} className="mitten-choice">
@@ -540,18 +539,20 @@ const OperationMittenSection = ({
                                 <fieldset className="mitten-subfieldset">
                                     <legend className="mitten-sublegend">
                                         Specific books, games, toys or gift cards this child would like
+                                        <span className="mitten-legend-hint"> &mdash; up to {WISHES_PER_CHILD}</span>
                                     </legend>
-                                    <p className="mitten-hint">Up to {WISHES_PER_CHILD} items.</p>
-                                    {child.wishes.map((wish, wishIndex) => (
-                                        <div key={wishIndex} className="mitten-field">
-                                            <label className="mitten-label" htmlFor={id(`wish-${wishIndex + 1}`)}>
-                                                Item {wishIndex + 1}
-                                            </label>
-                                            <input id={id(`wish-${wishIndex + 1}`)} type="text" className="mitten-input"
+                                    {/* Three near-identical labels would cost a row each, so the
+                                        number lives in the placeholder and the accessible name. */}
+                                    <div className="mitten-wish-list">
+                                        {child.wishes.map((wish, wishIndex) => (
+                                            <input key={wishIndex} id={id(`wish-${wishIndex + 1}`)}
+                                                type="text" className="mitten-input"
+                                                placeholder={`Item ${wishIndex + 1}`}
+                                                aria-label={`Gift idea ${wishIndex + 1} for child ${index + 1}`}
                                                 value={wish}
                                                 onChange={e => setWish(index, wishIndex, e.target.value)} />
-                                        </div>
-                                    ))}
+                                        ))}
+                                    </div>
                                 </fieldset>
                             </fieldset>
                         );
@@ -559,7 +560,7 @@ const OperationMittenSection = ({
 
                     {pickupInformation && (
                         <div className="mitten-callout markdown-content" {...inspectorProps({ fieldId: 'pickupInformation' })}>
-                            <ReactMarkdown>{pickupInformation}</ReactMarkdown>
+                            <ReactMarkdown>{md(pickupInformation)}</ReactMarkdown>
                         </div>
                     )}
 
