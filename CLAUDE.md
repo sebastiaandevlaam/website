@@ -125,6 +125,10 @@ Required env vars on the function:
 
 Sheet writing is shared with donations via `getSheetsClient()`, `appendSheetRows()` and `ensureHeaderRow(sheets, id, header)` in `functions/index.js`. `ensureHeaderRow` writes the header only when the sheet is empty and derives its range from the header length, so it works for both sheets.
 
+**Why appended rows are explicitly un-bolded.** `values.append` inherits formatting from the row above, so a bold header row makes row 2 bold, row 3 then inherits from row 2, and every future row is bold. `appendSheetRows` therefore issues a `repeatCell` clearing `bold` on exactly the range it just wrote, which breaks the chain at the first link and leaves the next append inheriting from a plain row. On a sheet it creates the header for, `ensureHeaderRow` also bolds and freezes row 1 so a new sheet needs no manual styling; existing sheets keep whatever styling they have. Both formatting steps are wrapped in `try`/`catch` — the row is already safely written by then, and cosmetics must never fail a submission. `batchUpdate` addresses tabs by numeric id rather than name, so `getSheetGridId()` looks it up and caches it per warm instance.
+
+Both of these apply to the donations sheet too, since the helpers are shared.
+
 **Contentful setup required** — content type `sectionOperationMitten`:
 
 - `title` (Short text)
