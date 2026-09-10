@@ -2110,3 +2110,292 @@ section.bg-default {
         grid-template-columns: 1fr;
     }
 }
+
+/* Operation Mitten Section */
+/* Shares the volunteer form's field styling, plus a repeating card per child.
+   The muted/darker tokens fall back to accessible literals so this block reads
+   the same whether or not the contrast variables are defined yet. */
+.mitten-container {
+    max-width: 48rem;
+}
+
+.mitten-intro {
+    margin-bottom: 1.5rem;
+    font-size: 1.125rem;
+    line-height: 1.7;
+}
+
+.mitten-callout {
+    border-left: 4px solid var(--pantry-red);
+    background-color: var(--white);
+    border-radius: 0 0.375rem 0.375rem 0;
+    padding: 1rem 1.25rem;
+    margin-bottom: 2rem;
+}
+
+.mitten-callout p {
+    font-size: 1rem;
+    line-height: 1.65;
+    margin-bottom: 0.5rem;
+}
+
+.mitten-callout p:last-child {
+    margin-bottom: 0;
+}
+
+.mitten-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.mitten-fieldset,
+.mitten-subfieldset {
+    border: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.mitten-legend {
+    font-size: 1.125rem;
+    font-weight: 700;
+    font-family: 'Nunito Sans', sans-serif;
+    color: var(--pantry-red);
+    margin-bottom: 0.25rem;
+    padding: 0;
+}
+
+.mitten-sublegend {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--pantry-text);
+    padding: 0;
+}
+
+.mitten-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+}
+
+.mitten-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.mitten-size-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
+    gap: 1rem;
+}
+
+/* 8rem keeps two columns of interests on a narrow phone rather than dropping
+   to a single very long list. */
+.mitten-checkbox-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
+    gap: 0.5rem 1rem;
+}
+
+.mitten-label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--pantry-text);
+}
+
+.mitten-required {
+    font-weight: 400;
+    color: var(--pantry-text-muted, #666666);
+}
+
+.mitten-hint {
+    font-size: 0.875rem;
+    color: var(--pantry-text-muted, #666666);
+    margin: 0;
+    line-height: 1.5;
+}
+
+.mitten-input,
+.mitten-select {
+    padding: 0.625rem 0.75rem;
+    border: 2px solid var(--pantry-beige);
+    border-radius: 0.375rem;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 1rem;
+    color: var(--pantry-text);
+    background: var(--white);
+    transition: border-color 0.2s ease;
+    width: 100%;
+}
+
+.mitten-input:focus,
+.mitten-select:focus {
+    outline: none;
+    border-color: var(--pantry-gold-dark, #8A6134);
+}
+
+.mitten-select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%234A4A4A' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    padding-right: 2.5rem;
+    cursor: pointer;
+}
+
+.mitten-choice-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem 1.5rem;
+}
+
+.mitten-choice {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    font-size: 1rem;
+    color: var(--pantry-text);
+    cursor: pointer;
+}
+
+.mitten-checkbox,
+.mitten-radio {
+    width: 1.1rem;
+    height: 1.1rem;
+    flex-shrink: 0;
+    accent-color: var(--pantry-red);
+    cursor: pointer;
+}
+
+.mitten-other-field {
+    margin-top: 0.5rem;
+}
+
+/* The child-count select drives how many child cards render, so it is sized
+   to its content rather than stretched across the form. */
+.mitten-count-select {
+    max-width: 8rem;
+}
+
+.mitten-count-field {
+    gap: 0.5rem;
+}
+
+/* One card per child, repeated as many times as the family says */
+.mitten-child-card {
+    border: 2px solid var(--pantry-beige);
+    border-radius: 0.5rem;
+    background-color: var(--white);
+    padding: 1.5rem;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.mitten-child-legend {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    font-family: 'Nunito Sans', sans-serif;
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: var(--pantry-red);
+    padding: 0 0.5rem;
+    margin-left: -0.5rem;
+}
+
+.mitten-child-number {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: 50%;
+    background-color: var(--pantry-red);
+    color: var(--white);
+    font-size: 0.95rem;
+    flex-shrink: 0;
+}
+
+.mitten-error {
+    color: #b91c1c;
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+/* Sits directly under the field that failed validation, which also takes
+   focus on submit — the form is long enough that a message by the submit
+   button alone reads as nothing having happened. */
+.mitten-field-error {
+    color: #b91c1c;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin: 0;
+    line-height: 1.4;
+}
+
+.mitten-input[aria-invalid="true"],
+.mitten-select[aria-invalid="true"] {
+    border-color: #b91c1c;
+    background-color: #fef2f2;
+}
+
+.mitten-input[aria-invalid="true"]:focus,
+.mitten-select[aria-invalid="true"]:focus {
+    border-color: #b91c1c;
+    box-shadow: 0 0 0 3px rgba(185, 29, 29, 0.18);
+}
+
+/* The holiday radios are a group, so the invalid marker goes on the legend
+   rather than a single control. */
+.mitten-radio[aria-invalid="true"] {
+    outline: 2px solid #b91c1c;
+    outline-offset: 2px;
+}
+
+.mitten-submit {
+    align-self: flex-start;
+}
+
+.mitten-closed {
+    background-color: var(--white);
+    border-left: 4px solid var(--pantry-red);
+    border-radius: 0 0.375rem 0.375rem 0;
+    padding: 1.5rem;
+    font-size: 1.0625rem;
+    line-height: 1.7;
+}
+
+.mitten-success {
+    text-align: center;
+    padding: 3rem 0;
+}
+
+.mitten-success-icon {
+    width: 4rem;
+    height: 4rem;
+    border-radius: 50%;
+    background-color: var(--pantry-red);
+    color: var(--white);
+    font-size: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+}
+
+@media (max-width: 560px) {
+    .mitten-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .mitten-child-card {
+        padding: 1.25rem 1rem;
+    }
+}

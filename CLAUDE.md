@@ -46,6 +46,7 @@ Contentful API → useContentfulData (hook) → App.jsx → SectionRenderer → 
 | `sectionIconGrid` | `IconGridSection` |
 | `sectionContact` | `ContactSection` |
 | `sectionVolunteer` | `VolunteerSection` |
+| `sectionOperationMitten` | `OperationMittenSection` |
 
 To add a new section type: create the component, add the mapping in `SectionRenderer.jsx`, and define the content type in Contentful.
 
@@ -108,6 +109,48 @@ All layout uses plain CSS classes — no utility classes, no CSS modules. Add ne
    - `backgroundStyle` (Short text, optional — same values as other sections)
 
 The contact time checkboxes (Morning / Afternoon / Evening) and all field labels are hardcoded. Everything else is Contentful-driven.
+
+## Operation Mitten Form
+
+`OperationMittenSection` is the web version of the paper "Operation Mitten Participation Form" — the holiday gift request families fill in for their children. It submits to the `submitOperationMitten` Cloud Function, which appends the submission to a Google Sheet using the same service-account setup as the donations sheet.
+
+**Key difference from the paper form:** the parent picks the number of children from a dropdown and the child block repeats that many times, instead of the paper form's fixed four. Changing the number preserves anything already filled in for the children that remain.
+
+**Sheet layout — one row per child.** Gift shoppers work child by child, so a submission is flattened: the family columns (shopper #, parent, phones, holiday) repeat on each of that family's rows, tied together by a shared `Submission ID` (e.g. `OM-MVZLG280-XACX`). Column order lives in `functions/operationMittenRow.js` (`OPERATION_MITTEN_HEADER`, 24 columns) — the single source of truth, so never reorder columns in the sheet by hand.
+
+Required env vars on the function:
+
+- `OPERATION_MITTEN_SHEET_ID` — the spreadsheet id for the Operation Mitten sheet
+- `GOOGLE_SERVICE_ACCOUNT_JSON` — already set for donations; share the new sheet with that service account's email as an Editor
+
+Sheet writing is shared with donations via `getSheetsClient()`, `appendSheetRows()` and `ensureHeaderRow(sheets, id, header)` in `functions/index.js`. `ensureHeaderRow` writes the header only when the sheet is empty and derives its range from the header length, so it works for both sheets.
+
+**Why appended rows are explicitly un-bolded.** `values.append` inherits formatting from the row above, so a bold header row makes row 2 bold, row 3 then inherits from row 2, and every future row is bold. `appendSheetRows` therefore issues a `repeatCell` clearing `bold` on exactly the range it just wrote, which breaks the chain at the first link and leaves the next append inheriting from a plain row. On a sheet it creates the header for, `ensureHeaderRow` also bolds and freezes row 1 so a new sheet needs no manual styling; existing sheets keep whatever styling they have. Both formatting steps are wrapped in `try`/`catch` — the row is already safely written by then, and cosmetics must never fail a submission. `batchUpdate` addresses tabs by numeric id rather than name, so `getSheetGridId()` looks it up and caches it per warm instance.
+
+Both of these apply to the donations sheet too, since the helpers are shared.
+
+**Contentful setup required** — content type `sectionOperationMitten`:
+
+- `title` (Short text)
+- `introText` (Long text / Markdown)
+- `eligibilityNote` (Long text / Markdown, optional) — the "18 years or younger" and "complete in English" rules, rendered as a callout
+- `pickupInformation` (Long text / Markdown, optional) — callout below the form
+- `maxChildren` (Integer, optional — defaults to 4, matching the paper form; capped at 12)
+- `genderOptions` (Short text, list — defaults to Boy, Girl)
+- `holidayOptions` (Short text, list — defaults to Christmas, Hanukkah, Other). The literal value `Other` reveals a free-text "Which holiday?" input; that text is what lands in the sheet's Holiday column.
+- `colorOptions` (Short text, list) — favourite colour dropdown; the whole field hides when empty
+- `interestOptions` (Short text, list) — activity checkboxes; the whole fieldset hides when empty
+- `openDate` / `closeDate` (Date & time, both optional) — outside the window the form is replaced by `closedMessage`. Leave both empty and the form is always open.
+- `closedMessage` (Long text / Markdown, optional)
+- `successHeadline` (Short text, optional)
+- `successBody` (Long text / Markdown, optional)
+- `backgroundStyle` (Short text, optional — same values as other sections)
+
+Field labels, the youth/adult size choice, and the three gift-idea slots are hardcoded. Validation requires shopper #, parent first name, phone, holiday, and a gender plus an age of 0–18 for every child; the function re-checks all of it and refuses more than 12 children.
+
+**Validation feedback.** `validate()` returns `{ field, message }` rather than a bare string, where `field` is the id of the input at fault. On a failed submit the form scrolls that field to the centre of the screen, focuses it, marks it `aria-invalid`, and renders the message directly beneath it via `aria-describedby`. This matters because the form runs several screens long — a message next to the submit button alone reads as nothing having happened when the empty field is off-screen above. The summary above the button is therefore only shown for errors with no field to point at, such as a failed request.
+
+**Phone numbers** must be valid US/NANP numbers. The rules live in `src/utils/phone.js` and its server-side twin `functions/phone.js` — the site and the functions deploy separately and cannot import across that boundary, so changing one means changing the other. Any separator is accepted on input (`5085550101`, `508.555.0101`, `+1 508 555 0101`), an area or exchange code starting with 0/1 or ending in `11` is rejected, and a valid number is reformatted to `(508) 555-0101` on blur and again before it reaches the sheet, so every row dials the same way. The additional phone is optional but validated when filled in.
 
 ## Footer
 
