@@ -7,6 +7,7 @@ const {
   buildOperationMittenRows,
   makeSubmissionId,
 } = require('./operationMittenRow');
+const { isValidUsPhone } = require('./phone');
 
 setGlobalOptions({ maxInstances: 10, region: 'us-east1' });
 
@@ -309,6 +310,14 @@ exports.submitOperationMitten = onRequest((req, res) => {
 
     if (!shopperNumber || !parentFirstName || !phone) {
       return res.status(400).json({ error: 'Missing required family details.' });
+    }
+
+    if (!isValidUsPhone(phone)) {
+      return res.status(400).json({ error: 'Please enter a valid US phone number.' });
+    }
+
+    if (submission.additionalPhone && !isValidUsPhone(submission.additionalPhone)) {
+      return res.status(400).json({ error: 'The additional phone number is not a valid US phone number.' });
     }
 
     if (!Array.isArray(children) || children.length === 0) {

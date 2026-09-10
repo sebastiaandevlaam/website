@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { useContentfulInspectorMode } from '@contentful/live-preview/react';
+import { isValidUsPhone, formatUsPhone } from '@/utils/phone';
 
 const FUNCTIONS_BASE_URL = import.meta.env.VITE_FUNCTIONS_BASE_URL;
 
@@ -80,6 +81,9 @@ const OperationMittenSection = ({
     const [isSubmitted, setIsSubmitted] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
+    // Id of the field that failed validation — drives the inline message, the
+    // red border and aria-invalid.
+    const [invalidField, setInvalidField] = useState('');
 
     // The drive runs on a schedule; outside the window the form is replaced by
     // the closed message rather than accepting entries nobody will shop for.
@@ -88,14 +92,32 @@ const OperationMittenSection = ({
     const alreadyClosed = closeDate && now > new Date(closeDate);
     const isClosed = notYetOpen || alreadyClosed;
 
+    // Once the parent starts fixing things, clear the complaint.
+    const clearError = () => { setError(''); setInvalidField(''); };
+
+    // Spread onto an input to mark it as the field at fault.
+    const invalidProps = (id) => (invalidField === id
+        ? { 'aria-invalid': true, 'aria-describedby': `${id}-error` }
+        : {});
+
+    // Inline message rendered directly beneath the offending field.
+    const FieldError = ({ id }) => (invalidField === id
+        ? <p className="mitten-field-error" id={`${id}-error`}>{error}</p>
+        : null);
+
     const setFamilyField = (field, value) => {
         setFamily(prev => ({ ...prev, [field]: value }));
-        setError('');
+        clearError();
     };
+
+    // Tidy a valid number into one shape on blur, so the parent can see we
+    // understood what they typed. Invalid input is left alone for them to fix.
+    const normalizePhoneField = (field) =>
+        setFamily(prev => ({ ...prev, [field]: formatUsPhone(prev[field]) }));
 
     const setChildField = (index, field, value) => {
         setChildren(prev => prev.map((child, i) => (i === index ? { ...child, [field]: value } : child)));
-        setError('');
+        clearError();
     };
 
     const setWish = (index, wishIndex, value) => {
@@ -121,37 +143,60 @@ const OperationMittenSection = ({
 
     const handleChildCountChange = (count) => {
         setChildren(prev => resizeChildren(prev, count));
-        setError('');
+        clearError();
     };
 
+    // Returns the first problem as { field, message }, where `field` is the id
+    // of the input at fault. The form is long enough that a message alone reads
+    // as "nothing happened" — we need to know where to send the user.
     const validate = () => {
-        if (!family.shopperNumber.trim()) return 'Please enter your Shopper number.';
-        if (!family.parentFirstName.trim()) return "Please enter the parent's or guardian's first name.";
-        if (!family.phone.trim()) return 'Please enter a phone number so we can reach you about pick-up.';
-        if (!family.holiday) return 'Please tell us which holiday these gifts are for.';
+        const problem = (field, message) => ({ field, message });
+
+        if (!family.shopperNumber.trim())
+            return problem('mitten-shopper-number', 'Please enter your Shopper number.');
+        if (!family.parentFirstName.trim())
+            return problem('mitten-parent-name', "Please enter the parent's or guardian's first name.");
+        if (!family.phone.trim())
+            return problem('mitten-phone', 'Please enter a phone number so we can reach you about pick-up.');
+        if (!isValidUsPhone(family.phone))
+            return problem('mitten-phone', 'Please enter a valid US phone number, for example (508) 555-0101.');
+        if (family.additionalPhone.trim() && !isValidUsPhone(family.additionalPhone))
+            return problem('mitten-phone-2', 'The additional phone number is not a valid US phone number.');
+        if (!family.holiday)
+            return problem('mitten-holiday-0', 'Please tell us which holiday these gifts are for.');
         if (family.holiday === 'Other' && !family.holidayOther.trim())
-            return 'Please tell us which holiday you celebrate.';
+            return problem('mitten-holiday-other', 'Please tell us which holiday you celebrate.');
 
         for (const [i, child] of children.entries()) {
-            if (!child.gender) return `Please select a gender for child ${i + 1}.`;
-            if (!String(child.age).trim()) return `Please enter an age for child ${i + 1}.`;
+            const childField = (suffix) => `mitten-child-${i + 1}-${suffix}`;
+            if (!child.gender)
+                return problem(childField('gender'), `Please select a gender for child ${i + 1}.`);
+            if (!String(child.age).trim())
+                return problem(childField('age'), `Please enter an age for child ${i + 1}.`);
             const age = Number(child.age);
             if (!Number.isInteger(age) || age < 0 || age > 18)
-                return `Child ${i + 1} must be 18 years or younger to receive gifts.`;
+                return problem(childField('age'), `Child ${i + 1} must be 18 years or younger to receive gifts.`);
         }
         return null;
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const validationError = validate();
-        if (validationError) {
-            setError(validationError);
+        const problem = validate();
+        if (problem) {
+            setError(problem.message);
+            setInvalidField(problem.field);
+            // Scroll first, then focus without a second scroll, so the field
+            // lands mid-screen instead of jammed under the sticky header.
+            const el = document.getElementById(problem.field);
+            el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            el?.focus({ preventScroll: true });
             return;
         }
 
         setIsLoading(true);
         setError('');
+        setInvalidField('');
         try {
             const response = await fetch(`${FUNCTIONS_BASE_URL}/submitOperationMitten`, {
                 method: 'POST',
@@ -241,8 +286,10 @@ const OperationMittenSection = ({
                                     Shopper # <span className="mitten-required">(required)</span>
                                 </label>
                                 <input id="mitten-shopper-number" type="text" className="mitten-input"
+                                    {...invalidProps('mitten-shopper-number')}
                                     value={family.shopperNumber}
                                     onChange={e => setFamilyField('shopperNumber', e.target.value)} />
+                                <FieldError id="mitten-shopper-number" />
                             </div>
 
                             <div className="mitten-field">
@@ -250,8 +297,10 @@ const OperationMittenSection = ({
                                     Parent&rsquo;s / Guardian&rsquo;s First Name <span className="mitten-required">(required)</span>
                                 </label>
                                 <input id="mitten-parent-name" type="text" className="mitten-input"
+                                    {...invalidProps('mitten-parent-name')}
                                     value={family.parentFirstName}
                                     onChange={e => setFamilyField('parentFirstName', e.target.value)} />
+                                <FieldError id="mitten-parent-name" />
                             </div>
 
                             <div className="mitten-field">
@@ -259,8 +308,12 @@ const OperationMittenSection = ({
                                     Phone Number <span className="mitten-required">(required)</span>
                                 </label>
                                 <input id="mitten-phone" type="tel" className="mitten-input"
+                                    inputMode="tel" autoComplete="tel" placeholder="(508) 555-0101"
                                     value={family.phone}
-                                    onChange={e => setFamilyField('phone', e.target.value)} />
+                                    {...invalidProps('mitten-phone')}
+                                    onChange={e => setFamilyField('phone', e.target.value)}
+                                    onBlur={() => normalizePhoneField('phone')} />
+                                <FieldError id="mitten-phone" />
                             </div>
 
                             <div className="mitten-field">
@@ -268,8 +321,12 @@ const OperationMittenSection = ({
                                     Additional Phone Number
                                 </label>
                                 <input id="mitten-phone-2" type="tel" className="mitten-input"
+                                    inputMode="tel" autoComplete="tel" placeholder="(508) 555-0199"
                                     value={family.additionalPhone}
-                                    onChange={e => setFamilyField('additionalPhone', e.target.value)} />
+                                    {...invalidProps('mitten-phone-2')}
+                                    onChange={e => setFamilyField('additionalPhone', e.target.value)}
+                                    onBlur={() => normalizePhoneField('additionalPhone')} />
+                                <FieldError id="mitten-phone-2" />
                             </div>
                         </div>
                     </fieldset>
@@ -280,23 +337,28 @@ const OperationMittenSection = ({
                             Are these gifts for&hellip; <span className="mitten-required">(required)</span>
                         </legend>
                         <div className="mitten-choice-row">
-                            {holidays.map(option => (
+                            {holidays.map((option, i) => (
                                 <label key={option} className="mitten-choice">
                                     <input type="radio" name="mitten-holiday" className="mitten-radio"
+                                        id={`mitten-holiday-${i}`}
+                                        {...(i === 0 ? invalidProps('mitten-holiday-0') : {})}
                                         checked={family.holiday === option}
                                         onChange={() => setFamilyField('holiday', option)} />
                                     {option}
                                 </label>
                             ))}
                         </div>
+                        <FieldError id="mitten-holiday-0" />
                         {family.holiday === 'Other' && (
                             <div className="mitten-field mitten-other-field">
                                 <label className="mitten-label" htmlFor="mitten-holiday-other">
                                     Which holiday? <span className="mitten-required">(required)</span>
                                 </label>
                                 <input id="mitten-holiday-other" type="text" className="mitten-input"
+                                    {...invalidProps('mitten-holiday-other')}
                                     value={family.holidayOther}
                                     onChange={e => setFamilyField('holidayOther', e.target.value)} />
+                                <FieldError id="mitten-holiday-other" />
                             </div>
                         )}
                     </fieldset>
@@ -335,6 +397,7 @@ const OperationMittenSection = ({
                                             Gender <span className="mitten-required">(required)</span>
                                         </label>
                                         <select id={id('gender')} className="mitten-select"
+                                            {...invalidProps(id('gender'))}
                                             value={child.gender}
                                             onChange={e => setChildField(index, 'gender', e.target.value)}>
                                             <option value="">Select</option>
@@ -342,6 +405,7 @@ const OperationMittenSection = ({
                                                 <option key={option} value={option}>{option}</option>
                                             ))}
                                         </select>
+                                        <FieldError id={id('gender')} />
                                     </div>
 
                                     <div className="mitten-field">
@@ -349,8 +413,10 @@ const OperationMittenSection = ({
                                             Age <span className="mitten-required">(required)</span>
                                         </label>
                                         <input id={id('age')} type="number" min="0" max="18" className="mitten-input"
+                                            {...invalidProps(id('age'))}
                                             value={child.age}
                                             onChange={e => setChildField(index, 'age', e.target.value)} />
+                                        <FieldError id={id('age')} />
                                     </div>
                                 </div>
 
@@ -497,7 +563,10 @@ const OperationMittenSection = ({
                         </div>
                     )}
 
-                    {error && <p className="mitten-error" role="alert">{error}</p>}
+                    {/* Field problems are reported inline at the field itself, which
+                        also takes focus — the summary is for everything else,
+                        such as a failed request. */}
+                    {error && !invalidField && <p className="mitten-error" role="alert">{error}</p>}
 
                     <button type="submit" className="button primary-button mitten-submit" disabled={isLoading}>
                         {isLoading ? 'Submitting…' : 'Submit Form'}

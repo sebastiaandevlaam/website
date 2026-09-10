@@ -5,6 +5,8 @@
 // columns (shopper #, parent, phones, holiday) repeat on each of a family's
 // rows, and the Submission ID ties them back together.
 
+const { formatUsPhone } = require('./phone');
+
 const OPERATION_MITTEN_HEADER = [
   'Date (ET)',
   'Submission ID',
@@ -67,8 +69,8 @@ function buildOperationMittenRows(submission, submissionId, submittedAt, formatD
     submissionId,
     clean(submission.shopperNumber),
     clean(submission.parentFirstName),
-    clean(submission.phone),
-    clean(submission.additionalPhone),
+    formatUsPhone(clean(submission.phone)),
+    formatUsPhone(clean(submission.additionalPhone)),
     holiday,
     children.length,
   ];

@@ -2237,6 +2237,36 @@ section.bg-default {
     margin: 0;
 }
 
+/* Sits directly under the field that failed validation, which also takes
+   focus on submit — the form is long enough that a message by the submit
+   button alone reads as nothing having happened. */
+.mitten-field-error {
+    color: #b91c1c;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin: 0;
+    line-height: 1.4;
+}
+
+.mitten-input[aria-invalid="true"],
+.mitten-select[aria-invalid="true"] {
+    border-color: #b91c1c;
+    background-color: #fef2f2;
+}
+
+.mitten-input[aria-invalid="true"]:focus,
+.mitten-select[aria-invalid="true"]:focus {
+    border-color: #b91c1c;
+    box-shadow: 0 0 0 3px rgba(185, 29, 29, 0.18);
+}
+
+/* The holiday radios are a group, so the invalid marker goes on the legend
+   rather than a single control. */
+.mitten-radio[aria-invalid="true"] {
+    outline: 2px solid #b91c1c;
+    outline-offset: 2px;
+}
+
 .mitten-submit {
     align-self: flex-start;
 }
