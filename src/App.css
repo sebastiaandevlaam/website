@@ -2164,18 +2164,25 @@ section.bg-default {
     gap: 1.25rem;
 }
 
+/* These stay display:block and space their children with margins rather than
+   flex + gap. WebKit lays a <fieldset> out through an extra anonymous box, so
+   making one a flex container is a long-standing source of engine-specific
+   spacing differences — the visual result here is identical either way, so
+   there is nothing to gain by risking it. */
 .mitten-fieldset,
 .mitten-subfieldset {
     border: none;
     padding: 0;
     margin: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+    display: block;
 }
 
-.mitten-fieldset {
-    gap: 0.75rem;
+.mitten-subfieldset > * + * {
+    margin-top: 0.5rem;
+}
+
+.mitten-fieldset > * + * {
+    margin-top: 0.75rem;
 }
 
 .mitten-legend {
@@ -2350,11 +2357,21 @@ section.bg-default {
     border: 2px solid var(--pantry-beige);
     border-radius: 0.5rem;
     background-color: var(--white);
-    padding: 1.25rem 1.25rem 1.125rem;
+    padding: 1rem 1.25rem 1.125rem;
     margin: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 0.875rem;
+    display: block;
+}
+
+.mitten-child-card > * + * {
+    margin-top: 0.875rem;
+}
+
+/* A block <fieldset> already leaves room under its legend, so the sibling
+   margin would double the gap. */
+.mitten-child-card > legend + *,
+.mitten-fieldset > legend + *,
+.mitten-subfieldset > legend + * {
+    margin-top: 0;
 }
 
 .mitten-child-legend {
