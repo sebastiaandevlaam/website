@@ -2260,6 +2260,12 @@ section.bg-default {
     gap: 0.5rem 1rem;
 }
 
+/* Colour names are one short word each, so they fit more per row than the
+   interest labels do — keeping the list to two rows rather than three. */
+.mitten-checkbox-grid.mitten-color-grid {
+    grid-template-columns: repeat(auto-fit, minmax(6rem, 1fr));
+}
+
 .mitten-label {
     font-size: 0.9rem;
     font-weight: 600;
