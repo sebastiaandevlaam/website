@@ -381,7 +381,7 @@ const OperationMittenSection = ({
                     {/* Number of children — drives how many child blocks render */}
                     <div className="mitten-field mitten-count-field">
                         <label className="mitten-label" htmlFor="mitten-child-count">
-                            Number of children in family <span className="mitten-required">(required)</span>
+                            Total number of children in family <span className="mitten-required">(required)</span>
                         </label>
                         <select id="mitten-child-count" className="mitten-select mitten-count-select"
                             value={children.length}
