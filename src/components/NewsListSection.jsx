@@ -1,14 +1,9 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
 import { useContentfulInspectorMode } from '@contentful/live-preview/react';
 import Icon from './Icon';
-import { toHttpsUrl } from '@/utils/url';
+import { toHttpsUrl, backgroundClass, formatPostDate } from '@/utils/contentful';
 
 const ITEMS_PER_PAGE = 10;
-
-const formatDate = (publishDate) =>
-    publishDate
-        ? new Date(publishDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
-        : null;
 
 const monthKey = (publishDate) => {
     const d = new Date(publishDate);
@@ -24,7 +19,7 @@ const getPageNumbers = (current, total) => {
 
 const NewsPost = ({ post, itemTag: ItemTag = 'h3' }) => {
     const { title: postTitle, slug, summary, publishDate, featuredImage } = post?.fields || {};
-    const formattedDate = formatDate(publishDate);
+    const formattedDate = formatPostDate(publishDate);
     const inspectorProps = useContentfulInspectorMode({ entryId: post?.sys?.id });
 
     const fullImageUrl = toHttpsUrl(featuredImage?.fields?.file?.url);
@@ -63,7 +58,7 @@ const NewsListSection = ({ title, leadParagraph, posts, displayLimit, displaySty
     const [selectedMonth, setSelectedMonth] = useState('');
     const topRef = useRef(null);
 
-    const bgClass = backgroundStyle === "Beige Background" ? "bg-beige" : "bg-default";
+    const bgClass = backgroundClass(backgroundStyle);
     const isGrid = displayStyle?.toLowerCase() === "grid";
     const inspectorProps = useContentfulInspectorMode({ entryId });
     const pageSize = displayLimit > 0 ? displayLimit : ITEMS_PER_PAGE;
@@ -160,7 +155,7 @@ const NewsListSection = ({ title, leadParagraph, posts, displayLimit, displaySty
                     <div className="news-grid" {...inspectorProps({ fieldId: 'posts' })}>
                         {pagedPosts.map(post => {
                             const { title: postTitle, slug, summary, publishDate, featuredImage } = post?.fields || {};
-                            const formattedDate = formatDate(publishDate);
+                            const formattedDate = formatPostDate(publishDate);
                             const imageAlt = featuredImage?.fields?.description || featuredImage?.fields?.title || postTitle || '';
                             const fullImageUrl = toHttpsUrl(featuredImage?.fields?.file?.url);
                             return (

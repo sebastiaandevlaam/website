@@ -1,4 +1,5 @@
 import { useContentfulInspectorMode } from '@contentful/live-preview/react';
+import { safeHref } from '@/utils/contentful';
 import Icon from "./Icon"
 
 // Last-resort accessible name for a link an editor left unlabelled, so the
@@ -42,7 +43,7 @@ const ButtonLink = ({ textLabel, url, style, openInNewTab, arrow = true, entryId
   }
 
   return (
-    <a href={url} target={target} rel={rel} className={className} {...inspectorProps({ fieldId: 'textLabel' })}>
+    <a href={safeHref(url)} target={target} rel={rel} className={className} {...inspectorProps({ fieldId: 'textLabel' })}>
       {label}{(style === 'Subtle Link' && arrow === true) && <> <Icon name="ArrowRight" aria-hidden="true" /></>}
     </a>
   );

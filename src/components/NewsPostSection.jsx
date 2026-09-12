@@ -1,6 +1,6 @@
 import { useContentfulInspectorMode } from '@contentful/live-preview/react'
 import RichTextRenderer from './RichTextRenderer';
-import { toHttpsUrl } from '@/utils/url';
+import { toHttpsUrl, backgroundClass, formatPostDate } from '@/utils/contentful';
 
 const handleBack = (e) => {
     e.preventDefault();
@@ -19,11 +19,8 @@ const NewsPostSection = ({ post, backgroundStyle, entryId }) => {
     const imageAlt = featuredImage?.fields?.description || featuredImage?.fields?.title || title || 'Post image';
     const fullImageUrl = toHttpsUrl(featuredImage?.fields?.file?.url);
 
-    const formattedDate = publishDate
-        ? new Date(publishDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
-        : null;
-
-    const bgClass = backgroundStyle === "Beige Background" ? "bg-beige" : "bg-default";
+    const formattedDate = formatPostDate(publishDate);
+    const bgClass = backgroundClass(backgroundStyle);
 
     // entryId is the newsPost entry ID (either from sectionNewsPost or auto-routed directly)
     const inspectorProps = useContentfulInspectorMode({ entryId });

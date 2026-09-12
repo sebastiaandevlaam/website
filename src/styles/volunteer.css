@@ -1,0 +1,6 @@
+@media (max-width: 480px) {
+    .volunteer-name-grid {
+        grid-template-columns: 1fr;
+    }
+
+}

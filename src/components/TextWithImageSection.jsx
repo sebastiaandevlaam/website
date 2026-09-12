@@ -1,7 +1,7 @@
 import { useContentfulInspectorMode } from '@contentful/live-preview/react'
 import RichTextRenderer from "./RichTextRenderer";
 import ButtonLink from "./ButtonLink";
-import { toHttpsUrl } from '@/utils/url';
+import { toHttpsUrl, backgroundClass, sectionId } from '@/utils/contentful';
 
 const getYouTubeEmbedUrl = (url) => {
     if (!url) return null;
@@ -21,16 +21,14 @@ const TextWithImageSection = ({ title, leadParagraph, body, image, imagePosition
     const embedUrl = getYouTubeEmbedUrl(videoUrl);
     const hasMedia = embedUrl || fullImageUrl;
 
-    const bgClass = backgroundStyle === "Beige Background" ? "bg-beige" : "bg-default";
+    const bgClass = backgroundClass(backgroundStyle);
     const imagePosClass = imagePosition === 'Left' ? 'image-left' : 'image-right';
-    const sectionId = optionalLink?.url?.startsWith('#') ? optionalLink.url.substring(1)
-        : title ? title.toLowerCase().replace(/\s+/g, '-')
-            : 'text-image';
+    const id = sectionId(optionalLink?.url, title, 'text-image');
 
     const inspectorProps = useContentfulInspectorMode({ entryId });
 
     return (
-        <section className={`text-image-section ${bgClass}`} id={sectionId}>
+        <section className={`text-image-section ${bgClass}`} id={id}>
             <div className={`container content-wrapper ${imagePosClass}${!hasMedia ? ' no-image' : ''}`}>
                 <div className="text-content">
                     <TitleTag className="section-title" {...inspectorProps({ fieldId: 'title' })}>{title}</TitleTag>

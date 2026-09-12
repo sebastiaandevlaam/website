@@ -20,6 +20,7 @@ npm run dev        # Dev server (localhost:5173)
 npm run build      # Production build → dist/
 npm run preview    # Preview production build locally
 npm run lint       # ESLint (front-end and functions/, both should be clean)
+npm test           # Vitest unit tests (row builders, phone, escaping, security)
 firebase deploy    # Deploy dist/ to Firebase (from repo root or website/)
 ```
 
@@ -54,6 +55,28 @@ To add a new section type: create the component, add the mapping in `SectionRend
 
 `@/` resolves to `src/`. Use `@/components/Foo` instead of relative paths.
 
+### Shared building blocks
+
+Reach for these before writing a new one — each replaced the same logic copied
+across several components:
+
+| Helper | Location | Replaces |
+|---|---|---|
+| `backgroundClass(style, fallback)` | `@/utils/contentful` | the `backgroundStyle === 'Beige Background' ? …` ternary in 8 components |
+| `sectionId(buttonUrl, title, fallback)` | `@/utils/contentful` | anchor-or-slugified-title id derivation in 4 sections |
+| `formatPostDate(date)` | `@/utils/contentful` | duplicate `toLocaleDateString` calls |
+| `isWithinWindow(start, end)` | `@/utils/contentful` | date-window checks in the announcement bar and the Mitten form |
+| `safeHref(url)` | `@/utils/contentful` | unchecked `href` from Contentful |
+| `trimMarkdown(value)` | `@/utils/markdown` | trailing blank lines becoming empty `<p>` |
+| `useFunctionSubmit(name)` | `@/hooks/useFunctionSubmit` | the fetch/loading/error/App-Check block in all three forms |
+| `<HoneypotField>`, `<SuccessCard>` | `@/components/form/` | per-form copies of the same markup |
+
+### Error handling
+
+Every section renders inside `SectionErrorBoundary`, so one malformed Contentful
+entry costs that section rather than blanking the page. Visitors see nothing;
+the failure is logged, and in dev a marker is shown.
+
 ## Styling Conventions
 
 CSS custom properties defined at `:root` in `App.css`:
@@ -68,7 +91,29 @@ CSS custom properties defined at `:root` in `App.css`:
 
 Fonts: **Nunito Sans** (headings) and **Open Sans** (body), loaded from Google Fonts via `index.html`.
 
-All layout uses plain CSS classes — no utility classes, no CSS modules. Add new styles to `App.css` following existing section-based organization.
+All layout uses plain CSS classes — no utility classes, no CSS modules.
+
+**`App.css` is only an import manifest.** The real CSS lives in `src/styles/`,
+split by area (`base`, `header`, `hero`, `sections`, `footer`, `responsive`,
+`news`, `donate`, `mitten`, …). The order of the `@import` list in `App.css` is
+the cascade order and must not be rearranged — later files intentionally
+override earlier ones.
+
+`src/styles/forms.css` holds the shared `.form-*` classes and is imported from
+`App.jsx` *after* `App.css`, so it can override the generic `.container`. Two
+consequences worth knowing:
+
+- A rule in `src/styles/*.css` that needs to beat a shared form rule must
+  out-specify it, not merely appear later (e.g. `.form-field.mitten-count-field`).
+- Per-form spacing differences are CSS variables (`--form-gap`,
+  `--form-stack-gap`, `--form-legend-gap`, `--form-sublegend-gap`,
+  `--form-hint-gap`, `--form-submit-gap`), set on the form element. The
+  volunteer form uses the defaults; the Mitten form sets tighter values because
+  it repeats per child.
+
+The donation form deliberately does **not** use the shared form classes: it has
+its own visual design (uppercase labels, red required markers, boxed errors, a
+green success icon). It shares the submit *logic* only.
 
 ## Contentful Integration Notes
 
@@ -153,6 +198,41 @@ Field labels, the youth/adult size choice, and the three gift-idea slots are har
 **Validation feedback.** `validate()` returns `{ field, message }` rather than a bare string, where `field` is the id of the input at fault. On a failed submit the form scrolls that field to the centre of the screen, focuses it, marks it `aria-invalid`, and renders the message directly beneath it via `aria-describedby`. This matters because the form runs several screens long — a message next to the submit button alone reads as nothing having happened when the empty field is off-screen above. The summary above the button is therefore only shown for errors with no field to point at, such as a failed request.
 
 **Phone numbers** must be valid US/NANP numbers. The rules live in `src/utils/phone.js` and its server-side twin `functions/phone.js` — the site and the functions deploy separately and cannot import across that boundary, so changing one means changing the other. Any separator is accepted on input (`5085550101`, `508.555.0101`, `+1 508 555 0101`), an area or exchange code starting with 0/1 or ending in `11` is rejected, and a valid number is reformatted to `(508) 555-0101` on blur and again before it reaches the sheet, so every row dials the same way. The additional phone is optional but validated when filled in.
+
+## Security
+
+Full detail, and the outstanding manual setup, in `functions/README-SECURITY.md`.
+
+**Form endpoints.** All three are public and unauthenticated, layered in
+`functions/security.js`: a CORS allowlist, a honeypot field, a minimum fill
+time, a per-instance rate limit, and App Check. App Check is the only layer that
+proves a request came from our site; it is written but **inert** until
+`VITE_RECAPTCHA_SITE_KEY` (client) and `APP_CHECK_ENFORCED=true` (server) are
+set. Enable the client first — the reverse order blocks every real submission.
+
+A submission that trips the honeypot or timing check gets a normal success
+response and is silently dropped, so spam tooling has nothing to tune against.
+
+**Emails.** Everything interpolated into a notification email is escaped via
+`functions/email.js`. Without it, text typed into a public form renders as live
+HTML in a staff inbox — a phishing email sent from our own verified domain.
+Never build an email row by hand; use `row()` / `mailtoCell()`.
+
+**Stripe webhook.** Its side effects are awaited before responding. Cloud
+Functions may freeze an instance the moment the response is sent, so
+fire-and-forget work there can be killed mid-flight, losing the sheet row for a
+donation already paid for.
+
+**returnUrl** from the donation form is validated against `SITE_URL` before
+being handed to Stripe as `success_url`, so a crafted session cannot land a
+donor on an attacker's page right after paying.
+
+**Headers.** `firebase.json` sets an enforced CSP plus HSTS, nosniff,
+Referrer-Policy, Permissions-Policy and COOP. `frame-ancestors` limits framing
+to ourselves and Contentful's editor. Adding a third-party embed means adding
+its origin to the matching directive, or the browser will block it — the
+console names the directive. Note `npm run dev` does not serve these headers;
+use `firebase emulators:start --only hosting` against `dist/` to test them.
 
 ## Footer
 

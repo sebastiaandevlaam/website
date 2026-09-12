@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { useContentfulInspectorMode } from '@contentful/live-preview/react';
+import { useFunctionSubmit } from '@/hooks/useFunctionSubmit';
+import { trimMarkdown } from '@/utils/markdown';
 
-const FUNCTIONS_BASE_URL = import.meta.env.VITE_FUNCTIONS_BASE_URL;
 const DEFAULT_AMOUNTS = [10, 25, 50, 100, 250];
 
 const EMPTY_ACK = {
@@ -55,8 +56,10 @@ const DonationSection = ({
   const [coverFees, setCoverFees] = useState(true);
   const [wantsAcknowledgement, setWantsAcknowledgement] = useState(null);
   const [ackData, setAckData] = useState(EMPTY_ACK);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
+  // Shares the App Check header and loading/error plumbing with the other two
+  // forms. The donation form's own styling is deliberately different from
+  // theirs, so only the submit logic is shared, not the markup or CSS.
+  const { submit, isLoading, error, setError } = useFunctionSubmit('createDonationCheckout');
 
   const currentReason = reasonList.find(r => r.value === selectedReason);
   const presetAmounts = getPresetsForReason(currentReason);
@@ -125,37 +128,24 @@ const DonationSection = ({
       }
     }
 
-    setIsLoading(true);
-    setError('');
+    const { ok, data } = await submit({
+      donationAmount,
+      processingFee: coverFeesActive ? processingFee : 0,
+      coverFees: coverFeesActive,
+      reason: currentReason?.label || selectedReason,
+      honoree: extraFieldValue.trim(),
+      amountTagline: selectedPreset?.tagline || '',
+      acknowledgement: (collectAcknowledgement && wantsAcknowledgement === true) ? ackData : null,
+      sendConfirmationEmail,
+      returnUrl: window.location.origin + window.location.pathname,
+    });
 
-    try {
-      const response = await fetch(`${FUNCTIONS_BASE_URL}/createDonationCheckout`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          donationAmount,
-          processingFee: coverFeesActive ? processingFee : 0,
-          coverFees: coverFeesActive,
-          reason: currentReason?.label || selectedReason,
-          honoree: extraFieldValue.trim(),
-          amountTagline: selectedPreset?.tagline || '',
-          acknowledgement: (collectAcknowledgement && wantsAcknowledgement === true) ? ackData : null,
-          sendConfirmationEmail,
-          returnUrl: window.location.origin + window.location.pathname,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (data.url) {
-        window.location.href = data.url;
-      } else {
-        setError(data.error || 'Something went wrong. Please try again.');
-        setIsLoading(false);
-      }
-    } catch {
-      setError('Unable to connect to the payment processor. Please try again.');
-      setIsLoading(false);
+    // Success here means Stripe gave us a hosted checkout URL to hand the donor
+    // to; there is no in-page success state before payment.
+    if (ok && data.url) {
+      window.location.href = data.url;
+    } else if (ok) {
+      setError('Could not start the payment session. Please try again.');
     }
   };
 
@@ -184,7 +174,7 @@ const DonationSection = ({
             )}
             {successBody && (
               <div className="markdown-content" {...inspectorProps({ fieldId: 'successBody' })}>
-                <ReactMarkdown>{successBody}</ReactMarkdown>
+                <ReactMarkdown>{trimMarkdown(successBody)}</ReactMarkdown>
               </div>
             )}
             <div className="donate-success-actions">
@@ -213,7 +203,7 @@ const DonationSection = ({
             {title && <TitleTag className="donate-section-title section-title" {...inspectorProps({ fieldId: 'title' })}>{title}</TitleTag>}
             {introText && (
               <div className="markdown-content donate-intro-text" {...inspectorProps({ fieldId: 'introText' })}>
-                <ReactMarkdown>{introText}</ReactMarkdown>
+                <ReactMarkdown>{trimMarkdown(introText)}</ReactMarkdown>
               </div>
             )}
           </div>
@@ -390,7 +380,7 @@ const DonationSection = ({
                   <div className="donate-ack-body">
                     {acknowledgementIntroText && (
                       <div className="markdown-content donate-ack-intro">
-                        <ReactMarkdown>{acknowledgementIntroText}</ReactMarkdown>
+                        <ReactMarkdown>{trimMarkdown(acknowledgementIntroText)}</ReactMarkdown>
                       </div>
                     )}
 

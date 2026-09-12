@@ -12,8 +12,8 @@ import OperationMittenSection from "./OperationMittenSection"
 // Section Renderer Component (Unchanged logic, just renders components with classes)
 // `titleTag` lets App promote the first section's title to <h1> on pages that
 // have no hero section, so every page has exactly one level-one heading.
-const SectionRenderer = ({ section, entryId, sitePhone, siteEmail, titleTag }) => {
-  switch (section.contentType) {
+const SectionRenderer = ({ section, contentType, entryId, sitePhone, siteEmail, titleTag }) => {
+  switch (contentType) {
     case 'sectionHero':
       return <HeroSection {...section} entryId={entryId} />
     case 'sectionTextWithImage':
@@ -33,8 +33,8 @@ const SectionRenderer = ({ section, entryId, sitePhone, siteEmail, titleTag }) =
     case 'sectionOperationMitten':
       return <OperationMittenSection {...section} entryId={entryId} titleTag={titleTag} />
     default:
-      console.warn(`Unknown section type: ${section.contentType}`)
-      return <div className="container"><div style={{ margin: '2rem 0', padding: '1rem', backgroundColor: '#fee2e2', color: '#b91c1c' }}>Unsupported section type: {section.contentType}</div></div>
+      console.warn(`Unknown section type: ${contentType}`)
+      return <div className="container"><div style={{ margin: '2rem 0', padding: '1rem', backgroundColor: '#fee2e2', color: '#b91c1c' }}>Unsupported section type: {contentType}</div></div>
   }
 };
 

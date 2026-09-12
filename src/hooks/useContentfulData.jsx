@@ -1,26 +1,20 @@
 import { useState, useEffect } from 'react';
 import { createClient } from 'contentful';
+import {
+  SPACE_ID,
+  ENVIRONMENT,
+  DELIVERY_TOKEN,
+  PREVIEW_TOKEN,
+  isContentfulPreviewFrame,
+} from '@/utils/contentfulConfig';
 
-// --- Contentful Client Initialization ---
-const SPACE_ID = 'sm8a9cvs0gzu';
-// Content Delivery API token (published content)
-const DELIVERY_TOKEN = 'cDYhRs7L5ijvVgHUuXhHC6CHD-ebtJ5zJ47X_YjUhaE';
-// Content Preview API token — find it in Contentful > Settings > API Keys > Content preview tokens
-const PREVIEW_TOKEN = 'qa2FJPG8o-Y9tv02d0Zg289dXpeqzGdbbpOj_Whmdac';
-
-// Detect if running inside Contentful's Live Preview iframe
-const isInPreview = (() => {
-  try {
-    return typeof window !== 'undefined' && window.top !== window;
-  } catch {
-    return true; // Cross-origin iframe (e.g. Contentful editor)
-  }
-})();
-
-const usePreviewApi = isInPreview && Boolean(PREVIEW_TOKEN);
+// Draft content loads only inside a real Contentful preview frame — see
+// isContentfulPreviewFrame for why "am I in an iframe?" was not enough.
+const usePreviewApi = isContentfulPreviewFrame() && Boolean(PREVIEW_TOKEN);
 
 const client = createClient({
   space: SPACE_ID,
+  environment: ENVIRONMENT,
   accessToken: usePreviewApi ? PREVIEW_TOKEN : DELIVERY_TOKEN,
   ...(usePreviewApi ? { host: 'preview.contentful.com' } : {}),
 });
