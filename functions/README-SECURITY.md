@@ -49,15 +49,32 @@ submission.**
    At this point the site sends tokens and the server still ignores them.
    Submit each form once and confirm they all still work.
 
-5. **Watch the metrics.** App Check → APIs shows verified vs unverified
-   requests. Wait until verified requests appear and look correct — a day is
-   plenty.
+5. **Watch the logs, not the console.** These are plain HTTP `onRequest`
+   functions, so Firebase verifies nothing for us — the App Check console's
+   per-API metrics cover Firestore, Storage and Auth, and its Functions row only
+   links to documentation. There is no metric for our endpoints.
 
-6. **Turn on enforcement**, server side only:
+   Use observe mode instead: it verifies every request and logs the outcome
+   without ever rejecting one.
+   ```bash
+   # functions/.env.holliston-pantry-shelf
+   APP_CHECK_OBSERVE=true
+   ```
+   ```bash
+   firebase deploy --only functions
+   firebase functions:log --only submitOperationMitten | grep appcheck
+   ```
+   Leave it a day, then count: `appcheck: VALID token` lines are real traffic
+   that would survive enforcement, `appcheck: WOULD REJECT` lines are traffic
+   that would be blocked. Only enforce once the rejects are bots rather than
+   families.
+
+6. **Turn on enforcement**, server side only. Replace the observe flag:
    ```bash
    # in functions/.env.holliston-pantry-shelf
-   APP_CHECK_ENFORCED=true
+   APP_CHECK_ENFORCED=true     # and remove APP_CHECK_OBSERVE
    ```
+   If both are set, enforcing wins.
    ```bash
    firebase deploy --only functions
    ```

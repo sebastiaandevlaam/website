@@ -38,9 +38,8 @@ const corsMiddleware = cors({
 // nothing until the console side is set up and verified.
 
 let appCheckModule;
-async function verifyAppCheck(req) {
-  if (process.env.APP_CHECK_ENFORCED !== 'true') return { ok: true, skipped: true };
 
+async function checkToken(req) {
   const token = req.header('X-Firebase-AppCheck');
   if (!token) return { ok: false, reason: 'missing App Check token' };
 
@@ -55,6 +54,36 @@ async function verifyAppCheck(req) {
   } catch (err) {
     return { ok: false, reason: `invalid App Check token: ${err.message}` };
   }
+}
+
+// Three modes, because going straight from off to enforcing is a leap of faith:
+//
+//   (neither set)            off      — no checking at all
+//   APP_CHECK_OBSERVE=true   observe  — verify and log, never reject
+//   APP_CHECK_ENFORCED=true  enforce  — verify and reject
+//
+// Observe exists because these are plain HTTP onRequest functions, so Firebase
+// does the verifying nowhere: the App Check console's per-API metrics cover
+// Firestore, Storage and Auth, not our endpoints. Observe mode is how we get
+// the equivalent evidence — a day of logs showing what share of real traffic
+// already carries a valid token — before flipping enforcement on.
+//
+// Grep the logs for `appcheck:` to count them.
+async function verifyAppCheck(req) {
+  const enforcing = process.env.APP_CHECK_ENFORCED === 'true';
+  const observing = process.env.APP_CHECK_OBSERVE === 'true';
+  if (!enforcing && !observing) return { ok: true, skipped: true };
+
+  const result = await checkToken(req);
+
+  if (!enforcing) {
+    console.log(result.ok
+      ? 'appcheck: VALID token (observe mode, not enforcing)'
+      : `appcheck: WOULD REJECT — ${result.reason} (observe mode, not enforcing)`);
+    return { ok: true, observed: result.ok };
+  }
+
+  return result;
 }
 
 // ── Honeypot and timing ─────────────────────────────────────────────────────

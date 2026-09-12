@@ -210,6 +210,13 @@ proves a request came from our site; it is written but **inert** until
 `VITE_RECAPTCHA_SITE_KEY` (client) and `APP_CHECK_ENFORCED=true` (server) are
 set. Enable the client first — the reverse order blocks every real submission.
 
+`verifyAppCheck` has three modes: off (neither flag), `APP_CHECK_OBSERVE=true`
+(verify and log, never reject) and `APP_CHECK_ENFORCED=true` (verify and
+reject). Observe exists because these are plain HTTP `onRequest` functions, so
+Firebase verifies nothing itself and the App Check console has no metrics for
+them — grepping the logs for `appcheck:` is the only way to learn what share of
+real traffic carries a token before enforcing.
+
 A submission that trips the honeypot or timing check gets a normal success
 response and is silently dropped, so spam tooling has nothing to tune against.
 

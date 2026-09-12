@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { createRequire } from 'module';
 
 const require = createRequire(import.meta.url);
@@ -125,15 +125,49 @@ describe('input caps', () => {
 });
 
 describe('App Check', () => {
+    const noToken = { header: () => undefined };
+
     it('is skipped while unconfigured, so deploying changes nothing', async () => {
-        const r = await verifyAppCheck({ header: () => undefined });
+        const r = await verifyAppCheck(noToken);
         expect(r).toEqual({ ok: true, skipped: true });
     });
 
     it('rejects a request with no token once enforced', async () => {
         process.env.APP_CHECK_ENFORCED = 'true';
-        const r = await verifyAppCheck({ header: () => undefined });
+        const r = await verifyAppCheck(noToken);
         expect(r.ok).toBe(false);
         expect(r.reason).toMatch(/missing/i);
+    });
+
+    // These are plain HTTP functions, so Firebase verifies nothing for us and
+    // the console's per-API metrics never cover them. Observe mode is the only
+    // way to learn what share of real traffic carries a token before enforcing.
+    describe('observe mode', () => {
+        beforeEach(() => { process.env.APP_CHECK_OBSERVE = 'true'; });
+        afterEach(() => { delete process.env.APP_CHECK_OBSERVE; });
+
+        it('never blocks, even with no token', async () => {
+            const r = await verifyAppCheck(noToken);
+            expect(r.ok).toBe(true);
+            expect(r.observed).toBe(false);
+        });
+
+        it('records what it saw, so the logs can be counted', async () => {
+            const logged = [];
+            const realLog = console.log;
+            console.log = (m) => logged.push(String(m));
+            try {
+                await verifyAppCheck(noToken);
+            } finally {
+                console.log = realLog;
+            }
+            expect(logged.join(' ')).toMatch(/appcheck: WOULD REJECT/);
+        });
+
+        it('enforcing wins when both are set', async () => {
+            process.env.APP_CHECK_ENFORCED = 'true';
+            const r = await verifyAppCheck(noToken);
+            expect(r.ok).toBe(false);
+        });
     });
 });
