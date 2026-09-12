@@ -36,7 +36,7 @@ const EMPTY_CHILD = {
     shoeSize: '',
     sizeType: '',
     clothingPreference: '',
-    favoriteColor: '',
+    favoriteColors: [],
     interests: [],
     interestsOther: '',
     favoriteCharacter: '',
@@ -135,14 +135,16 @@ const OperationMittenSection = ({
         )));
     };
 
-    const toggleInterest = (index, value) => {
+    // Adds or removes one value from a child's multi-select list. Shared by
+    // interests and favourite colours.
+    const toggleChildValue = (index, field, value) => {
         setChildren(prev => prev.map((child, i) => (
             i === index
                 ? {
                     ...child,
-                    interests: child.interests.includes(value)
-                        ? child.interests.filter(v => v !== value)
-                        : [...child.interests, value],
+                    [field]: child[field].includes(value)
+                        ? child[field].filter(v => v !== value)
+                        : [...child[field], value],
                 }
                 : child
         )));
@@ -350,7 +352,7 @@ const OperationMittenSection = ({
                     {/* Number of children — drives how many child blocks render */}
                     <div className="form-field mitten-count-field">
                         <label className="form-label" htmlFor="mitten-child-count">
-                            Number of children in family <span className="form-required">(required)</span>
+                            Total number of children in family <span className="form-required">(required)</span>
                         </label>
                         <select id="mitten-child-count" className="form-select mitten-count-select"
                             value={children.length}
@@ -433,31 +435,37 @@ const OperationMittenSection = ({
                                     </div>
                                 </fieldset>
 
-                                {/* Clothing preference and favourite colour share a row */}
-                                <div className="form-grid">
-                                    <div className="form-field">
-                                        <label className="form-label" htmlFor={id('clothing')}>
-                                            Preferred article(s) of clothing
-                                        </label>
-                                        <input id={id('clothing')} type="text" className="form-input"
-                                            placeholder="e.g. hoodies, leggings"
-                                            value={child.clothingPreference}
-                                            onChange={e => setChildField(index, 'clothingPreference', e.target.value)} />
-                                    </div>
-                                    {colors.length > 0 && (
-                                        <div className="form-field" {...inspectorProps({ fieldId: 'colorOptions' })}>
-                                            <label className="form-label" htmlFor={id('color')}>Favorite color</label>
-                                            <select id={id('color')} className="form-select"
-                                                value={child.favoriteColor}
-                                                onChange={e => setChildField(index, 'favoriteColor', e.target.value)}>
-                                                <option value="">Select</option>
-                                                {colors.map(option => (
-                                                    <option key={option} value={option}>{option}</option>
-                                                ))}
-                                            </select>
-                                        </div>
-                                    )}
+                                <div className="form-field">
+                                    <label className="form-label" htmlFor={id('clothing')}>
+                                        Preferred article(s) of clothing
+                                    </label>
+                                    <input id={id('clothing')} type="text" className="form-input"
+                                        placeholder="e.g. hoodies, leggings, warm socks"
+                                        value={child.clothingPreference}
+                                        onChange={e => setChildField(index, 'clothingPreference', e.target.value)} />
                                 </div>
+
+                                {/* Favourite colours — a child rarely has just one, and the
+                                    shoppers can use any of them. */}
+                                {colors.length > 0 && (
+                                    <fieldset className="form-subfieldset" {...inspectorProps({ fieldId: 'colorOptions' })}>
+                                        <legend className="form-sublegend">
+                                            Favorite colors <span className="form-legend-hint">&mdash; select all that apply</span>
+                                        </legend>
+                                        {/* Colour names are single short words, so they pack more
+                                            densely than the interest labels. */}
+                                        <div className="form-checkbox-grid mitten-color-grid">
+                                            {colors.map(option => (
+                                                <label key={option} className="form-choice">
+                                                    <input type="checkbox" className="form-checkbox"
+                                                        checked={child.favoriteColors.includes(option)}
+                                                        onChange={() => toggleChildValue(index, 'favoriteColors', option)} />
+                                                    {option}
+                                                </label>
+                                            ))}
+                                        </div>
+                                    </fieldset>
+                                )}
 
                                 {/* Interests */}
                                 {interests.length > 0 && (
@@ -470,7 +478,7 @@ const OperationMittenSection = ({
                                                 <label key={option} className="form-choice">
                                                     <input type="checkbox" className="form-checkbox"
                                                         checked={child.interests.includes(option)}
-                                                        onChange={() => toggleInterest(index, option)} />
+                                                        onChange={() => toggleChildValue(index, 'interests', option)} />
                                                     {option}
                                                 </label>
                                             ))}

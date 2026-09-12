@@ -40,7 +40,7 @@ function sanitizeSubmission(body) {
         shoeSize: capString(child?.shoeSize, 20),
         sizeType: capString(child?.sizeType, 20),
         clothingPreference: capString(child?.clothingPreference, 200),
-        favoriteColor: capString(child?.favoriteColor, 40),
+        favoriteColors: capStringArray(child?.favoriteColors, 40, 20),
         interests: capStringArray(child?.interests, 60, 40),
         interestsOther: capString(child?.interestsOther, 200),
         favoriteCharacter: capString(child?.favoriteCharacter, 120),

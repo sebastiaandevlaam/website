@@ -47,7 +47,15 @@
     min-width: 7.5rem;
 }
 
-.form-subfieldset > .mitten-other-field {
+.form-subfieldset > /* Colour names are one short word each, so they fit more per row than the
+   interest labels do — keeping the list to two rows rather than three.
+   (.form-checkbox-grid here, not .mitten-checkbox-grid: the shared form
+   classes replaced the prefixed ones on this branch.) */
+.form-checkbox-grid.mitten-color-grid {
+    grid-template-columns: repeat(auto-fit, minmax(6rem, 1fr));
+}
+
+.mitten-other-field {
     margin-top: 0.25rem;
 }
 

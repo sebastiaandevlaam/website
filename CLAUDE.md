@@ -161,6 +161,8 @@ The contact time checkboxes (Morning / Afternoon / Evening) and all field labels
 
 **Key difference from the paper form:** the parent picks the number of children from a dropdown and the child block repeats that many times, instead of the paper form's fixed four. Changing the number preserves anything already filled in for the children that remain.
 
+Multi-select answers (interests, favourite colours) are written to their column as a comma-separated list, the same way the paper form let a family circle several.
+
 **Sheet layout — one row per child.** Gift shoppers work child by child, so a submission is flattened: the family columns (shopper #, parent, phones, holiday) repeat on each of that family's rows, tied together by a shared `Submission ID` (e.g. `OM-MVZLG280-XACX`). Column order lives in `functions/operationMittenRow.js` (`OPERATION_MITTEN_HEADER`, 24 columns) — the single source of truth, so never reorder columns in the sheet by hand.
 
 Required env vars on the function:
@@ -183,7 +185,7 @@ Both of these apply to the donations sheet too, since the helpers are shared.
 - `maxChildren` (Integer, optional — defaults to 4, matching the paper form; capped at 12)
 - `genderOptions` (Short text, list — defaults to Boy, Girl)
 - `holidayOptions` (Short text, list — defaults to Christmas, Hanukkah, Other). The literal value `Other` reveals a free-text "Which holiday?" input; that text is what lands in the sheet's Holiday column.
-- `colorOptions` (Short text, list) — favourite colour dropdown; the whole field hides when empty
+- `colorOptions` (Short text, list) — favourite colour checkboxes, multi-select like the interests; the whole fieldset hides when empty
 - `interestOptions` (Short text, list) — activity checkboxes; the whole fieldset hides when empty
 - `openDate` / `closeDate` (Date & time, both optional) — outside the window the form is replaced by `closedMessage`. Leave both empty and the form is always open.
 - `closedMessage` (Long text / Markdown, optional)
