@@ -149,3 +149,43 @@
         width: 100%;
     }
 }
+
+/* Language picker — the same control as the shopper application's. Sized to
+   its content rather than the full form width. */
+.form-language-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem 0.75rem;
+    margin-bottom: 1.25rem;
+}
+
+.form-select.form-language-select {
+    width: auto;
+    min-width: 11rem;
+}
+
+/* Right-to-left (Arabic). The shared form rules are written for LTR — the
+   select chevron sits on the right and callouts are edged on the left — so
+   mirror those here. Scoped to the section's `dir`, so LTR is untouched. */
+.mitten-section[dir="rtl"] .form-select {
+    background-position: left 0.75rem center;
+    padding-right: 0.75rem;
+    padding-left: 2.5rem;
+}
+
+.mitten-section[dir="rtl"] .form-callout,
+.mitten-section[dir="rtl"] .mitten-closed {
+    border-left: none;
+    border-right: 4px solid var(--pantry-red);
+    border-radius: 0.375rem 0 0 0.375rem;
+}
+
+.mitten-section[dir="rtl"] .mitten-child-legend {
+    margin-left: 0;
+    margin-right: -0.5rem;
+}
+
+.mitten-section[dir="rtl"] input[dir="ltr"] {
+    text-align: right;
+}
