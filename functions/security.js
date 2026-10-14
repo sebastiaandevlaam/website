@@ -1,4 +1,4 @@
-// Abuse controls for the three public, unauthenticated form endpoints.
+// Abuse controls for the public, unauthenticated form endpoints.
 //
 // Layered deliberately, because no single layer is sufficient:
 //
@@ -111,9 +111,9 @@ function looksAutomated(body) {
 // ── Rate limiting ───────────────────────────────────────────────────────────
 // In-memory, so the window is per warm instance rather than global. With
 // maxInstances: 10 a determined attacker gets roughly 10x the limit — this
-// blunts bursts, it does not stop a distributed flood. Firestore would make it
-// global; it is not enabled on this project, and the cost/benefit did not
-// justify turning it on for a pantry form.
+// blunts bursts, it does not stop a distributed flood. Firestore (now used for
+// paid campaigns) could make it global, but a write per form post did not
+// justify the cost for a pantry form.
 
 const WINDOW_MS = 10 * 60 * 1000;
 const MAX_PER_WINDOW = 8;
@@ -161,6 +161,30 @@ function capStringArray(value, max = DEFAULT_MAX, maxItems = 50) {
   return value.slice(0, maxItems).map(v => capString(v, max));
 }
 
+// ── Return URLs ─────────────────────────────────────────────────────────────
+
+const SITE_URL = () => process.env.SITE_URL || 'https://hollistonpantryshelf.org';
+
+// The client tells us where to send a buyer after payment, and Stripe will
+// redirect there from its own domain. Left unchecked, anyone can mint a session
+// that sends a real donor to a page they control immediately after paying —
+// the perfect setup for "just confirm your card details" phishing. Only our own
+// origin is allowed; anything else silently falls back to `fallbackPath`.
+function safeReturnUrl(returnUrl, fallbackPath = '/') {
+  const fallback = `${SITE_URL()}${fallbackPath}`;
+  if (!returnUrl) return fallback;
+  try {
+    const url = new URL(returnUrl);
+    const site = new URL(SITE_URL());
+    const localhost = url.hostname === 'localhost' || url.hostname === '127.0.0.1';
+    if (url.origin === site.origin || localhost) return url.origin + url.pathname;
+    console.warn('Rejected off-site returnUrl:', returnUrl);
+  } catch {
+    console.warn('Rejected unparseable returnUrl:', returnUrl);
+  }
+  return fallback;
+}
+
 // ── Combined gate ───────────────────────────────────────────────────────────
 
 // Runs every layer that applies to a form post. Returns null to proceed, or a
@@ -201,6 +225,7 @@ module.exports = {
   rateLimit,
   capString,
   capStringArray,
+  safeReturnUrl,
   HONEYPOT_FIELD,
   MIN_FILL_SECONDS,
   __testing: { hits },

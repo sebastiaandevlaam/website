@@ -48,6 +48,7 @@ Contentful API → useContentfulData (hook) → App.jsx → SectionRenderer → 
 | `sectionContact` | `ContactSection` |
 | `sectionVolunteer` | `VolunteerSection` |
 | `sectionOperationMitten` | `OperationMittenSection` |
+| `sectionCampaign` | `CampaignSection` |
 
 To add a new section type: create the component, add the mapping in `SectionRenderer.jsx`, and define the content type in Contentful.
 
@@ -132,11 +133,9 @@ green success icon). It shares the submit *logic* only.
 
 ## Volunteer Form
 
-`VolunteerSection` submits to the `submitVolunteerApplication` Cloud Function, which emails the application via the Resend API. Required env vars on the function:
+`VolunteerSection` submits to the `submitVolunteerApplication` Cloud Function, which emails the application (see **Email** below), with Reply-To set to the applicant. Required env var on the function, besides the shared email ones:
 
-- `RESEND_API_KEY` — API key from resend.com
-- `RESEND_FROM` — verified sender address (e.g. `volunteers@hollistonpantryshelf.org`)
-- `VOLUNTEER_EMAIL_TO` — recipient address for incoming applications
+- `VOLUNTEER_EMAIL_TO` — recipient address(es) for incoming applications, comma-separated
 
 **Contentful setup required:**
 
@@ -206,11 +205,87 @@ Field labels, the youth/adult size choice, and the three gift-idea slots are har
 
 **Phone numbers** must be valid US/NANP numbers. The rules live in `src/utils/phone.js` and its server-side twin `functions/phone.js` — the site and the functions deploy separately and cannot import across that boundary, so changing one means changing the other. Any separator is accepted on input (`5085550101`, `508.555.0101`, `+1 508 555 0101`), an area or exchange code starting with 0/1 or ending in `11` is rejected, and a valid number is reformatted to `(508) 555-0101` on blur and again before it reaches the sheet, so every row dials the same way. The additional phone is optional but validated when filled in.
 
+## Paid Campaigns (Duck Drop, event tickets)
+
+One generic mechanism sells anything priced in Contentful: the Duck Drop
+(numbered rubber ducks) and event tickets. `CampaignSection` renders a
+`sectionCampaign`, which references a `campaign`; the buyer picks quantities,
+pays on Stripe Checkout, and returns to the same page with
+`?order=success&session_id=…` for the thank-you view.
+
+**Products live only in Contentful.** Stripe gets inline `price_data`, so
+nothing is configured in the Stripe dashboard per campaign. The browser sends
+only the campaign id, quantities and buyer details; `createCampaignCheckout`
+fetches the campaign from Contentful itself and prices it there.
+
+**Code layout** (functions):
+
+- `campaignOrder.js` — pure rules: `normalizeCampaign`, `priceOrder`, the fee
+  gross-up, capacity (`availability`, `applyHold`, `applySale`), numbering.
+  Unit-tested; change rules here.
+- `campaignRow.js` — sheet headers and rows. Numbered campaigns write one row
+  per number; ticket campaigns one row per order.
+- `campaignEmail.js` — the buyer email from the campaign's Markdown template.
+- `campaigns.js` — the endpoints, Firestore transactions and the Stripe event
+  handler. Stripe events for campaigns arrive on the existing `stripeWebhook`
+  (`donations.js`), which hands anything with `metadata.campaign_order_id` to
+  `handleCampaignCheckoutEvent`.
+
+`src/utils/campaign.js` holds the browser twin of `processingFeeCents` — change
+both together; `campaign.test.js` fails if they ever disagree.
+
+**Firestore** is the source of truth for stock (`websiteCampaigns/{campaignId}`)
+and orders (`websiteCampaignOrders/{orderId}`). The database is shared with the
+shopper apps, hence the prefix; never deploy `firestore.rules` from this repo.
+Stock is *held* in a transaction when checkout starts, so two buyers cannot pay
+for the last ticket. A hold becomes a sale on `checkout.session.completed`, is
+released on `checkout.session.expired` or when the buyer cancels on Stripe
+(`cancelCampaignCheckout`), and also carries its own expiry, so a lost webhook
+cannot lock stock away. Every webhook step (mark paid, sheet row, email) is
+idempotent and answers 500 on failure, so Stripe's retries are safe.
+
+**Units.** Capacity counts units: an item's `unitsPerItem` (a family ticket = 4
+people, a duck 5-pack = 5 ducks) counts toward `totalCap`, and in a numbered
+campaign each unit gets its own consecutive number, starting at 1.
+
+**Contentful setup required:**
+
+- `campaignItem`: `name` (Short text), `description` (Short text, optional),
+  `price` (Number, USD — an item with no price is never offered),
+  `unitsPerItem` (Integer, optional, default 1), `maxPerOrder` (Integer,
+  optional), `totalCap` (Integer, optional — this item's own stock),
+  `fairMarketValue` (Number, optional — per item; when set, the email adds the
+  IRS quid-pro-quo statement).
+- `campaign`: `name` (Short text), `campaignId` (Short text, unique, e.g.
+  `duck-drop-2027` — the Firestore key, **never change it once sales start**),
+  `campaignType` (Short text: `Numbered` or `Tickets`), `items` (References,
+  many → `campaignItem`), `openDate` / `closeDate` (Date & time, optional),
+  `totalCap` (Integer, optional), `reservedSpots` (Integer, optional — taken
+  off `totalCap` for sponsors/VIPs), `maxPerOrder` (Integer, optional — items
+  per order), `coverFeesEnabled` (Boolean, default on), `coverFeesLabel`
+  (Short text, optional), `spreadsheetId` (Short text), `confirmationEmailSubject`
+  (Short text, optional), `confirmationEmailBody` (Long text / Markdown,
+  optional), `confirmationEmailFrom` (Short text, optional — must be in
+  `EMAIL_ALLOWED_SENDERS`), `confirmationEmailReplyTo` (Short text, optional),
+  `successHeadline`, `successBody`, `closedMessage`, `soldOutMessage`
+  (optional).
+- `sectionCampaign`: `title`, `introText` (Markdown), `campaign` (Reference →
+  `campaign`), `backgroundStyle`.
+
+Empty caps mean no cap. Email placeholders: `{firstName}` `{lastName}`
+`{orderId}` `{campaignName}` `{total}` `{count}` `{numbers}` and
+`{orderSummary}` (a table — on a line of its own). A numbered campaign's email
+always includes the numbers, even if the template forgets `{numbers}`.
+
+Required env vars on the functions, besides the Stripe, sheets and email ones:
+`CONTENTFUL_SPACE_ID`, `CONTENTFUL_ENVIRONMENT`, `CONTENTFUL_DELIVERY_TOKEN`.
+Setup steps are in `functions/README-SECURITY.md` section 3.
+
 ## Security
 
 Full detail, and the outstanding manual setup, in `functions/README-SECURITY.md`.
 
-**Form endpoints.** All three are public and unauthenticated, layered in
+**Form endpoints.** All are public and unauthenticated (campaign checkout included), layered in
 `functions/security.js`: a CORS allowlist, a honeypot field, a minimum fill
 time, a per-instance rate limit, and App Check. App Check is the only layer that
 proves a request came from our site; it is written but **inert** until
@@ -227,7 +302,22 @@ real traffic carries a token before enforcing.
 A submission that trips the honeypot or timing check gets a normal success
 response and is silently dropped, so spam tooling has nothing to tune against.
 
-**Emails.** Everything interpolated into a notification email is escaped via
+**Email sending.** All email goes through our Google Workspace via the Gmail
+API, in `functions/mailer.js` — never add another provider inline; call
+`sendEmail({ to, subject, html, replyTo, from })`. A dedicated service account
+with domain-wide delegation (scope `gmail.send` only) sends as one mailbox,
+`EMAIL_SENDER_MAILBOX` (default `website@hollistonpantryshelf.org`), so
+everything the site sends is recognisable and lands in that mailbox's Sent
+folder. `from` may name an alias of that mailbox, but only one listed in
+`EMAIL_ALLOWED_SENDERS`; anything else falls back to the mailbox. That list
+matters because delegation lets the service account send as *anyone* in the
+domain, and a sender may later come from Contentful. The limit is roughly 2,000
+messages a day per mailbox, aliases included. Env vars:
+`GMAIL_SERVICE_ACCOUNT_JSON`, `EMAIL_SENDER_MAILBOX`, `EMAIL_FROM_NAME`
+(optional), `EMAIL_ALLOWED_SENDERS` (optional). Setup steps and
+`send-test-email.js` are in `functions/README-SECURITY.md`.
+
+**Email content.** Everything interpolated into a notification email is escaped via
 `functions/email.js`. Without it, text typed into a public form renders as live
 HTML in a staff inbox — a phishing email sent from our own verified domain.
 Never build an email row by hand; use `row()` / `mailtoCell()`.

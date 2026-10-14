@@ -1,0 +1,145 @@
+/* ===========================================================================
+   Paid campaigns (CampaignSection) — Duck Drop, event tickets.
+   Builds on the shared .form-* classes in forms.css; only the item list, the
+   quantity stepper, the total and the numbers on the thank-you card live here.
+   =========================================================================== */
+
+.campaign-section {
+    padding: 4rem 0;
+}
+
+.campaign-items {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.campaign-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    background: var(--white);
+    border: 2px solid var(--pantry-beige);
+    border-radius: 0.5rem;
+}
+
+.campaign-item.is-sold-out {
+    opacity: 0.6;
+}
+
+.campaign-item-name {
+    font-family: 'Nunito Sans', sans-serif;
+    font-weight: 700;
+    font-size: 1.05rem;
+    color: var(--pantry-text);
+}
+
+.campaign-item-description {
+    font-size: 0.9rem;
+    color: var(--pantry-text-muted, #666666);
+    margin: 0.125rem 0 0;
+}
+
+.campaign-item-price {
+    font-weight: 600;
+    color: var(--pantry-red);
+    margin: 0.25rem 0 0;
+}
+
+.campaign-item-stock {
+    font-weight: 400;
+    color: var(--pantry-text-muted, #666666);
+}
+
+.campaign-stepper {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    flex-shrink: 0;
+}
+
+.campaign-stepper-button {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    border: 2px solid var(--pantry-red);
+    background: var(--white);
+    color: var(--pantry-red);
+    font-size: 1.25rem;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.campaign-stepper-button:disabled {
+    border-color: var(--pantry-beige);
+    color: var(--pantry-text-muted, #666666);
+    cursor: not-allowed;
+}
+
+.campaign-stepper-button:focus-visible {
+    outline: 3px solid var(--pantry-gold-dark, #8A6134);
+    outline-offset: 2px;
+}
+
+/* .form-input sets width:100%; the stepper needs a fixed small box. */
+.form-input.campaign-stepper-input {
+    width: 3.5rem;
+    text-align: center;
+    padding-left: 0.25rem;
+    padding-right: 0.25rem;
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+
+.campaign-stepper-input::-webkit-outer-spin-button,
+.campaign-stepper-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.campaign-total {
+    font-size: 1.25rem;
+    margin: 0;
+}
+
+.campaign-confirmation {
+    margin: 0 auto 1.5rem;
+}
+
+.campaign-numbers-label {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.campaign-numbers {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 1rem;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.campaign-numbers li {
+    min-width: 3rem;
+    padding: 0.375rem 0.75rem;
+    border-radius: 999px;
+    /* Red, not gold: white on the brand gold is under 3:1 contrast. */
+    background: var(--pantry-red);
+    color: var(--white);
+    font-weight: 700;
+    font-size: 1.125rem;
+}
+
+@media (max-width: 480px) {
+    .campaign-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}

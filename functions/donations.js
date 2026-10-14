@@ -1,34 +1,17 @@
 const { onRequest } = require('firebase-functions/https');
 const { DONATION_HEADER, buildDonationRow } = require('./donationRow');
 const { getSheetsClient, appendSheetRows, ensureHeaderRow } = require('./sheets');
-const { corsMiddleware, screenRequest, capString } = require('./security');
+const { corsMiddleware, screenRequest, capString, safeReturnUrl: safeReturnUrlFor } = require('./security');
 const { escapeHtml, escapeSubject, row, mailtoCell } = require('./email');
+const { sendEmail } = require('./mailer');
+const { handleCampaignCheckoutEvent } = require('./campaigns');
 
 // Donations at or above this amount (USD) always trigger a notification email,
 // even when the donation reason does not have sendConfirmationEmail enabled.
 const LARGE_DONATION_EMAIL_THRESHOLD = 500;
 
-const SITE_URL = () => process.env.SITE_URL || 'https://hollistonpantryshelf.org';
-
-// The client tells us where to send the donor after payment, and Stripe will
-// redirect there from its own domain. Left unchecked, anyone can mint a session
-// that sends a real donor to a page they control immediately after paying —
-// the perfect setup for "just confirm your card details" phishing. Only our own
-// origin is allowed; anything else silently falls back to the donate page.
-function safeReturnUrl(returnUrl) {
-  const fallback = `${SITE_URL()}/donate`;
-  if (!returnUrl) return fallback;
-  try {
-    const url = new URL(returnUrl);
-    const site = new URL(SITE_URL());
-    const localhost = url.hostname === 'localhost' || url.hostname === '127.0.0.1';
-    if (url.origin === site.origin || localhost) return url.origin + url.pathname;
-    console.warn('Rejected off-site returnUrl:', returnUrl);
-  } catch {
-    console.warn('Rejected unparseable returnUrl:', returnUrl);
-  }
-  return fallback;
-}
+// Only our own origin may receive the donor after payment; see safeReturnUrl.
+const safeReturnUrl = (returnUrl) => safeReturnUrlFor(returnUrl, '/donate');
 
 exports.createDonationCheckout = onRequest((req, res) => {
   corsMiddleware(req, res, async () => {
@@ -141,6 +124,20 @@ exports.stripeWebhook = onRequest(async (req, res) => {
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
 
+  // Campaign orders (Duck Drop, tickets) share this endpoint and Stripe
+  // account. Unlike donations they answer 500 on failure so Stripe retries;
+  // every campaign step is idempotent, so a retry can't double-count or
+  // double-send.
+  if (event.data.object?.metadata?.campaign_order_id) {
+    try {
+      await handleCampaignCheckoutEvent(event);
+      return res.json({ received: true });
+    } catch (err) {
+      console.error('Campaign webhook failed:', err);
+      return res.status(500).json({ error: 'Campaign order processing failed' });
+    }
+  }
+
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object;
     const meta = session.metadata || {};
@@ -178,9 +175,6 @@ async function appendDonationRow(session, meta) {
 }
 
 async function sendDonationEmail(session, meta) {
-  const { Resend } = require('resend');
-  const resend = new Resend(process.env.RESEND_API_KEY);
-
   const donorName = session.customer_details?.name || '—';
   const donorEmail = session.customer_details?.email || '—';
   const amountPaid = (session.amount_total / 100).toFixed(2);
@@ -211,9 +205,10 @@ async function sendDonationEmail(session, meta) {
     </table>
   `;
 
-  await resend.emails.send({
-    from: process.env.RESEND_FROM,
+  await sendEmail({
     to: process.env.DONATION_EMAIL_TO,
+    // Stripe collected and checked this address, so staff can reply to thank the donor.
+    replyTo: session.customer_details?.email,
     subject: escapeSubject(`New Donation — $${amountPaid} from ${donorName}`),
     html,
   });

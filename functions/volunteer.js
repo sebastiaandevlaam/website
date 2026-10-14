@@ -1,6 +1,7 @@
 const { onRequest } = require('firebase-functions/https');
 const { corsMiddleware, screenRequest, capString, capStringArray } = require('./security');
 const { escapeSubject, row, mailtoCell } = require('./email');
+const { sendEmail } = require('./mailer');
 
 exports.submitVolunteerApplication = onRequest((req, res) => {
   corsMiddleware(req, res, async () => {
@@ -30,9 +31,6 @@ exports.submitVolunteerApplication = onRequest((req, res) => {
       return res.status(400).json({ error: 'Please enter a valid email address.' });
     }
 
-    const { Resend } = require('resend');
-    const resend = new Resend(process.env.RESEND_API_KEY);
-
     const list = (arr) => (arr.length ? arr.join(', ') : '—');
 
     const html = `
@@ -50,15 +48,16 @@ exports.submitVolunteerApplication = onRequest((req, res) => {
     `;
 
     try {
-      await resend.emails.send({
-        from: process.env.RESEND_FROM,
+      await sendEmail({
         to: process.env.VOLUNTEER_EMAIL_TO,
+        // So the coordinator can answer the applicant straight from the inbox.
+        replyTo: email,
         subject: escapeSubject(`New Volunteer Application — ${firstName} ${lastName}`),
         html,
       });
       res.json({ success: true });
     } catch (err) {
-      console.error('Resend error:', err);
+      console.error('Volunteer email error:', err);
       res.status(500).json({ error: 'Failed to send application. Please try again.' });
     }
   });

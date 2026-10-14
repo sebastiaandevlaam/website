@@ -8,6 +8,7 @@ import NewsPostSection from "./NewsPostSection"
 import DonationSection from "./DonationSection"
 import VolunteerSection from "./VolunteerSection"
 import OperationMittenSection from "./OperationMittenSection"
+import CampaignSection from "./CampaignSection"
 
 // Section Renderer Component (Unchanged logic, just renders components with classes)
 // `titleTag` lets App promote the first section's title to <h1> on pages that
@@ -32,6 +33,8 @@ const SectionRenderer = ({ section, contentType, entryId, sitePhone, siteEmail, 
       return <VolunteerSection {...section} entryId={entryId} titleTag={titleTag} />
     case 'sectionOperationMitten':
       return <OperationMittenSection {...section} entryId={entryId} titleTag={titleTag} />
+    case 'sectionCampaign':
+      return <CampaignSection {...section} entryId={entryId} titleTag={titleTag} />
     default:
       console.warn(`Unknown section type: ${contentType}`)
       return <div className="container"><div style={{ margin: '2rem 0', padding: '1rem', backgroundColor: '#fee2e2', color: '#b91c1c' }}>Unsupported section type: {contentType}</div></div>
