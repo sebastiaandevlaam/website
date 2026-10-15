@@ -12,6 +12,7 @@
 // Output: GUIDE_SCREENS (default: ./screens next to this file).
 
 import { createRequire } from 'module';
+import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import { highlight, clearHighlight, shoot, byText } from './annotate.mjs';
@@ -23,6 +24,7 @@ const CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 const SPACE = 'sm8a9cvs0gzu';
 const APP = `https://app.contentful.com/spaces/${SPACE}`;
 const OUT = (process.env.GUIDE_SCREENS || new URL('./screens/', import.meta.url).pathname).replace(/\/?$/, '/');
+fs.mkdirSync(OUT, { recursive: true });
 
 // The Duck Drop TEST entries created for the walkthrough.
 const ENTRY = {
@@ -129,8 +131,24 @@ if (await capture('c01-add-entry.jpg', ['Add entry', 'Create entry'], { button: 
   const add = await byText(page, 'Add entry', 'button') || await byText(page, 'Create entry', 'button');
   await add.click();
   await new Promise(r => setTimeout(r, 1200));
-  // Only opens the menu to show it; nothing is chosen.
-  await capture('c02-choose-type.jpg', ['Campaign Item'], { button: true, band: 640 });
+  // Only opens the menu to show it; nothing is chosen. Typing filters the
+  // menu so the item is visible; the outline must land inside the menu, not
+  // on the "Campaign Item" type label in the entry list behind it.
+  await page.keyboard.type('Campaign');
+  await new Promise(r => setTimeout(r, 800));
+  const inMenu = await page.evaluateHandle(() => {
+    const popup = '[role="menu"], [role="listbox"], [role="dialog"], [data-test-id*="menu" i], [data-test-id*="popover" i], [class*="popover" i]';
+    return [...document.querySelectorAll('body *')].find(el =>
+      el.closest(popup) && el.offsetParent !== null &&
+      [...el.childNodes].some(n => n.nodeType === 3 && n.textContent.trim() === 'Campaign Item')) || null;
+  });
+  if (inMenu.asElement()) {
+    const box = await highlight(page, inMenu.asElement(), { pad: 4 });
+    await shoot(page, OUT + 'c02-choose-type.jpg', box, { band: 640 });
+    await clearHighlight(page);
+  } else {
+    missed.push('c02-choose-type.jpg (Campaign Item in the menu)');
+  }
   await page.keyboard.press('Escape');
 }
 

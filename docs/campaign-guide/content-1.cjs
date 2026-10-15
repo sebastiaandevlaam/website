@@ -72,7 +72,7 @@ ${tip('<p>No sheet yet? You can leave the spreadsheet field empty and add it lat
 <p>Make one <b>Campaign Item</b> for each thing a buyer can choose: "Duck", "5-pack of ducks", "Adult ticket", "Family ticket". Items can be reused next year.</p>
 ${steps(
   step('1', 'Start a new entry', `<p>In Contentful, open the <b>Content</b> tab and click <b>Add entry</b>.</p>`, shot('c01-add-entry.jpg', 'Content tab → Add entry.')),
-  step('2', 'Choose "Campaign Item"', `<p>Pick <b>Campaign Item</b> from the list.</p>`, shot('c02-choose-type.jpg', 'Choose Campaign Item.')),
+  step('2', 'Choose "Campaign Item"', `<p>Type <b>Campaign</b> in the search box at the top of the menu to shorten the list, then click <b>Campaign Item</b>.</p>`, shot('c02-choose-type.jpg', 'Choose Campaign Item.')),
   step('3', 'Name', `<p>Type the name buyers will see, for example <b>Duck</b> or <b>Adult ticket</b>. It also appears on the payment page and in the sheet.</p>
     <p><b>Description</b> (optional) is a short line under the name, such as "Dinner and dessert included" or "Admits 2 adults and 2 children".</p>`, shot('c03-item-name.jpg', 'The Name field.')),
   step('4', 'Price', `<p>Enter the price in dollars, numbers only: <code>10</code>, <code>40</code>, <code>12.50</code>.</p>`, shot('c04-item-price.jpg', 'Price (USD).')),
@@ -85,7 +85,7 @@ ${steps(
   step('6', 'Limits (optional)', `<p><b>Max per Order</b>: the most of this item one buyer can take, for example 10 tickets. <b>Total Available</b>: stock for this item alone, for example 8 sponsor tables. Leave both empty for no limit.</p>`, shot('c06-item-caps.jpg', 'Max per Order and Total Available.')),
   step('7', 'Fair market value (tickets with a meal or gift)', `<p>If the buyer receives something of value, like dinner, enter its value per ticket here, for example <code>25</code> for a $40 dinner ticket. The confirmation email then includes the statement the IRS requires about how much of the payment is tax-deductible.</p>
     <p>Leave it empty for the Duck Drop.</p>`, shot('c07-item-fmv.jpg', 'Fair Market Value (USD).')),
-  step('8', 'Publish', `<p>Click <b>Publish</b> on the right. Repeat for each item.</p>`, shot('c27-publish.jpg', 'The Publish button.')),
+  step('8', 'Publish', `<p>Click the green <b>Publish</b> button on the right. Once an entry is published, that button reads <b>Change status</b>; after you edit a published entry it offers <b>Publish changes</b>, and your edits only reach the website after you click it. Repeat for each item.</p>`, shot('c27-publish.jpg', 'The status button on the right (here on an entry that is already published).')),
 )}
 ${tip('<p>Not sure about the fair market value? Ask the treasurer. A common approach is the cost per person of the meal the venue charges.</p>')}
 `,

@@ -13,6 +13,7 @@ const path = require('path');
 const HERE = __dirname;
 const SCREENS = process.env.GUIDE_SCREENS || path.join(HERE, 'screens');
 const OUT = process.env.GUIDE_OUT || HERE;
+fs.mkdirSync(OUT, { recursive: true });
 
 // ── Helpers used by the content files ──────────────────────────────────────
 const missing = [];

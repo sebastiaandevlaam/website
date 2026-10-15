@@ -14,6 +14,7 @@
 // Output: GUIDE_SCREENS (default: ./screens next to this file).
 
 import { createRequire } from 'module';
+import fs from 'fs';
 import { highlight, clearHighlight, shoot, byText } from './annotate.mjs';
 
 const require = createRequire(import.meta.url);
@@ -27,6 +28,7 @@ const CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 const SITE = 'https://hollistonpantryshelf.org/duck-drop-test';
 const FUNCTIONS = 'us-east1-holliston-pantry-shelf.cloudfunctions.net';
 const OUT = (process.env.GUIDE_SCREENS || new URL('./screens/', import.meta.url).pathname).replace(/\/?$/, '/');
+fs.mkdirSync(OUT, { recursive: true });
 const STRIPE = !process.argv.includes('--no-stripe');
 
 const BUYER = { first: 'Jane', last: 'Example', email: 'jane@example.com', phone: '5085550123' };

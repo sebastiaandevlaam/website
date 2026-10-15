@@ -15,8 +15,9 @@ ${steps(
   step('4', 'Campaign Type', `<p>Choose <b>Numbered</b> for the Duck Drop or <b>Tickets</b> for an event.</p>`, shot('c10-campaign-type.jpg', 'Campaign Type.')),
   step('5', 'Start Number (Numbered only)', `<p>The number the first duck gets. Leave empty to start at 1. Use it when ducks are also sold on paper: if the paper forms use 1–500, enter <code>501</code> here.</p>
     <p>If you raise it later, the next duck jumps to the new number. Lowering it has no effect, so a number is never given out twice.</p>`, shot('c11-start-number.jpg', 'Start Number.')),
-  step('6', 'Items', `<p>Click <b>Add existing content</b> and pick the items you made in chapter 3. The order here is the order on the website; drag to rearrange.</p>`, shot('c12-items.jpg', 'Items, linked to the Campaign Items.')),
-  step('7', 'Open and close dates (optional)', `<p><b>Open Date</b>: sales start at this moment. <b>Close Date</b>: sales stop and visitors see the Closed Message instead of the form. Leave both empty to sell straight away with no end date.</p>`, shot('c13-dates.jpg', 'Open Date and Close Date.')),
+  step('6', 'Items', `<p>Click <b>Add content → Add existing content</b> and pick the items you made in chapter 3. The order here is the order on the website; drag to rearrange.</p>`, shot('c12-items.jpg', 'Items, linked to the Campaign Items.')),
+  step('7', 'Open and close dates (optional)', `<p><b>Open Date</b>: sales start at this moment. <b>Close Date</b>: sales stop and visitors see the Closed Message instead of the form. Leave both empty to sell straight away with no end date.</p>
+    ${tip('<p>Check the time zone next to each time. It should show Eastern time: <b>UTC-04:00</b> in summer, <b>UTC-05:00</b> in winter. Choose it from the list if it shows something else.</p>')}`, shot('c13-dates.jpg', 'Open Date and Close Date.')),
   step('8', 'Limits (optional)', `<p><b>Total Capacity</b>: how many ducks or people in total. For tickets this counts people, so a family ticket uses 4.</p>
     <p><b>Reserved Spots</b>: places held back from the total for sponsors, volunteers or VIPs who don't buy online. You can change this at any time.</p>
     <p><b>Max Items per Order</b>: the most items one buyer can take in one order.</p>
@@ -53,17 +54,17 @@ ${steps(
 <h3>A. Create the section</h3>
 ${steps(
   step('1', 'Add a Campaign Section', `<p><b>Content → Add entry → Campaign Section</b>. Enter a <b>Title</b> (the heading on the page, such as "Adopt a Duck!") and an <b>Intro Text</b> explaining the event, the date and what buyers get.</p>`, shot('c23-section-title.jpg', 'Title.')),
-  step('2', 'Link the campaign', `<p>Under <b>Campaign</b>, click <b>Add existing content</b> and choose your campaign. Pick a <b>Background Style</b> if you like, then <b>Publish</b>.</p>`, shot('c24-section-campaign.jpg', 'The Campaign field linked to the campaign.')),
+  step('2', 'Link the campaign', `<p>Under <b>Campaign</b>, click <b>Add content → Add existing content</b> and choose your campaign. Pick a <b>Background Style</b> if you like, then <b>Publish</b>.</p>`, shot('c24-section-campaign.jpg', 'The Campaign field linked to the campaign.')),
 )}
 <h3>B1. On a new page</h3>
 ${steps(
   step('3', 'Create the page', `<p><b>Content → Add entry → Page</b>. Fill in an <b>Internal Title</b> and a <b>Slug</b>: the web address, starting with a slash, such as <code>/duck-drop</code>.</p>`, shot('c25-page-slug.jpg', 'Slug.')),
-  step('4', 'Add the section', `<p>Under <b>Sections</b>, click <b>Add existing content</b>, choose the Campaign Section, then <b>Publish</b>. The page is now live at that address, but nobody can find it yet. Test it now (chapter 6) before you link to it.</p>`, shot('c26-page-sections.jpg', 'Sections on the page.')),
+  step('4', 'Add the section', `<p>Under <b>Sections</b>, click <b>Add content → Add existing content</b>, choose the Campaign Section, then <b>Publish</b>. The page is now live at that address, but nobody can find it yet. Test it now (chapter 6) before you link to it.</p>`, shot('c26-page-sections.jpg', 'Sections on the page.')),
   step('5', 'Link to it from the menu (after testing)', `<p>Open the <b>Navigation Menu</b> entry, add a <b>Button / Link</b> under <b>Menu Items</b> with the text and the slug, and publish. Or link to the page from a button on the homepage or in the announcement bar.</p>`, shot('c28-nav-items.jpg', 'Menu Items in the Navigation Menu.')),
 )}
 <h3>B2. Or on an existing page</h3>
 ${steps(
-  step('3', 'Add the section to the page', `<p>Open the page, for example <i>Support</i>. Under <b>Sections</b>, click <b>Add existing content</b>, choose the Campaign Section, drag it into place and <b>Publish</b>. It is visible to everyone immediately, so do this after testing.</p>`, shot('c29-existing-page-sections.jpg', 'Sections on an existing page.')),
+  step('3', 'Add the section to the page', `<p>Open the page, for example <i>Support</i>. Under <b>Sections</b>, click <b>Add content → Add existing content</b>, choose the Campaign Section, drag it into place and <b>Publish</b>. It is visible to everyone immediately, so do this after testing.</p>`, shot('c29-existing-page-sections.jpg', 'Sections on an existing page.')),
 )}
 `,
   },
