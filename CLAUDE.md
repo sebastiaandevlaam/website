@@ -247,7 +247,8 @@ idempotent and answers 500 on failure, so Stripe's retries are safe.
 
 **Units.** Capacity counts units: an item's `unitsPerItem` (a family ticket = 4
 people, a duck 5-pack = 5 ducks) counts toward `totalCap`, and in a numbered
-campaign each unit gets its own consecutive number, starting at 1.
+campaign each unit gets its own consecutive number, starting at `startNumber`
+(default 1).
 
 **Contentful setup required:**
 
@@ -259,7 +260,7 @@ campaign each unit gets its own consecutive number, starting at 1.
   IRS quid-pro-quo statement).
 - `campaign`: `name` (Short text), `campaignId` (Short text, unique, e.g.
   `duck-drop-2027` — the Firestore key, **never change it once sales start**),
-  `campaignType` (Short text: `Numbered` or `Tickets`), `items` (References,
+  `campaignType` (Short text: `Numbered` or `Tickets`), `startNumber` (Integer, optional — first number for a numbered campaign, default 1; numbers never go backwards if it is changed mid-campaign), `items` (References,
   many → `campaignItem`), `openDate` / `closeDate` (Date & time, optional),
   `totalCap` (Integer, optional), `reservedSpots` (Integer, optional — taken
   off `totalCap` for sponsors/VIPs), `maxPerOrder` (Integer, optional — items

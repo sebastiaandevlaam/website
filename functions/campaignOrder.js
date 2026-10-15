@@ -57,6 +57,7 @@ function normalizeCampaign(entry) {
     id: String(f.campaignId || '').trim(),
     name: String(f.name || '').trim(),
     numbered: /^number/i.test(String(f.campaignType || '')),
+    startNumber: Math.max(1, optionalCount(f.startNumber) || 1),
     openDate: f.openDate || null,
     closeDate: f.closeDate || null,
     totalCap: optionalCount(f.totalCap),
@@ -228,7 +229,9 @@ function applySale(campaign, state, orderId, order) {
   for (const line of order.lines) soldItems[line.itemId] = (soldItems[line.itemId] || 0) + line.quantity;
 
   let numbers = null;
-  let nextNumber = state?.nextNumber || 1;
+  // Numbers never go backwards: raising startNumber mid-campaign jumps ahead,
+  // lowering it is ignored, so no number is ever issued twice.
+  let nextNumber = Math.max(state?.nextNumber || 1, campaign.startNumber || 1);
   if (campaign.numbered) {
     numbers = { first: nextNumber, count: order.units };
     nextNumber += order.units;

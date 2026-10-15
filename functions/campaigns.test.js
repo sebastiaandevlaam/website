@@ -153,6 +153,21 @@ describe('applySale', () => {
         expect(second.holdLapsed).toBe(true);
     });
 
+    it('starts at startNumber and never goes backwards', () => {
+        const from100 = { ...ducks, startNumber: 100 };
+        const first = applySale(from100, {}, 'A', order);
+        expect(first.numbers).toEqual({ first: 100, count: 7 });
+        // Lowered mid-campaign: ignored.
+        expect(applySale({ ...ducks, startNumber: 5 }, first.state, 'B', order).numbers.first).toBe(107);
+        // Raised mid-campaign: jumps ahead.
+        expect(applySale({ ...ducks, startNumber: 500 }, first.state, 'B', order).numbers.first).toBe(500);
+    });
+
+    it('reads startNumber from Contentful, defaulting to 1', () => {
+        expect(ducks.startNumber).toBe(1);
+        expect(normalizeCampaign({ fields: { startNumber: 250 } }).startNumber).toBe(250);
+    });
+
     it('does not number tickets', () => {
         const { order: t } = priceOrder(gala, { adult: 1 }, false);
         expect(applySale(gala, {}, 'A', t).numbers).toBeNull();

@@ -5,7 +5,7 @@
 //   CONTENTFUL_MANAGEMENT_TOKEN=CFPAT-… node --env-file=.env --env-file=.env.holliston-pantry-shelf setup-campaign-content-types.js          # dry run
 //   CONTENTFUL_MANAGEMENT_TOKEN=CFPAT-… node --env-file=.env --env-file=.env.holliston-pantry-shelf setup-campaign-content-types.js --apply
 //
-// Safe to re-run: a content type that already exists is left untouched, and
+// Safe to re-run: an existing content type only gains fields it is missing, and
 // sectionCampaign is only added to the page if it is missing. Creates no
 // entries, so nothing changes for visitors. Field ids must match
 // campaignOrder.js / CampaignSection.jsx — see CLAUDE.md "Paid Campaigns".
@@ -54,6 +54,8 @@ const CONTENT_TYPES = [
       }), 'Permanent key for stock and numbering, e.g. duck-drop-2027. NEVER change it once sales have started.'],
       [f('campaignType', 'Campaign Type', 'Symbol', { required: true, validations: [{ in: ['Numbered', 'Tickets'] }] }),
         'Numbered: every unit gets a number, one sheet row per number (Duck Drop). Tickets: one sheet row per order.'],
+      [f('startNumber', 'Start Number', 'Integer', { validations: [min(1)] }),
+        'Numbered campaigns only: the first number handed out. Empty = 1. Changing it later never reuses a number: raising it jumps ahead, lowering it is ignored.'],
       [f('items', 'Items', 'Array', {
         required: true,
         items: { type: 'Link', linkType: 'Entry', validations: [{ linkContentType: ['campaignItem'] }] },
@@ -114,7 +116,7 @@ async function cma(method, path, { body, version } = {}) {
 async function createContentType(def) {
   const existing = await cma('GET', `/content_types/${def.id}`);
   if (existing.status !== 404) {
-    console.log(`• ${def.id}: already exists — left untouched`);
+    await addMissingFields(def, existing.data);
     return;
   }
   console.log(`• ${def.id}: will create with ${def.fields.length} fields (${def.fields.map(([fd]) => fd.id).join(', ')})`);
@@ -127,12 +129,38 @@ async function createContentType(def) {
 
   // Help texts live on the editor interface, which Contentful creates with
   // default widgets on activation; only the help text is added.
-  const ei = await cma('GET', `/content_types/${def.id}/editor_interface`);
-  const help = new Map(def.fields.filter(([, h]) => h).map(([fd, h]) => [fd.id, h]));
+  await setHelpTexts(def.id, def.fields);
+  console.log(`  ✓ created, activated, help texts set`);
+}
+
+// An existing type is never changed, only extended: fields the definition has
+// and Contentful lacks are appended (at the end — editors can reorder them).
+async function addMissingFields(def, current) {
+  const have = new Set(current.fields.map(fd => fd.id));
+  const missing = def.fields.filter(([fd]) => !have.has(fd.id));
+  if (missing.length === 0) {
+    console.log(`• ${def.id}: exists and is complete — left untouched`);
+    return;
+  }
+  console.log(`• ${def.id}: exists; will add ${missing.map(([fd]) => fd.id).join(', ')}`);
+  if (!APPLY) return;
+
+  const { sys, name, description, displayField, fields } = current;
+  const updated = await cma('PUT', `/content_types/${def.id}`, {
+    body: { name, description, displayField, fields: [...fields, ...missing.map(([fd]) => fd)] },
+    version: sys.version,
+  });
+  await cma('PUT', `/content_types/${def.id}/published`, { version: updated.data.sys.version });
+  await setHelpTexts(def.id, missing);
+  console.log('  ✓ fields added, activated, help texts set');
+}
+
+async function setHelpTexts(contentTypeId, fieldDefs) {
+  const ei = await cma('GET', `/content_types/${contentTypeId}/editor_interface`);
+  const help = new Map(fieldDefs.filter(([, h]) => h).map(([fd, h]) => [fd.id, h]));
   const controls = (ei.data.controls || []).map(c =>
     help.has(c.fieldId) ? { ...c, settings: { ...(c.settings || {}), helpText: help.get(c.fieldId) } } : c);
-  await cma('PUT', `/content_types/${def.id}/editor_interface`, { body: { controls }, version: ei.data.sys.version });
-  console.log(`  ✓ created, activated, help texts set`);
+  await cma('PUT', `/content_types/${contentTypeId}/editor_interface`, { body: { controls }, version: ei.data.sys.version });
 }
 
 async function allowOnPage() {

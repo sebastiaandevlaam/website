@@ -185,6 +185,7 @@ exports.createCampaignCheckout = onRequest((req, res) => {
           campaign: {
             name: campaign.name,
             numbered: campaign.numbered,
+            startNumber: campaign.startNumber,
             spreadsheetId: campaign.spreadsheetId,
             email: campaign.email,
           },
