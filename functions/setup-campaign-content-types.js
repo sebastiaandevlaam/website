@@ -68,7 +68,7 @@ const CONTENT_TYPES = [
       [f('coverFeesLabel', 'Cover Fees Label', 'Symbol'), 'Optional wording for that checkbox.'],
       [f('spreadsheetId', 'Spreadsheet ID', 'Symbol', {
         validations: [{ regexp: { pattern: '^[A-Za-z0-9_-]{20,}$' }, message: 'Paste only the id from the sheet URL (between /d/ and /edit), not the whole link.' }],
-      }), 'Optional. The id of this campaign\'s Google Sheet (from its URL, between /d/ and /edit). Share the sheet with the service account as Editor; keep the first tab named Sheet1. Orders are always stored in Firestore; the sheet gets a copy of orders placed after the id is set.'],
+      }), 'Optional. Sheet id from its URL (between /d/ and /edit). Share the sheet with the service account as Editor; keep the first tab named Sheet1. Orders are always kept in Firestore; the sheet only gets orders placed after this is set.'],
       [f('confirmationEmailSubject', 'Confirmation Email Subject', 'Symbol'), 'Optional. Placeholders allowed, e.g. "Your ducks for {campaignName}". Default: "Your order for {campaignName}".'],
       [f('confirmationEmailBody', 'Confirmation Email Body', 'Text'),
         'Markdown. Placeholders: {firstName} {lastName} {orderId} {campaignName} {total} {count} {numbers}, and {orderSummary} (a table, on its own line). Duck numbers are added automatically if {numbers} is missing.'],
