@@ -192,7 +192,7 @@ Both of these apply to the donations sheet too, since the helpers are shared.
 - `successBody` (Long text / Markdown, optional)
 - `backgroundStyle` (Short text, optional — same values as other sections)
 
-Field labels, the youth/adult size choice, and the three gift-idea slots are hardcoded. Validation requires shopper #, parent first name, phone, holiday, and a gender plus an age of 0–18 for every child; the function re-checks all of it and refuses more than 12 children.
+Field labels, the youth/adult size choice, and the three gift-idea slots are hardcoded. Validation requires shopper #, parent first name, phone, holiday, and a gender, an age of 0–18 and the preferred clothing for every child; the function re-checks all of it and refuses more than 12 children.
 
 **Validation feedback.** `validate()` returns `{ field, key, vars }` rather than a bare string, where `field` is the id of the input at fault and `key` names the message in the translations (so a message on screen follows a language change). On a failed submit the form scrolls that field to the centre of the screen, focuses it, marks it `aria-invalid`, and renders the message directly beneath it via `aria-describedby`. This matters because the form runs several screens long — a message next to the submit button alone reads as nothing having happened when the empty field is off-screen above. The summary above the button is therefore only shown for errors with no field to point at, such as a failed request.
 

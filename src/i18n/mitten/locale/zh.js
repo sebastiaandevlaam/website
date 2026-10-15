@@ -60,6 +60,7 @@ export default {
         errorHolidayOther: '请告诉我们您庆祝哪个节日。',
         errorChildGender: '请选择孩子 {n} 的性别。',
         errorChildAge: '请输入孩子 {n} 的年龄。',
+        errorChildClothing: '请填写孩子 {n} 喜欢的衣物。',
         errorChildAgeRange: '孩子 {n} 必须在 18 岁或以下才能获得礼物。',
     },
 

@@ -75,6 +75,7 @@ export default {
         errorHolidayOther: 'Please tell us which holiday you celebrate.',
         errorChildGender: 'Please select a gender for child {n}.',
         errorChildAge: 'Please enter an age for child {n}.',
+        errorChildClothing: 'Please enter the preferred clothing for child {n}.',
         errorChildAgeRange: 'Child {n} must be 18 years or younger to receive gifts.',
     },
 

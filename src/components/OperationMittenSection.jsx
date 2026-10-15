@@ -194,6 +194,8 @@ const OperationMittenSection = ({
             const age = Number(child.age);
             if (!Number.isInteger(age) || age < 0 || age > 18)
                 return problem(childField('age'), 'errorChildAgeRange', n);
+            if (!child.clothingPreference.trim())
+                return problem(childField('clothing'), 'errorChildClothing', n);
         }
         return null;
     };
@@ -472,12 +474,14 @@ const OperationMittenSection = ({
 
                                 <div className="form-field">
                                     <label className="form-label" htmlFor={id('clothing')}>
-                                        {t('clothing')}
+                                        {t('clothing')} {required}
                                     </label>
                                     <input id={id('clothing')} type="text" className="form-input"
+                                        {...invalidProps(id('clothing'))}
                                         placeholder={t('clothingPlaceholder')}
                                         value={child.clothingPreference}
                                         onChange={e => setChildField(index, 'clothingPreference', e.target.value)} />
+                                    <FieldError id={id('clothing')} />
                                 </div>
 
                                 {/* Favourite colours — a child rarely has just one, and the

@@ -60,6 +60,7 @@ export default {
         errorHolidayOther: 'Por favor, diga-nos qual feriado você comemora.',
         errorChildGender: 'Por favor, selecione o sexo da criança {n}.',
         errorChildAge: 'Por favor, informe a idade da criança {n}.',
+        errorChildClothing: 'Por favor, informe as roupas preferidas da criança {n}.',
         errorChildAgeRange: 'A criança {n} deve ter 18 anos ou menos para receber presentes.',
     },
 

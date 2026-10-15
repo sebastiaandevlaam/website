@@ -60,6 +60,7 @@ export default {
         errorHolidayOther: '어떤 명절을 기념하시는지 알려 주세요.',
         errorChildGender: '자녀 {n}의 성별을 선택해 주세요.',
         errorChildAge: '자녀 {n}의 나이를 입력해 주세요.',
+        errorChildClothing: '자녀 {n}의 선호하는 의류를 입력해 주세요.',
         errorChildAgeRange: '선물을 받으려면 자녀 {n}의 나이가 18세 이하여야 합니다.',
     },
 

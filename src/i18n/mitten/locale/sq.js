@@ -60,6 +60,7 @@ export default {
         errorHolidayOther: 'Ju lutemi na tregoni cilën festë festoni.',
         errorChildGender: 'Ju lutemi zgjidhni gjininë e fëmijës {n}.',
         errorChildAge: 'Ju lutemi shkruani moshën e fëmijës {n}.',
+        errorChildClothing: 'Ju lutemi shkruani veshjet e preferuara të fëmijës {n}.',
         errorChildAgeRange: 'Fëmija {n} duhet të jetë 18 vjeç ose më i vogël për të marrë dhurata.',
     },
 

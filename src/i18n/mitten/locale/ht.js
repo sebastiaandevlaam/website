@@ -60,6 +60,7 @@ export default {
         errorHolidayOther: 'Tanpri di nou ki fèt ou selebre.',
         errorChildGender: 'Tanpri chwazi sèks timoun {n}.',
         errorChildAge: 'Tanpri ekri laj timoun {n}.',
+        errorChildClothing: 'Tanpri ekri rad timoun {n} prefere.',
         errorChildAgeRange: 'Timoun {n} dwe gen 18 an oswa mwens pou l resevwa kado.',
     },
 

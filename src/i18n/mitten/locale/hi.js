@@ -60,6 +60,7 @@ export default {
         errorHolidayOther: 'कृपया बताएँ कि आप कौन सा त्योहार मनाते हैं।',
         errorChildGender: 'कृपया बच्चे {n} का लिंग चुनें।',
         errorChildAge: 'कृपया बच्चे {n} की उम्र लिखें।',
+        errorChildClothing: 'कृपया बच्चे {n} के पसंदीदा कपड़े लिखें।',
         errorChildAgeRange: 'उपहार पाने के लिए बच्चे {n} की उम्र 18 साल या उससे कम होनी चाहिए।',
     },
 

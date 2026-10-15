@@ -92,6 +92,9 @@ exports.submitOperationMitten = onRequest((req, res) => {
       if (!Number.isInteger(age) || age < 0 || age > 18) {
         return res.status(400).json({ error: `Child ${index + 1} must be 18 years or younger.` });
       }
+      if (!child.clothingPreference.trim()) {
+        return res.status(400).json({ error: `Please enter the preferred clothing for child ${index + 1}.` });
+      }
     }
 
     const submittedAt = new Date();

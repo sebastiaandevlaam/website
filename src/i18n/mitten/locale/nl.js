@@ -60,6 +60,7 @@ export default {
         errorHolidayOther: 'Laat ons weten welke feestdag u viert.',
         errorChildGender: 'Kies een geslacht voor kind {n}.',
         errorChildAge: 'Vul een leeftijd in voor kind {n}.',
+        errorChildClothing: 'Vul de gewenste kleding in voor kind {n}.',
         errorChildAgeRange: 'Kind {n} moet 18 jaar of jonger zijn om cadeaus te krijgen.',
     },
 

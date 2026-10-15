@@ -60,6 +60,7 @@ export default {
         errorHolidayOther: 'يُرجى إخبارنا بالمناسبة التي تحتفلون بها.',
         errorChildGender: 'يُرجى اختيار جنس الطفل {n}.',
         errorChildAge: 'يُرجى إدخال عمر الطفل {n}.',
+        errorChildClothing: 'يُرجى كتابة الملابس المفضلة للطفل {n}.',
         errorChildAgeRange: 'يجب أن يكون عمر الطفل {n} ‏18 عامًا أو أقل ليحصل على الهدايا.',
     },
 
