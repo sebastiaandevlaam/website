@@ -118,10 +118,3 @@ pre code { background: none; padding: 0; }
   main { gap: 56px; }
   .step { padding: 14px 14px 16px; }
 }
-@media print {
-  .toc, .copy button { display: none; }
-  .layout { display: block; padding: 0; }
-  .chapter { break-before: page; }
-  .step { break-inside: avoid; }
-  main { gap: 0; }
-}

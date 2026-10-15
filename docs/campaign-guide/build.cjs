@@ -50,9 +50,32 @@ const chapters = [
 ];
 
 // ── Page ───────────────────────────────────────────────────────────────────
-const style = fs.readFileSync(path.join(HERE, 'guide.css'), 'utf8');
+const style = ['guide.css', 'print.css'].map(f => fs.readFileSync(path.join(HERE, f), 'utf8')).join('\n');
+const logo = fs.readFileSync(path.join(HERE, '..', '..', 'src', 'assets', 'hps_logo.png')).toString('base64');
+const edition = new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
 
 const toc = chapters.map(c => `<li><a href="#${c.id}">${c.title}</a></li>`).join('');
+// Print only: a cover and a contents page. Page numbers are filled in by the
+// PDF step below, which measures where each chapter lands.
+const printCover = `<section class="print-only print-cover">
+  <div class="band">
+    <div class="logo"><img src="data:image/png;base64,${logo}" alt="Holliston Pantry Shelf"></div>
+    <p class="kicker">Website guide for Contentful editors</p>
+    <h1>Running a paid campaign</h1>
+    <p class="sub">Set up, open, run and close a Duck Drop or a ticket sale on the pantry website, step by step.</p>
+  </div>
+  <div class="meta">
+    <div><b>Covers</b><span>Numbered campaigns (Duck Drop) and event tickets</span></div>
+    <div><b>You need</b><span>Contentful editor access and the pantry's Google Drive</span></div>
+    <div><b>Edition</b><span>${edition}</span></div>
+    <div><b>Website</b><span>hollistonpantryshelf.org</span></div>
+  </div>
+  <div class="stripe"></div>
+</section>`;
+const printToc = `<nav class="print-only print-toc" aria-label="Contents"><h2>Contents</h2><ol>${chapters.map((c, i) => `
+  <li><a href="#${c.id}"><span class="n">${i + 1}</span><span class="t">${c.title}</span><span class="p" data-page-for="${c.id}"></span><span class="d">${c.eyebrow}</span></a></li>`).join('')}
+</ol></nav>`;
+
 const body = chapters.map(c => `
 <section class="chapter" id="${c.id}">
   <p class="eyebrow">${c.eyebrow}</p>
@@ -66,6 +89,8 @@ const head = `<title>Running a Paid Campaign</title>
 <style>${style}</style>`;
 
 const page = `<div class="layout">
+  ${printCover}
+  ${printToc}
   <header class="cover">
     <p class="eyebrow">Holliston Pantry Shelf · Website guide</p>
     <h1>Running a paid campaign</h1>
@@ -99,20 +124,44 @@ console.log('✓ campaign-guide.html', (full.length / 1e6).toFixed(1) + ' MB');
 if (missing.length) console.log(`  ${missing.length} screenshots still to capture: ${missing.join(', ')}`);
 
 // ── PDF ────────────────────────────────────────────────────────────────────
+// Chrome cannot put page numbers in a contents list by itself, so each
+// chapter is first printed on its own to count its pages (every chapter
+// starts on a new page, so the counts add up), then the full PDF is printed
+// with the numbers filled in.
+const pageCount = (pdf) => Math.max(...[...Buffer.from(pdf).toString('latin1').matchAll(/\/Count (\d+)/g)].map(m => Number(m[1])));
+
 if (!process.argv.includes('--no-pdf')) {
   (async () => {
     const puppeteer = require(path.join(HERE, '..', '..', 'node_modules', 'puppeteer-core'));
     const browser = await puppeteer.launch({ executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome', headless: true });
     const tab = await browser.newPage();
-    await tab.setContent(full, { waitUntil: 'load', timeout: 120000 });
-    await tab.evaluate(() => document.fonts.ready);
-    await tab.pdf({
-      path: path.join(OUT, 'campaign-guide.pdf'), format: 'Letter', printBackground: true,
-      margin: { top: '0.6in', bottom: '0.7in', left: '0.6in', right: '0.6in' },
-      displayHeaderFooter: true, headerTemplate: '<span></span>',
-      footerTemplate: '<div style="font-size:8px;width:100%;text-align:center;color:#888">Running a paid campaign · page <span class="pageNumber"></span> of <span class="totalPages"></span></div>',
-    });
+    const load = async () => {
+      await tab.setContent(full, { waitUntil: 'load', timeout: 120000 });
+      await tab.evaluate(() => document.fonts.ready);
+    };
+    const print = (file) => tab.pdf({ ...(file ? { path: file } : {}), preferCSSPageSize: true, printBackground: true });
+
+    await load();
+    // Cover and contents: measured too, in case the contents ever spill over.
+    await tab.evaluate(() => document.querySelectorAll('main, .chapter').forEach(el => el.remove()));
+    let next = pageCount(await print()) + 1;
+    const starts = {};
+    for (const { id } of chapters) {
+      await load();
+      await tab.evaluate((keep) => {
+        document.querySelectorAll('.print-only').forEach(el => el.remove());
+        document.querySelectorAll('.chapter').forEach(el => { if (el.id !== keep) el.remove(); });
+      }, id);
+      starts[id] = next;
+      next += pageCount(await print());
+    }
+
+    await load();
+    await tab.evaluate((starts) => {
+      document.querySelectorAll('[data-page-for]').forEach(el => { el.textContent = starts[el.dataset.pageFor]; });
+    }, starts);
+    await print(path.join(OUT, 'campaign-guide.pdf'));
     await browser.close();
-    console.log('✓ campaign-guide.pdf');
+    console.log(`✓ campaign-guide.pdf (${next - 1} pages)`);
   })();
 }
