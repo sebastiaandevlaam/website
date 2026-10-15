@@ -223,7 +223,8 @@ fetches the campaign from Contentful itself and prices it there.
 - `campaignOrder.js` — pure rules: `normalizeCampaign`, `priceOrder`, the fee
   gross-up, capacity (`availability`, `applyHold`, `applySale`), numbering.
   Unit-tested; change rules here.
-- `campaignRow.js` — sheet headers and rows. Numbered campaigns write one row
+- `campaignRow.js` — sheet headers and rows. The sheet is optional; Firestore
+  always holds the full order. Numbered campaigns write one row
   per number; ticket campaigns one row per order.
 - `campaignEmail.js` — the buyer email from the campaign's Markdown template.
 - `campaigns.js` — the endpoints, Firestore transactions and the Stripe event
@@ -263,7 +264,7 @@ campaign each unit gets its own consecutive number, starting at 1.
   `totalCap` (Integer, optional), `reservedSpots` (Integer, optional — taken
   off `totalCap` for sponsors/VIPs), `maxPerOrder` (Integer, optional — items
   per order), `coverFeesEnabled` (Boolean, default on), `coverFeesLabel`
-  (Short text, optional), `spreadsheetId` (Short text), `confirmationEmailSubject`
+  (Short text, optional), `spreadsheetId` (Short text, optional — without it orders live only in Firestore; set later, it applies to new orders only), `confirmationEmailSubject`
   (Short text, optional), `confirmationEmailBody` (Long text / Markdown,
   optional), `confirmationEmailFrom` (Short text, optional — must be in
   `EMAIL_ALLOWED_SENDERS`), `confirmationEmailReplyTo` (Short text, optional),

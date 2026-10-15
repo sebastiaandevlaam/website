@@ -154,12 +154,6 @@ exports.createCampaignCheckout = onRequest((req, res) => {
     if (!campaign) return res.status(404).json({ error: 'This campaign could not be found.' });
     if (!isOpen(campaign)) return res.status(400).json({ error: 'Sorry, sales for this are closed.' });
 
-    // Without a sheet, a paid order would have nowhere to land for staff.
-    if (!campaign.spreadsheetId) {
-      console.error(`Campaign ${campaign.id} has no spreadsheetId in Contentful.`);
-      return res.status(503).json({ error: 'Sales are not open yet. Please try again later.' });
-    }
-
     const priced = priceOrder(campaign, input.quantities, input.coverFees);
     if (priced.error) return res.status(400).json({ error: priced.error });
     const { order } = priced;
@@ -354,8 +348,10 @@ async function handleCampaignCheckoutEvent(event) {
   const orderRef = db().collection(ORDERS).doc(orderId);
 
   // Sheet and email are independent: one failing must not stop the other.
+  // The sheet is optional — Firestore always holds the full order — and the
+  // id is snapshotted at checkout, so adding one later applies to new orders.
   const results = await Promise.allSettled([
-    once(orderRef, 'sheet', async () => {
+    record.campaign.spreadsheetId && once(orderRef, 'sheet', async () => {
       const sheets = getSheetsClient();
       await ensureHeaderRow(sheets, record.campaign.spreadsheetId, headerFor(record));
       await appendSheetRows(sheets, record.campaign.spreadsheetId, buildCampaignRows(record, formatDateEastern));

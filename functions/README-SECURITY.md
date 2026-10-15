@@ -193,7 +193,9 @@ are done. Section 2 must be finished first — the buyer email depends on it.
    buyers' names and emails). **Do not deploy rules from this repo** — they
    would replace the shopper apps' rules.
 
-4. **Per campaign — a spreadsheet.** Create a Google Sheet, leave the first
+4. **Per campaign — a spreadsheet (optional).** Every order is stored in
+   Firestore regardless; the sheet is the staff-facing copy, and only orders
+   placed after the id is set are written to it. Create a Google Sheet, leave the first
    tab named `Sheet1`, and share it as **Editor** with the sheets service
    account (`client_email` in `GOOGLE_SERVICE_ACCOUNT_JSON`). Paste its id into
    the campaign's `spreadsheetId` field. The header row is written on the first
