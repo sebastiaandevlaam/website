@@ -63,7 +63,22 @@ const CampaignSuccess = ({ sessionId, campaign, inspectorProps }) => {
             inspectorProps={inspectorProps}
             className="campaign-success"
         >
-            {!order && !gaveUp && <p role="status">Confirming your order…</p>}
+            {/* The payment is already complete here; what takes a few seconds
+                is Stripe's confirmation reaching us. Say so plainly, so people
+                wait for their numbers instead of assuming something stalled. */}
+            {!order && !gaveUp && (
+                <div className="campaign-waiting" role="status">
+                    <span className="campaign-spinner" aria-hidden="true" />
+                    <div>
+                        <p className="campaign-waiting-title">Your payment went through.</p>
+                        <p>
+                            {/^number/i.test(campaign.campaignType || '')
+                                ? 'We\'re assigning your numbers now. This usually takes a few seconds, so please keep this page open.'
+                                : 'We\'re confirming your order now. This usually takes a few seconds, so please keep this page open.'}
+                        </p>
+                    </div>
+                </div>
+            )}
             {order && (
                 <div className="campaign-confirmation" role="status">
                     {numbers.length > 0 && (

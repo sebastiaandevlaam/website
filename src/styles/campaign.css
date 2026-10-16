@@ -137,6 +137,48 @@
     font-size: 1.125rem;
 }
 
+/* Shown on the thank-you page while the paid order is being confirmed. */
+.campaign-waiting {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    max-width: 32rem;
+    margin: 0 auto 1.5rem;
+    padding: 1rem 1.25rem;
+    text-align: left;
+    background: var(--white);
+    border: 2px solid var(--pantry-beige);
+    border-radius: 0.5rem;
+}
+
+.campaign-waiting p {
+    margin: 0;
+}
+
+.campaign-waiting-title {
+    font-weight: 700;
+    color: var(--pantry-text);
+}
+
+.campaign-spinner {
+    flex-shrink: 0;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    border: 3px solid var(--pantry-beige);
+    border-top-color: var(--pantry-red);
+    animation: campaign-spin 0.9s linear infinite;
+}
+
+@keyframes campaign-spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Without motion, a still ring still reads as "in progress" next to the text. */
+@media (prefers-reduced-motion: reduce) {
+    .campaign-spinner { animation: none; }
+}
+
 @media (max-width: 480px) {
     .campaign-item {
         flex-direction: column;
